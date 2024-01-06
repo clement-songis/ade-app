@@ -3,109 +3,123 @@ package com.chtibizoux.adeapp
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Divider
+import androidx.annotation.StringRes
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Alarm
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import com.chtibizoux.adeapp.ui.alarms.Alarms
 import com.chtibizoux.adeapp.ui.theme.ADEAppTheme
+import com.chtibizoux.adeapp.ui.timetable.Timetable
+import com.chtibizoux.adeapp.ui.timetable.TimetableTitle
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            ADEAppTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
-                ) {
-                    Background(Hour(8, 0), Hour(18, 0), 30)
-                    Greeting("noob")
+            Application()
+        }
+    }
+}
+
+sealed class Screen(
+    val route: String,
+    @StringRes val label: Int,
+    val icon: ImageVector,
+    val title: (@Composable () -> Unit)?
+) {
+    constructor(route: String, title: Int, icon: ImageVector) : this(route, title, icon, {
+        Text(stringResource(title))
+    })
+
+    data object Timetable :
+        Screen(
+            "timetable",
+            R.string.title_timetable,
+            Icons.Filled.CalendarMonth,
+            { TimetableTitle() })
+
+    data object Alarms : Screen("alarms", R.string.title_alarms, Icons.Filled.Alarm)
+}
+
+val screens = listOf(
+    Screen.Timetable,
+    Screen.Alarms,
+)
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun Application() {
+    ADEAppTheme {
+        val navController = rememberNavController()
+        val navBackStackEntry by navController.currentBackStackEntryAsState()
+        val currentDestination = navBackStackEntry?.destination
+        Scaffold(
+            topBar = {
+                CenterAlignedTopAppBar(colors = topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.primary,
+                ), title = {
+                    screens.find { it.route == currentDestination?.route }?.title?.invoke()
+                        ?: Text(stringResource(R.string.app_name))
+                })
+            },
+            bottomBar = {
+                NavigationBar {
+                    screens.forEach { screen ->
+                        NavigationBarItem(icon = {
+                            Icon(
+                                screen.icon, contentDescription = stringResource(screen.label)
+                            )
+                        },
+                            label = { Text(stringResource(screen.label)) },
+                            selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
+                            onClick = {
+                                navController.navigate(screen.route) {
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            })
+                    }
                 }
+            },
+        ) { padding ->
+            NavHost(
+                navController, startDestination = Screen.Timetable.route, Modifier.padding(padding)
+            ) {
+                composable(Screen.Timetable.route) { Timetable(navController) }
+                composable(Screen.Alarms.route) { Alarms(navController) }
             }
         }
     }
 }
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!", fontSize = 100.sp, modifier = modifier
-    )
-}
-
-//@Composable
-//fun Day(events: List<Event>, modifier: Modifier = Modifier) {
-//    Column {
-//        events.forEach { event ->
-//            Event(event)
-//        }
-//    }
-//}
-
-data class Hour(var hour: Int, var minutes: Int) {
-    constructor(minutes: Int) : this(minutes / 60, minutes % 60)
-
-    var minutesNumber
-        get() = hour * 60 + minutes
-        set(nb) {
-            hour = nb / 60
-            minutes = nb % 60
-        }
-
-    override fun toString(): String =
-        "${hour.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}"
-}
-
-@Composable
-fun Background(startHour: Hour, endHour: Hour, spacing: Int) {
-    Column/*(modifier = Spacing(16.dp), mainAxisSize = LayoutSize.Expand)*/ {
-        (startHour.minutesNumber..endHour.minutesNumber step spacing).forEachIndexed { nb, _ ->
-            Row {
-                Text(
-                    text = Hour(nb).toString(),
-                    fontSize = 22.sp,
-                )
-                Divider(
-                    color = Color.DarkGray,
-                    thickness = 2.dp,
-                )
-            }
-//            Divider(
-//                color = Color.Blue, thickness = 2.dp,
-//                modifier = Modifier
-//                    .fillMaxHeight()
-//                    .width(1.dp)
-//            )
-        }
-    }
-//    Divider(color = Color.DarkGray, thickness = 1.dp)
-//    startHour.hour
-}
-
-//@Composable
-//fun Event(name: String, modifier: Modifier = Modifier) {
-//    Text(
-//        text = "Hello $name!",
-//        fontSize = 100.sp,
-//        modifier = modifier
-//    )
-//}
 
 @Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
-    ADEAppTheme {
-        Greeting("Android")
-    }
+fun Preview() {
+    Application()
 }

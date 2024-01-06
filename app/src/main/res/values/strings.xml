@@ -1,3 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?><!DOCTYPE resources [<!ENTITY appname "ADE App">]>
 <resources>
-    <string name="app_name">ADE App</string>
+    <string name="app_name" translatable="false">&appname;</string>
+    <string name="title_timetable">Timetable</string>
+    <string name="title_edt">Timetable</string>
+    <string name="title_alarms">Alarms</string>
+    <string name="title_notifications">Notifications</string>
+    <string name="welcome_message">Welcome to &appname; !</string>
+    <string name="app_description">A great app for easily managing a schedule.</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="login_explanation">The application will only use it to gain access to your schedule and will not save your identifiers</string>
+    <string name="login_text">To get started, log in with your intranet credentials.</string>
+    <string name="login">Login</string>
+<!--    <string name="invalid_username">Not a valid username</string>-->
+<!--    <string name="invalid_password">Password must be >5 characters</string>-->
+<!--    <string name="login_failed">"Login failed"</string>-->
+    <string name="alarm_add">Add an alarm</string>
 </resources>
