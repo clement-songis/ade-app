@@ -105,7 +105,7 @@ class DataSource {
     }
 
 //        $ADE_BASE/jsp/webapi?function=${getResources}&projectId=$PROJECT_ID&detail=${3}&data=$data
-    
+
 //        $ADE_BASE/jsp/webapi?function=imageET&displayConfId=2&detail=2&weeks=20&days=0,1,2,3,4,5,6&width=1920&height=1080&resources=67&projectId=3&data=$data
 //        $ADE_BASE/jsp/webapi?function=imageET&displayConfId=2&weeks=20&days=0&width=540&height=960&resources=67&projectId=3&data=$data
     private fun getIcs(resourceId: Int): String {
@@ -168,6 +168,7 @@ class DataSource {
 
                 return@withContext Result.Success(User(resourceId, data))
             } catch (e: Throwable) {
+                println(e)
                 return@withContext Result.Error(IOException("Error logging in", e))
             }
         }

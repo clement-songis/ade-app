@@ -3,7 +3,6 @@ package com.chtibizoux.adeapp.data
 import androidx.datastore.core.DataStore
 import com.chtibizoux.adeapp.data.xml.Calendar
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 
 class SettingsRepository(
     private val dataStore: DataStore<Settings>,
