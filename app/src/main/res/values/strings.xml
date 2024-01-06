@@ -12,8 +12,8 @@
     <string name="login_explanation">The application will only use it to gain access to your schedule and will not save your identifiers</string>
     <string name="login_text">To get started, log in with your intranet credentials.</string>
     <string name="login">Login</string>
-<!--    <string name="invalid_username">Not a valid username</string>-->
-<!--    <string name="invalid_password">Password must be >5 characters</string>-->
-<!--    <string name="login_failed">"Login failed"</string>-->
+    <string name="invalid_username">Not a valid username</string>
+    <string name="invalid_password">Password must be >5 characters</string>
+    <string name="login_failed">"Login failed"</string>
     <string name="alarm_add">Add an alarm</string>
 </resources>
