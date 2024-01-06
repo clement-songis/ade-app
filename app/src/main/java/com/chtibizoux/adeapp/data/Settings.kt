@@ -2,6 +2,8 @@ package com.chtibizoux.adeapp.data
 
 import androidx.datastore.core.CorruptionException
 import androidx.datastore.core.Serializer
+import kotlinx.collections.immutable.PersistentList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
@@ -10,26 +12,42 @@ import java.io.OutputStream
 
 @Serializable
 data class Settings(
-    val lastUpdate: Long
+    val user: User? = null,
+    val alarms: PersistentList<Alarm> = persistentListOf(),
+    val defaultAlarmRepeat: Int = 1,
+    val defaultInterval: Int = 0,
+//    val defaultRingTone: String,
+//    val defaultVibration: Boolean,
+)
+
+@Serializable
+data class User(val resourceId: Int, val data: String)
+
+@Serializable
+data class Alarm(
+    val forHour: String,
+    val hours: PersistentList<String>,
+    val summary: String,
+    val description: String,
+    //  val ringTone: String, uri or "silent"
+    //  val vibration: bool,
 )
 
 class SettingsSerializer constructor() : Serializer<Settings> {
 
-    override val defaultValue = Settings(lastUpdate = 0)
+    override val defaultValue = Settings()
 
-    override suspend fun readFrom(input: InputStream): Settings =
-        try {
-            Json.decodeFromString(
-                Settings.serializer(), input.readBytes().decodeToString()
-            )
-        } catch (serialization: SerializationException) {
-            throw CorruptionException("Unable to read Settings", serialization)
-        }
+    override suspend fun readFrom(input: InputStream): Settings = try {
+        Json.decodeFromString(
+            Settings.serializer(), input.readBytes().decodeToString()
+        )
+    } catch (serialization: SerializationException) {
+        throw CorruptionException("Unable to read Settings", serialization)
+    }
 
     override suspend fun writeTo(t: Settings, output: OutputStream) {
         output.write(
-            Json.encodeToString(Settings.serializer(), t)
-                .encodeToByteArray()
+            Json.encodeToString(Settings.serializer(), t).encodeToByteArray()
         )
     }
 }
