@@ -1,38 +1,42 @@
 package com.chtibizoux.adeapp
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.StringRes
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.NavDestination.Companion.hierarchy
-import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
-import com.chtibizoux.adeapp.ui.alarms.Alarms
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.chtibizoux.adeapp.ui.LoginState
+import com.chtibizoux.adeapp.ui.SettingsViewModel
+import com.chtibizoux.adeapp.ui.SettingsViewModelFactory
+import com.chtibizoux.adeapp.data.dataStore
+import com.chtibizoux.adeapp.ui.home.Home
+import com.chtibizoux.adeapp.ui.login.Login
 import com.chtibizoux.adeapp.ui.theme.ADEAppTheme
-import com.chtibizoux.adeapp.ui.timetable.Timetable
-import com.chtibizoux.adeapp.ui.timetable.TimetableTitle
+import com.chtibizoux.adeapp.ui.home.timetable.TimetableTitle
+import com.chtibizoux.adeapp.ui.startup.Startup
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -53,12 +57,12 @@ sealed class Screen(
         Text(stringResource(title))
     })
 
-    data object Timetable :
-        Screen(
-            "timetable",
-            R.string.title_timetable,
-            Icons.Filled.CalendarMonth,
-            { TimetableTitle() })
+    data object Timetable : Screen(
+        "timetable",
+        R.string.title_timetable,
+        Icons.Filled.CalendarMonth,
+        { TimetableTitle() }
+    )
 
     data object Alarms : Screen("alarms", R.string.title_alarms, Icons.Filled.Alarm)
 }
@@ -68,52 +72,33 @@ val screens = listOf(
     Screen.Alarms,
 )
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Application() {
+fun Application(
+    viewModel: SettingsViewModel = viewModel(
+        factory = SettingsViewModelFactory(LocalContext.current.dataStore)
+    )
+) {
+    val context = LocalContext.current
+    LaunchedEffect(Unit) {
+        viewModel.toastMessage.collect { message ->
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+        }
+    }
     ADEAppTheme {
-        val navController = rememberNavController()
-        val navBackStackEntry by navController.currentBackStackEntryAsState()
-        val currentDestination = navBackStackEntry?.destination
-        Scaffold(
-            topBar = {
-                CenterAlignedTopAppBar(colors = topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary,
-                ), title = {
-                    screens.find { it.route == currentDestination?.route }?.title?.invoke()
-                        ?: Text(stringResource(R.string.app_name))
-                })
-            },
-            bottomBar = {
-                NavigationBar {
-                    screens.forEach { screen ->
-                        NavigationBarItem(icon = {
-                            Icon(
-                                screen.icon, contentDescription = stringResource(screen.label)
-                            )
-                        },
-                            label = { Text(stringResource(screen.label)) },
-                            selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
-                            onClick = {
-                                navController.navigate(screen.route) {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
-                                    }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
-                            })
-                    }
-                }
-            },
-        ) { padding ->
-            NavHost(
-                navController, startDestination = Screen.Timetable.route, Modifier.padding(padding)
-            ) {
-                composable(Screen.Timetable.route) { Timetable(navController) }
-                composable(Screen.Alarms.route) { Alarms(navController) }
-            }
+        when (viewModel.loginState) {
+            LoginState.CONNECTED -> Home()
+            LoginState.FIRST_CONNECTION -> Startup()
+            LoginState.LOADING -> Loading()
+            LoginState.DISCONNECTED -> Login(viewModel)
+        }
+    }
+}
+
+@Composable
+private fun Loading() {
+    Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+        Box(contentAlignment = Alignment.Center) {
+            CircularProgressIndicator(modifier = Modifier.size(80.dp), strokeCap = StrokeCap.Round, strokeWidth = 8.dp)
         }
     }
 }

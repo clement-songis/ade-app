@@ -1,4 +1,4 @@
-package com.chtibizoux.adeapp.ui.alarms
+package com.chtibizoux.adeapp.ui.home.alarms
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme

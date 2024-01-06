@@ -8,7 +8,7 @@
     <string name="username">Utilisateur</string>
     <string name="password">Mot de passe</string>
     <string name="login_explanation">L\'application s\'en servira juste pour récupèrer l\'acces ton emploi du temps et ne sauvegardera pas tes identifiants</string>
-    <string name="login_text">Pour commencer connecte toi avec les identifiants de l\'intranet</string>
+    <string name="login_text">Pour commencer, connecte toi avec les identifiants de l\'intranet</string>
     <string name="login">Se connecter</string>
     <string name="title_edt">EDT</string>
     <string name="alarm_add">Ajouter une alarme</string>

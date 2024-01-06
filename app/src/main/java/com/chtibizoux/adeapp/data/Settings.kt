@@ -1,7 +1,9 @@
 package com.chtibizoux.adeapp.data
 
+import android.content.Context
 import androidx.datastore.core.CorruptionException
 import androidx.datastore.core.Serializer
+import androidx.datastore.dataStore
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.serialization.Serializable
@@ -13,6 +15,7 @@ import java.io.OutputStream
 @Serializable
 data class Settings(
     val user: User? = null,
+    val firstTime: Boolean = true,
     val alarms: PersistentList<Alarm> = persistentListOf(),
     val defaultAlarmRepeat: Int = 1,
     val defaultInterval: Int = 0,
@@ -33,7 +36,7 @@ data class Alarm(
     //  val vibration: bool,
 )
 
-class SettingsSerializer constructor() : Serializer<Settings> {
+object SettingsSerializer : Serializer<Settings> {
 
     override val defaultValue = Settings()
 
@@ -51,3 +54,5 @@ class SettingsSerializer constructor() : Serializer<Settings> {
         )
     }
 }
+
+val Context.dataStore by dataStore("settings.json", SettingsSerializer)

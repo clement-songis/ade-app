@@ -1,4 +1,4 @@
-package com.chtibizoux.adeapp.ui.timetable
+package com.chtibizoux.adeapp.ui.home.timetable
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
@@ -38,13 +38,9 @@ import java.util.Locale
 
 @Composable
 fun TimetableTitle() {
-    var date by remember {
-        mutableLongStateOf(System.currentTimeMillis())
-    }
+    var date by remember { mutableLongStateOf(System.currentTimeMillis()) }
 
-    var showDatePicker by remember {
-        mutableStateOf(false)
-    }
+    var showDatePicker by remember { mutableStateOf(false) }
 
     Button(onClick = { showDatePicker = true }) {
         Text(DateFormat.getDateInstance(DateFormat.FULL, Locale.getDefault()).format(Date(date)))
@@ -80,7 +76,7 @@ fun MyDatePickerDialog(initialDate: Long, onDateSelected: (Long?) -> Unit) {
 @Composable
 fun Timetable(navController: NavHostController) {
     val pagerState = rememberPagerState(pageCount = { 10 })
-    HorizontalPager(state = pagerState) { page ->
+    HorizontalPager(pagerState) { page ->
 //            days[page]
         Day()
     }
@@ -100,19 +96,19 @@ private fun Day() {
     }
 }
 
-data class Hour(var hour: Int, var minutes: Int) {
-    constructor(minutes: Int) : this(minutes / 60, minutes % 60)
-
-    var minutesNumber
-        get() = hour * 60 + minutes
-        set(nb) {
-            hour = nb / 60
-            minutes = nb % 60
-        }
-
-    override fun toString(): String =
-        "${hour.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}"
-}
+//data class Hour(var hour: Int, var minutes: Int) {
+//    constructor(minutes: Int) : this(minutes / 60, minutes % 60)
+//
+//    var minutesNumber
+//        get() = hour * 60 + minutes
+//        set(nb) {
+//            hour = nb / 60
+//            minutes = nb % 60
+//        }
+//
+//    override fun toString(): String =
+//        "${hour.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}"
+//}
 
 @Composable
 fun Background(startHour: Int, endHour: Int) {
