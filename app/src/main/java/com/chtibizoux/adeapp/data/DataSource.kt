@@ -193,9 +193,9 @@ class DataSource {
         return hours.toSet().sorted()
     }
 
-    suspend fun getStartingHour(user: User): Result<String> = withContext(Dispatchers.IO) {
+    suspend fun getStartingHour(user: User, date: Date): Result<String> = withContext(Dispatchers.IO) {
         try {
-            val (days) = getSimpleEvents(user, Date())
+            val (days) = getSimpleEvents(user, date)
             val hours = startingHours(days)
             if (hours.size != 1) {
                 throw Error("Bad days number ${hours.size}")
