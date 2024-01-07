@@ -1,7 +1,5 @@
 package com.chtibizoux.adeapp.data.ics
 
-import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toPersistentList
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.GregorianCalendar
@@ -61,10 +59,10 @@ class Parser {
                             }
                             if (index == -1) {
                                 val date = toMyDate(event.dtStart)
-                                val day = Day(date, persistentListOf(event))
+                                val day = Day(date, listOf(event))
                                 days.add(day)
                             } else {
-                                days[index] = days[index].copy(events = days[index].events.add(event))
+                                days[index] = days[index].copy(events = days[index].events + event)
                             }
                             eventBuilder = null
                         }
@@ -116,7 +114,7 @@ class Parser {
                 }
             }
         }
-        return MyCalendar(days.toPersistentList())
+        return MyCalendar(days)
     }
 
     private val dateTimeFormat = SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'", Locale.getDefault())

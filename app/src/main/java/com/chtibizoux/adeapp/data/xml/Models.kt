@@ -1,23 +1,22 @@
 package com.chtibizoux.adeapp.data.xml
 
-import kotlinx.collections.immutable.PersistentList
 import kotlinx.serialization.Serializable
 
 
 @Serializable
 data class Calendar(
-    val days: PersistentList<Day<Event>>,
+    val days: List<Day<Event>>,
 )
 
 @Serializable
 data class SimpleCalendar(
-    val days: PersistentList<Day<SimpleEvent>>,
+    val days: List<Day<SimpleEvent>>,
 )
 
 @Serializable
 data class Day<T>(
     val date: String,
-    val events: PersistentList<T>,
+    val events: List<T>,
 )
 
 @Serializable
@@ -36,7 +35,7 @@ data class Event(
     val startHour: String,
     val endHour: String,
     val color: String,
-    val resources: PersistentList<Resource>,
+    val resources: List<Resource>,
 )
 
 @Serializable

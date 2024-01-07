@@ -18,7 +18,7 @@
     <string name="add">Ajouter</string>
     <string name="cancel">Annuler</string>
     <string name="alarm_choice">Choix des réveils</string>
-    <string name="default_alarm_interval">Réveiller après (min)</string>
+    <string name="default_alarm_interval">Réveiller avant (min)</string>
     <string name="repeat_interval">Nombre d\'alarme</string>
     <string name="default_interval">Interval entre les alarmes</string>
 </resources>

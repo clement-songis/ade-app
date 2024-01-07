@@ -1,10 +1,9 @@
 package com.chtibizoux.adeapp.data.ics
 
-import kotlinx.collections.immutable.PersistentList
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class MyCalendar(val days: PersistentList<Day>)
+data class MyCalendar(val days: List<Day>)
 
 @Serializable
 data class MyDate(val day: Int, val month: Int, val year: Int)
@@ -13,7 +12,7 @@ data class MyDate(val day: Int, val month: Int, val year: Int)
 data class Day(
 //    val date: String,
     val date: MyDate,
-    val events: PersistentList<Event>,
+    val events: List<Event>,
 )
 
 @Serializable

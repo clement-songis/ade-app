@@ -4,8 +4,6 @@ import android.content.Context
 import androidx.datastore.core.CorruptionException
 import androidx.datastore.core.Serializer
 import androidx.datastore.dataStore
-import kotlinx.collections.immutable.PersistentList
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
@@ -16,7 +14,7 @@ import java.io.OutputStream
 data class Settings(
     val user: User? = null,
     val firstTime: Boolean = true,
-    val alarms: PersistentList<Alarm> = persistentListOf(),
+    val alarms: List<Alarm> = listOf(),
     val defaultAlarmRepeat: Int = 1,
     val defaultInterval: Int = 0,
 //    val defaultRingTone: String,
@@ -55,7 +53,7 @@ data class Time(val hour: Int, val minute: Int) {
 @Serializable
 data class Alarm(
     val forHour: String,
-    val hours: PersistentList<Time>,
+    val hours: List<Time>,
     val summary: String = "",
     val description: String = "",
     //  val ringTone: String, uri or "silent"

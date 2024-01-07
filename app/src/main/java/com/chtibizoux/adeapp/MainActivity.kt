@@ -1,7 +1,9 @@
 package com.chtibizoux.adeapp
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.StringRes
@@ -16,7 +18,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.StrokeCap
@@ -26,7 +27,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.chtibizoux.adeapp.data.dataStore
 import com.chtibizoux.adeapp.ui.LoginState
 import com.chtibizoux.adeapp.ui.SettingsViewModel
 import com.chtibizoux.adeapp.ui.SettingsViewModelFactory
@@ -36,9 +36,19 @@ import com.chtibizoux.adeapp.ui.login.Login
 import com.chtibizoux.adeapp.ui.startup.Startup
 import com.chtibizoux.adeapp.ui.theme.ADEAppTheme
 
+const val ALARMS_CHANNEL_ID = "alarm_id"
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val channelName = getString(R.string.title_alarms)
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val channel = NotificationChannel(
+            ALARMS_CHANNEL_ID,
+            channelName,
+            NotificationManager.IMPORTANCE_HIGH
+        )
+        notificationManager.createNotificationChannel(channel)
         setContent {
             Application()
         }
@@ -73,15 +83,9 @@ val screens = listOf(
 @Composable
 fun Application(
     viewModel: SettingsViewModel = viewModel(
-        factory = SettingsViewModelFactory(LocalContext.current.dataStore)
+        factory = SettingsViewModelFactory(LocalContext.current)
     )
 ) {
-    val context = LocalContext.current
-    LaunchedEffect(Unit) {
-        viewModel.toastMessage.collect { message ->
-            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-        }
-    }
     ADEAppTheme {
         when (viewModel.loginState) {
             LoginState.CONNECTED -> Home()

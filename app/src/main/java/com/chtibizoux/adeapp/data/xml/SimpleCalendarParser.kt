@@ -1,8 +1,6 @@
 package com.chtibizoux.adeapp.data.xml
 
 import android.util.Xml
-import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toPersistentList
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
 import java.io.IOException
@@ -34,15 +32,15 @@ class SimpleCalendarParser {
                 val event = readEvent(parser)
                 val index = days.indexOfFirst { it.date == event.date }
                 if (index == -1) {
-                    days.add(Day(event.date, persistentListOf(event)))
+                    days.add(Day(event.date, listOf(event)))
                 } else {
-                    days[index] = days[index].copy(events = days[index].events.add(event))
+                    days[index] = days[index].copy(events = days[index].events + event)
                 }
             } else {
                 skip(parser)
             }
         }
-        return SimpleCalendar(days.toPersistentList())
+        return SimpleCalendar(days)
     }
 
     @Throws(XmlPullParserException::class, IOException::class)
