@@ -2,6 +2,7 @@ package com.chtibizoux.adeapp.data
 
 import androidx.datastore.core.DataStore
 import com.chtibizoux.adeapp.data.xml.Calendar
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.Flow
 
 class SettingsRepository(
@@ -26,19 +27,11 @@ class SettingsRepository(
         dataStore.updateData { settings -> settings.copy(user = user) }
     }
 
-    suspend fun getCalendar(user: User): Result<Calendar> {
-        val result = dataSource.getCalendar(user)
-
-//        if (result is Result.Success) {
-//            setCalendar(result.data)
-//        }
-
-        return result
+    suspend fun setAlarms(alarms: List<Alarm>) {
+        dataStore.updateData { settings -> settings.copy(alarms = alarms.toPersistentList(), firstTime = false) }
     }
 
-//    private suspend fun setCalendar(calendar: Calendar) {
-//        userPreferencesStore.updateData { preferences ->
-//            preferences.toBuilder().setCalendar(calendar).build()
-//        }
-//    }
+    suspend fun getStartingHours(user: User): Result<List<String>> {
+        return dataSource.getStartingHours(user)
+    }
 }

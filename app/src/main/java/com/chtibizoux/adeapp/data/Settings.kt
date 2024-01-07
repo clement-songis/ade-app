@@ -27,9 +27,26 @@ data class Settings(
 data class User(val resourceId: Int, val data: String)
 
 @Serializable
+data class Time(val hour: Int, val minute: Int) {
+    companion object {
+        fun fromString(time: String): Time? {
+            val matchResult = Regex("^([0-9]{1,2}):([0-9]{1,2})$").find(time) ?: return null
+            val (hour, minute) = matchResult.destructured
+            val h = hour.toIntOrNull() ?: return null
+            val m = minute.toIntOrNull() ?: return null
+            return Time(h, m)
+        }
+    }
+
+    override fun toString(): String {
+        return "${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}"
+    }
+}
+
+@Serializable
 data class Alarm(
     val forHour: String,
-    val hours: PersistentList<String>,
+    val hours: PersistentList<Time>,
     val summary: String,
     val description: String,
     //  val ringTone: String, uri or "silent"

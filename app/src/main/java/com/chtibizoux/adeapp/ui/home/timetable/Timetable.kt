@@ -20,6 +20,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -62,7 +63,7 @@ fun MyDatePickerDialog(initialDate: Long, onDateSelected: (Long?) -> Unit) {
     val datePickerState = rememberDatePickerState(initialDate)
 
     DatePickerDialog(onDismissRequest = { onDateSelected(null) }, confirmButton = {
-        Button(onClick = {
+        TextButton(onClick = {
             onDateSelected(datePickerState.selectedDateMillis)
         }) {
             Text("Ok")

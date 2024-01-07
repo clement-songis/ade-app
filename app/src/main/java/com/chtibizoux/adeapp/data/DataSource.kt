@@ -5,6 +5,10 @@ import com.chtibizoux.adeapp.data.ics.MyCalendar
 import com.chtibizoux.adeapp.data.ics.Parser
 import com.chtibizoux.adeapp.data.xml.Calendar
 import com.chtibizoux.adeapp.data.xml.CalendarParser
+import com.chtibizoux.adeapp.data.xml.Day
+import com.chtibizoux.adeapp.data.xml.SimpleCalendar
+import com.chtibizoux.adeapp.data.xml.SimpleCalendarParser
+import com.chtibizoux.adeapp.data.xml.SimpleEvent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.BufferedReader
@@ -106,7 +110,7 @@ class DataSource {
 
 //        $ADE_BASE/jsp/webapi?function=${getResources}&projectId=$PROJECT_ID&detail=${3}&data=$data
 
-//        $ADE_BASE/jsp/webapi?function=imageET&displayConfId=2&detail=2&weeks=20&days=0,1,2,3,4,5,6&width=1920&height=1080&resources=67&projectId=3&data=$data
+    //        $ADE_BASE/jsp/webapi?function=imageET&displayConfId=2&detail=2&weeks=20&days=0,1,2,3,4,5,6&width=1920&height=1080&resources=67&projectId=3&data=$data
 //        $ADE_BASE/jsp/webapi?function=imageET&displayConfId=2&weeks=20&days=0&width=540&height=960&resources=67&projectId=3&data=$data
     private fun getIcs(resourceId: Int): String {
         val url = URL("$INTRANET_BASE/ICS_ADE/$resourceId.ics")
@@ -119,39 +123,95 @@ class DataSource {
     }
 
     private val dateFormat: SimpleDateFormat = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
-    private fun getEvents(user: User, date: Date? = null/*, week: Int? = null, day: Int? = null*/): InputStream {
+//    private fun getEvents(
+//        user: User,
+//        date: Date? = null/*, week: Int? = null, day: Int? = null*/
+//    ): InputStream {
+//        var query = ""
+//        if (date != null) {
+//            query += "&date=${dateFormat.format(date)}"
+//        }
+//        val url =
+//            URL("$ADE_BASE/jsp/webapi?function=getEvents&detail=8&resources=${user.resourceId}&projectId=$PROJECT_ID&data=${user.data}")
+//        val connection = url.openConnection() as HttpURLConnection
+//        connection.run {
+//            readTimeout = 10000
+//            connectTimeout = 15000
+//            return inputStream
+//        }
+//    }
+
+    private fun getSimpleEvents(
+        user: User,
+        date: Date? = null/*, week: Int? = null, day: Int? = null*/
+    ): SimpleCalendar {
         var query = ""
         if (date != null) {
             query += "&date=${dateFormat.format(date)}"
         }
         val url =
-            URL("$ADE_BASE/jsp/webapi?function=getEvents&detail=8&resources=${user.resourceId}&projectId=$PROJECT_ID&data=${user.data}")
+            URL("$ADE_BASE/jsp/webapi?function=getEvents&detail=3&resources=${user.resourceId}&projectId=$PROJECT_ID&data=${user.data}")
         val connection = url.openConnection() as HttpURLConnection
         connection.run {
             readTimeout = 10000
             connectTimeout = 15000
-            return inputStream
+
+            val parser = SimpleCalendarParser()
+            return parser.parse(inputStream)
         }
     }
+//    suspend fun getCalendar(resourceId: Int): Result<MyCalendar> = withContext(Dispatchers.IO) {
+//        try {
+//            val ics = getIcs(resourceId)
+//            val parser = Parser()
+//            val calendar = parser.parse(ics)
+//            return@withContext Result.Success(calendar)
+//        } catch (e: Throwable) {
+//            println(e)
+//            return@withContext Result.Error(IOException("Error getting calendar", e))
+//        }
+//    }
+//
+//    suspend fun getCalendar(user: User): Result<Calendar> = withContext(Dispatchers.IO) {
+//        try {
+//            val stream = getEvents(user)
+//            val parser = CalendarParser()
+//            val calendar = parser.parse(stream)
+//            return@withContext Result.Success(calendar)
+//        } catch (e: Throwable) {
+//            println(e)
+//            return@withContext Result.Error(IOException("Error getting calendar", e))
+//        }
+//    }
 
-    suspend fun getCalendar(resourceId: Int): Result<MyCalendar> = withContext(Dispatchers.IO) {
+    private fun startingHours(days: List<Day<SimpleEvent>>): List<String> {
+        val hours = mutableListOf<String>()
+        for (day in days) {
+            val events = day.events.map { it.startHour }.sorted()
+            hours.add(events[0])
+        }
+        return hours.toSet().sorted()
+    }
+
+    suspend fun getStartingHour(user: User): Result<String> = withContext(Dispatchers.IO) {
         try {
-            val ics = getIcs(resourceId)
-            val parser = Parser()
-            val calendar = parser.parse(ics)
-            return@withContext Result.Success(calendar)
+            val (days) = getSimpleEvents(user, Date())
+            val hours = startingHours(days)
+            if (hours.size != 1) {
+                throw Error("Bad days number ${hours.size}")
+            }
+            return@withContext Result.Success(hours.first())
         } catch (e: Throwable) {
             println(e)
-            return@withContext Result.Error(IOException("Error getting calendar", e))
+            return@withContext Result.Error(IOException("Error getting current day", e))
         }
     }
 
-    suspend fun getCalendar(user: User): Result<Calendar> = withContext(Dispatchers.IO) {
+    suspend fun getStartingHours(user: User): Result<List<String>> = withContext(Dispatchers.IO) {
         try {
-            val stream = getEvents(user)
-            val parser = CalendarParser()
-            val calendar = parser.parse(stream)
-            return@withContext Result.Success(calendar)
+            val (days) = getSimpleEvents(user)
+            val hours = startingHours(days)
+            return@withContext Result.Success(hours.filter { it < "12:00" })
         } catch (e: Throwable) {
             println(e)
             return@withContext Result.Error(IOException("Error getting calendar", e))

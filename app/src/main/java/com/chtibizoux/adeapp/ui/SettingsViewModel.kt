@@ -9,10 +9,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.chtibizoux.adeapp.R
+import com.chtibizoux.adeapp.data.Alarm
 import com.chtibizoux.adeapp.data.DataSource
 import com.chtibizoux.adeapp.data.Result
 import com.chtibizoux.adeapp.data.Settings
 import com.chtibizoux.adeapp.data.SettingsRepository
+import com.chtibizoux.adeapp.data.xml.Calendar
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
@@ -25,6 +27,9 @@ class SettingsViewModel(private val repository: SettingsRepository) : ViewModel(
     var loginState by mutableStateOf(LoginState.LOADING)
         private set
 
+    var startingHours: List<String>? by mutableStateOf(null)
+        private set
+
     val settings = repository.settings
 
     private val _toastMessage = MutableSharedFlow<@receiver:StringRes Int>()
@@ -34,12 +39,17 @@ class SettingsViewModel(private val repository: SettingsRepository) : ViewModel(
         loginState = LoginState.LOADING
         viewModelScope.launch {
             val result = repository.login(username, password)
-            if (result is Result.Success) {
-                loginState = LoginState.FIRST_CONNECTION
-            } else {
+            if (result is Result.Error) {
                 loginState = LoginState.DISCONNECTED
                 _toastMessage.emit(R.string.login_failed)
             }
+        }
+    }
+
+    fun setAlarms(alarms: List<Alarm>) {
+        loginState = LoginState.LOADING
+        viewModelScope.launch {
+            repository.setAlarms(alarms)
         }
     }
 
@@ -49,6 +59,17 @@ class SettingsViewModel(private val repository: SettingsRepository) : ViewModel(
                 loginState = if (settings.user == null) {
                     LoginState.DISCONNECTED
                 } else if (settings.firstTime) {
+                    if (startingHours == null) {
+                        val result = repository.getStartingHours(settings.user)
+                        if (result is Result.Success) {
+                            startingHours = result.data
+                        } else {
+//                            TODO: Add retry popup or screen
+                            throw Error("Get calendar failed")
+//                            loginState = LoginState.RETRY
+//                            _toastMessage.emit(R.string.get_calendar_failed)
+                        }
+                    }
                     LoginState.FIRST_CONNECTION
                 } else {
                     LoginState.CONNECTED

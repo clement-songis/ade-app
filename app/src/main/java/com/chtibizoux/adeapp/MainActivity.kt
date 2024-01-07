@@ -85,7 +85,7 @@ fun Application(
     ADEAppTheme {
         when (viewModel.loginState) {
             LoginState.CONNECTED -> Home()
-            LoginState.FIRST_CONNECTION -> Startup()
+            LoginState.FIRST_CONNECTION -> Startup(viewModel)
             LoginState.LOADING -> Loading()
             LoginState.DISCONNECTED -> Login(viewModel)
         }

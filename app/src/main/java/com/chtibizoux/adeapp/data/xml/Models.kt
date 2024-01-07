@@ -6,13 +6,26 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Calendar(
-    val days: PersistentList<Day>,
+    val days: PersistentList<Day<Event>>,
 )
 
 @Serializable
-data class Day(
+data class SimpleCalendar(
+    val days: PersistentList<Day<SimpleEvent>>,
+)
+
+@Serializable
+data class Day<T>(
     val date: String,
-    val events: PersistentList<Event>,
+    val events: PersistentList<T>,
+)
+
+@Serializable
+data class SimpleEvent(
+    val name: String,
+    val date: String,
+    val startHour: String,
+    val endHour: String,
 )
 
 @Serializable

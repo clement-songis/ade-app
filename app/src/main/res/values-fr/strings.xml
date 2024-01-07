@@ -15,4 +15,5 @@
     <string name="invalid_password">Mot de passe invalide</string>
     <string name="login_failed">La connexion a échoué</string>
     <string name="alarm_add">Ajouter une alarme</string>
+    <string name="next">Suivant</string>
 </resources>
