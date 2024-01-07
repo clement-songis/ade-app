@@ -58,7 +58,7 @@ class SettingsViewModel(private val repository: SettingsRepository) : ViewModel(
         alarms.replaceAll { alarm ->
             Alarm(alarm.forHour, (0..<defaultAlarmRepeat).map {
                 val time = Time.fromString(alarm.forHour)!!
-                Time(time.getMinutesNumber() + defaultAlarmInterval + it * defaultAlarmInterval)
+                Time(time.getMinutesNumber() + defaultAlarmInterval + it * defaultInterval)
             }.toPersistentList())
         }
     }
