@@ -27,6 +27,10 @@ class SettingsRepository(
         dataStore.updateData { settings -> settings.copy(user = user) }
     }
 
+    suspend fun closeStartup() {
+        dataStore.updateData { settings -> settings.copy(firstTime = false) }
+    }
+
     suspend fun setAlarms(alarms: List<Alarm>) {
         dataStore.updateData { settings -> settings.copy(alarms = alarms.toPersistentList(), firstTime = false) }
     }

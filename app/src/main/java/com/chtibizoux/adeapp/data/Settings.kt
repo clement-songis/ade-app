@@ -28,6 +28,8 @@ data class User(val resourceId: Int, val data: String)
 
 @Serializable
 data class Time(val hour: Int, val minute: Int) {
+    constructor(minutesNumber: Int) : this(minutesNumber / 60, minutesNumber % 60)
+
     companion object {
         fun fromString(time: String): Time? {
             val matchResult = Regex("^([0-9]{1,2}):([0-9]{1,2})$").find(time) ?: return null
@@ -38,8 +40,15 @@ data class Time(val hour: Int, val minute: Int) {
         }
     }
 
+    fun getMinutesNumber() = hour * 60 + minute
+
     override fun toString(): String {
         return "${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}"
+    }
+
+    fun add(minutes: Int): Time {
+        val minutesNumber = hour * 60 + minute + minutes
+        return Time(minutesNumber / 60, minutesNumber % 60)
     }
 }
 
@@ -47,8 +56,8 @@ data class Time(val hour: Int, val minute: Int) {
 data class Alarm(
     val forHour: String,
     val hours: PersistentList<Time>,
-    val summary: String,
-    val description: String,
+    val summary: String = "",
+    val description: String = "",
     //  val ringTone: String, uri or "silent"
     //  val vibration: bool,
 )

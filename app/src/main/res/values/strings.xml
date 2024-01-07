@@ -16,5 +16,10 @@
     <string name="invalid_password">Password must be >5 characters</string>
     <string name="login_failed">Login failed</string>
     <string name="alarm_add">Add an alarm</string>
-    <string name="next">Next</string>
+    <string name="add">Add</string>
+    <string name="cancel">Cancel</string>
+    <string name="alarm_choice">Choice of alarm clocks</string>
+    <string name="default_alarm_interval">Start after (min)</string>
+    <string name="repeat_interval">Nombre d\'alarme</string>
+    <string name="default_interval">Interval entre les alarmes</string>
 </resources>

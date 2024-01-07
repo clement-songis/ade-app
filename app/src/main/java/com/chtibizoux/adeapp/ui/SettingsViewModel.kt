@@ -2,6 +2,8 @@ package com.chtibizoux.adeapp.ui
 
 import androidx.annotation.StringRes
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.datastore.core.DataStore
@@ -14,7 +16,9 @@ import com.chtibizoux.adeapp.data.DataSource
 import com.chtibizoux.adeapp.data.Result
 import com.chtibizoux.adeapp.data.Settings
 import com.chtibizoux.adeapp.data.SettingsRepository
-import com.chtibizoux.adeapp.data.xml.Calendar
+import com.chtibizoux.adeapp.data.Time
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
@@ -27,10 +31,14 @@ class SettingsViewModel(private val repository: SettingsRepository) : ViewModel(
     var loginState by mutableStateOf(LoginState.LOADING)
         private set
 
-    var startingHours: List<String>? by mutableStateOf(null)
-        private set
+    val alarms = mutableStateListOf<Alarm>()
 
-    val settings = repository.settings
+    var defaultAlarmInterval by mutableIntStateOf(60)
+        private set
+    var defaultAlarmRepeat by mutableIntStateOf(1)
+        private set
+    var defaultInterval by mutableIntStateOf(1)
+        private set
 
     private val _toastMessage = MutableSharedFlow<@receiver:StringRes Int>()
     val toastMessage = _toastMessage.asSharedFlow()
@@ -46,23 +54,74 @@ class SettingsViewModel(private val repository: SettingsRepository) : ViewModel(
         }
     }
 
-    fun setAlarms(alarms: List<Alarm>) {
+    private fun updateAlarms() {
+        alarms.replaceAll { alarm ->
+            Alarm(alarm.forHour, (0..<defaultAlarmRepeat).map {
+                val time = Time.fromString(alarm.forHour)!!
+                Time(time.getMinutesNumber() + defaultAlarmInterval + it * defaultAlarmInterval)
+            }.toPersistentList())
+        }
+    }
+
+    fun noAlarm() {
         loginState = LoginState.LOADING
         viewModelScope.launch {
-            repository.setAlarms(alarms)
+            repository.closeStartup()
         }
+    }
+
+    fun setAlarms() {
+        loginState = LoginState.LOADING
+        viewModelScope.launch {
+            repository.setAlarms(alarms.toList())
+        }
+//        TODO: Go to alarm page
+    }
+
+    fun setAlarmInterval(interval: String) {
+        if (interval.isEmpty()) {
+            defaultAlarmInterval = 0
+        }
+        val i = interval.toIntOrNull()
+        if (i != null && i >= 0) {
+            defaultAlarmInterval = i
+        }
+        updateAlarms()
+    }
+
+    fun setAlarmRepeat(repeat: String) {
+        if (repeat.isEmpty()) {
+            defaultAlarmRepeat = 1
+        }
+        val r = repeat.toIntOrNull()
+        if (r != null && r >= 1) {
+            defaultAlarmRepeat = r
+        }
+        updateAlarms()
+    }
+
+    fun setInterval(interval: String) {
+        if (interval.isEmpty()) {
+            defaultInterval = 0
+        }
+        val i = interval.toIntOrNull()
+        if (i != null && i >= 0) {
+            defaultInterval = i
+        }
+        updateAlarms()
     }
 
     init {
         viewModelScope.launch {
-            settings.collect { settings ->
+            repository.settings.collect { settings ->
                 loginState = if (settings.user == null) {
                     LoginState.DISCONNECTED
                 } else if (settings.firstTime) {
-                    if (startingHours == null) {
+                    if (alarms.isEmpty()) {
                         val result = repository.getStartingHours(settings.user)
                         if (result is Result.Success) {
-                            startingHours = result.data
+                            alarms.addAll(result.data.map { Alarm(it, persistentListOf()) })
+                            updateAlarms()
                         } else {
 //                            TODO: Add retry popup or screen
                             throw Error("Get calendar failed")

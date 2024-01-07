@@ -15,5 +15,10 @@
     <string name="invalid_password">Mot de passe invalide</string>
     <string name="login_failed">La connexion a échoué</string>
     <string name="alarm_add">Ajouter une alarme</string>
-    <string name="next">Suivant</string>
+    <string name="add">Ajouter</string>
+    <string name="cancel">Annuler</string>
+    <string name="alarm_choice">Choix des réveils</string>
+    <string name="default_alarm_interval">Wake up after (min)</string>
+    <string name="repeat_interval">Number of alarms</string>
+    <string name="default_interval">Interval between alarms (min)</string>
 </resources>
