@@ -41,6 +41,7 @@ fun Startup(viewModel: SettingsViewModel) {
         ) {
             Text(stringResource(R.string.alarm_choice), Modifier.padding(20.dp), fontSize = 25.sp)
             Column {
+                // TODO: Better ui, fields, focus, animations
                 OutlinedTextField(
                     value = viewModel.defaultAlarmRepeat,
                     onValueChange = {

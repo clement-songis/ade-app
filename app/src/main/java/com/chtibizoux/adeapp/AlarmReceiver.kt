@@ -26,8 +26,10 @@ const val ALARM_MESSAGE = "ADE Alarm"
 class AlarmReceiver : BroadcastReceiver() {
     companion object {
         fun setBackgroundWork(context: Context) {
+            // TODO: test multiple alarms and add delays if necessary
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager
             val intent = Intent(context, AlarmReceiver::class.java)
+//            intent.putExtra("state", "Main")
             val alarmIntent = PendingIntent.getBroadcast(
                 context,
                 0,
@@ -35,25 +37,27 @@ class AlarmReceiver : BroadcastReceiver() {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
-            alarmManager?.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, 30000, alarmIntent)
-//            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager
-//            // TODO: Check if not already exist
-//            if (!alarmManager.) {
-//                val intent = Intent(context, AlarmReceiver::class.java)
-//                val alarmIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
-//
-//                val calendar: Calendar = Calendar.getInstance().apply {
-//                    timeInMillis = System.currentTimeMillis()
-//                    set(Calendar.HOUR_OF_DAY, UPDATE_HOUR)
-//                    // set(Calendar.MINUTES, 0)
-//                }
-//                alarmManager?.setInexactRepeating(
-//                    AlarmManager.RTC_WAKEUP, calendar.timeInMillis, AlarmManager.INTERVAL_DAY, alarmIntent
-//                )
-//            }
+//            alarmManager?.setInexactRepeating(
+//                AlarmManager.RTC_WAKEUP,
+//                Date().time,
+//                AlarmManager.INTERVAL_FIFTEEN_MINUTES,
+//                alarmIntent
+//            )
+            val calendar: Calendar = Calendar.getInstance().apply {
+                timeInMillis = System.currentTimeMillis()
+                set(Calendar.HOUR_OF_DAY, UPDATE_HOUR)
+                // set(Calendar.MINUTES, 0)
+            }
+            alarmManager?.setInexactRepeating(
+                AlarmManager.RTC_WAKEUP,
+                calendar.timeInMillis,
+                AlarmManager.INTERVAL_DAY,
+                alarmIntent
+            )
         }
 
         fun removeBackgroundWork(context: Context) {
+            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager
             val intent = Intent(context, AlarmReceiver::class.java)
             val alarmIntent = PendingIntent.getBroadcast(
                 context,
@@ -61,7 +65,7 @@ class AlarmReceiver : BroadcastReceiver() {
                 intent,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
-            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager
+
             alarmManager?.cancel(alarmIntent)
         }
 
@@ -71,9 +75,6 @@ class AlarmReceiver : BroadcastReceiver() {
             settings: Settings
         ) {
             Toast.makeText(context, "test", Toast.LENGTH_LONG).show()
-//            setAlarm(context, Time(14, 0))
-//            setAlarm(context, Time(15, 2))
-
 //            TODO: Attention no today trigger
 //            if (!alarmAlreadyInUse) {
             val notificationManager =
@@ -82,7 +83,7 @@ class AlarmReceiver : BroadcastReceiver() {
                 val tomorrow = Calendar.getInstance()
                 tomorrow.time = Date()
                 tomorrow.add(Calendar.DATE, 1)
-                if (settings.user == null) throw Error("No user")
+                if (settings.user == null) throw Error(context.getString(R.string.no_user))
                 val result = repository.getStartingHour(settings.user, tomorrow.time)
                 if (result is Result.Success) {
                     val alarm = settings.alarms.find { it.forHour == result.data }
@@ -90,34 +91,124 @@ class AlarmReceiver : BroadcastReceiver() {
                         for (time in alarm.hours) {
                             setAlarm(context, time)
                         }
+
+                        val intent = Intent(AlarmClock.ACTION_SHOW_ALARMS).apply {
+                            flags =
+                                Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK
+                        }
+                        val viewIntent = PendingIntent.getActivity(
+                            context,
+                            0,
+                            intent,
+                            PendingIntent.FLAG_IMMUTABLE
+                        )
+//                        val cancelIntent = Intent(context, CancelAlarmReceiver::class.java)
+//                        val cancelPendingIntent =
+//                            PendingIntent.getBroadcast(
+//                                context,
+//                                0,
+//                                cancelIntent,
+//                                PendingIntent.FLAG_IMMUTABLE
+//                            )
                         val builder = NotificationCompat.Builder(context, ALARMS_CHANNEL_ID)
-                            .setSmallIcon(R.drawable.ic_launcher_foreground)
-                            .setContentTitle("Alarm Error")
-                            .setContentText("${alarm.hours.size} alarm(s) set for ${result.data}")
+//                            .setSmallIcon(R.drawable.ic_launcher_foreground)
+                            .setContentTitle(context.getString(R.string.alarm_success))
+                            .setContentText(
+                                context.getString(
+                                    R.string.alarm_success_text,
+                                    alarm.hours.size.toString(),
+                                    result.data
+                                )
+                            )
+//                            .addAction(
+//                                R.drawable.ic_cancel,
+//                                context.getString(R.string.cancel),
+//                                cancelPendingIntent
+//                            )
+                            .setContentIntent(viewIntent)
                             .setPriority(NotificationCompat.PRIORITY_HIGH)
                         notificationManager.notify(1, builder.build())
                     } else {
+//                        val viewIntent = Intent(context, MainActivity::class.java).apply {
+//                            AlarmsPath
+//                        }
+//                        val viewPendingIntent = PendingIntent.getActivity(
+//                            context,
+//                            0,
+//                            viewIntent,
+//                            PendingIntent.FLAG_IMMUTABLE
+//                        )
+//                        val addIntent = Intent(context, MainActivity::class.java).apply {
+//                            NewAlarmPath
+//                        }
+//                        val addPendingIntent = PendingIntent.getActivity(
+//                            context,
+//                            0,
+//                            addIntent,
+//                            PendingIntent.FLAG_IMMUTABLE
+//                        )
                         val builder = NotificationCompat.Builder(context, ALARMS_CHANNEL_ID)
-                            .setSmallIcon(R.drawable.ic_launcher_foreground)
-                            .setContentTitle("Alarm Error")
-                            .setContentText("No alarm set for this hour ${result.data}")
+//                            .setSmallIcon(R.drawable.ic_launcher_foreground)
+                            .setContentTitle(context.getString(R.string.alarm_error))
+                            .setContentText(context.getString(R.string.no_alarm_error, result.data))
+//                            .addAction(
+//                                R.drawable.ic_add,
+//                                context.getString(R.string.add),
+//                                addPendingIntent
+//                            )
+//                            .setContentIntent(viewPendingIntent)
                             .setPriority(NotificationCompat.PRIORITY_HIGH)
                         notificationManager.notify(1, builder.build())
                     }
                 } else {
                     val builder = NotificationCompat.Builder(context, ALARMS_CHANNEL_ID)
-                        .setSmallIcon(R.drawable.ic_launcher_foreground)
-                        .setContentTitle("Alarm Error")
-                        .setContentText("Error getting starting hour from ade api")/* TODO: replace by string resource */
+//                        .setSmallIcon(R.drawable.ic_launcher_foreground)
+                        .setContentTitle(context.getString(R.string.alarm_error))
+                        .setContentText(context.getString(R.string.get_alarm_error))
                         .setPriority(NotificationCompat.PRIORITY_HIGH)
                     notificationManager.notify(1, builder.build())
+
+//                    Retry
+                    val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager
+                    val intent = Intent(context, AlarmReceiver::class.java)
+                    val alarmIntent = PendingIntent.getBroadcast(
+                        context,
+                        0,
+                        intent,
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                    )
+
+                    alarmManager?.set(
+                        AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                        30000,
+                        alarmIntent
+                    )
                 }
             } catch (e: Exception) {
+//                val viewIntent = Intent(context, MainActivity::class.java).apply {
+//                    AlarmsPath
+//                }
+//                val viewPendingIntent =
+//                    PendingIntent.getActivity(context, 0, viewIntent, PendingIntent.FLAG_IMMUTABLE)
+                val retryIntent = Intent(context, AlarmReceiver::class.java)
+                val retryPendingIntent =
+                    PendingIntent.getBroadcast(
+                        context,
+                        0,
+                        retryIntent,
+                        PendingIntent.FLAG_IMMUTABLE
+                    )
                 val builder = NotificationCompat.Builder(context, ALARMS_CHANNEL_ID)
-                    .setSmallIcon(R.drawable.ic_launcher_foreground)
-                    .setContentTitle("Alarm Error")
+//                    .setSmallIcon(R.drawable.ic_launcher_foreground)
+                    .setContentTitle(context.getString(R.string.alarm_error))
                     .setContentText(e.toString())
                     .setPriority(NotificationCompat.PRIORITY_HIGH)
+                    .addAction(
+                        R.drawable.ic_sync,
+                        context.getString(R.string.add),
+                        retryPendingIntent
+                    )
+//                    .setContentIntent(viewPendingIntent)
                 notificationManager.notify(1, builder.build())
             }
 //            }
@@ -125,12 +216,13 @@ class AlarmReceiver : BroadcastReceiver() {
 
         private fun setAlarm(context: Context, time: Time) {
             val setIntent = Intent(AlarmClock.ACTION_SET_ALARM).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK
                 putExtra(AlarmClock.EXTRA_MESSAGE, ALARM_MESSAGE)
                 putExtra(AlarmClock.EXTRA_HOUR, time.hour)
                 putExtra(AlarmClock.EXTRA_MINUTES, time.minute)
                 putExtra(AlarmClock.EXTRA_SKIP_UI, true)
             }
+            // If don't work use setFullScreenIntent on a notification
             if (setIntent.resolveActivity(context.packageManager) != null) {
                 context.startActivity(setIntent)
             } else {
@@ -141,6 +233,7 @@ class AlarmReceiver : BroadcastReceiver() {
 
         fun dismissAlarm(context: Context) {
             val dismissIntent = Intent(AlarmClock.ACTION_DISMISS_ALARM).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK
                 putExtra(AlarmClock.EXTRA_ALARM_SEARCH_MODE, AlarmClock.ALARM_SEARCH_MODE_LABEL)
                 putExtra(AlarmClock.EXTRA_MESSAGE, ALARM_MESSAGE)
                 putExtra(AlarmClock.EXTRA_SKIP_UI, true)

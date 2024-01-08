@@ -132,7 +132,7 @@ class DataSource {
 //            query += "&date=${dateFormat.format(date)}"
 //        }
 //        val url =
-//            URL("$ADE_BASE/jsp/webapi?function=getEvents&detail=8&resources=${user.resourceId}&projectId=$PROJECT_ID&data=${user.data}")
+//            URL("$ADE_BASE/jsp/webapi?function=getEvents&detail=8$query&resources=${user.resourceId}&projectId=$PROJECT_ID&data=${user.data}")
 //        val connection = url.openConnection() as HttpURLConnection
 //        connection.run {
 //            readTimeout = 10000
@@ -150,7 +150,7 @@ class DataSource {
             query += "&date=${dateFormat.format(date)}"
         }
         val url =
-            URL("$ADE_BASE/jsp/webapi?function=getEvents&detail=3&resources=${user.resourceId}&projectId=$PROJECT_ID&data=${user.data}")
+            URL("$ADE_BASE/jsp/webapi?function=getEvents&detail=3$query&resources=${user.resourceId}&projectId=$PROJECT_ID&data=${user.data}")
         val connection = url.openConnection() as HttpURLConnection
         connection.run {
             readTimeout = 10000

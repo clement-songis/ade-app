@@ -22,4 +22,10 @@
     <string name="default_alarm_interval">Wake up before (min)</string>
     <string name="repeat_interval">Number of alarms</string>
     <string name="default_interval">Interval between alarms (min)</string>
+    <string name="alarm_success">Alarm Success</string>
+    <string name="alarm_error">Alarm Error</string>
+    <string name="get_alarm_error">Error getting class start time from ADE API</string>
+    <string name="no_alarm_error">No alarm set for this time %1$s</string>
+    <string name="alarm_success_text">%1$s alarm(s) set for %2$s</string>
+    <string name="no_user">No users logged in</string>
 </resources>

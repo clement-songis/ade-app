@@ -43,6 +43,7 @@ fun Alarms(navController: NavHostController) {
     ) {
         Text("Not implemented")
         Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+            //TODO: alarm ui add delete modify
 //            Row(
 //                modifier = Modifier
 //                    .fillMaxWidth()

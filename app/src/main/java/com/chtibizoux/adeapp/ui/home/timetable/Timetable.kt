@@ -89,6 +89,7 @@ private fun Day() {
         modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
     ) {
         Background(8, 19)
+        // TODO: Add events, offline, requests, change icon
 //    Column {
 //        events.forEach { event ->
 //            Event(event)
@@ -97,24 +98,10 @@ private fun Day() {
     }
 }
 
-//data class Hour(var hour: Int, var minutes: Int) {
-//    constructor(minutes: Int) : this(minutes / 60, minutes % 60)
-//
-//    var minutesNumber
-//        get() = hour * 60 + minutes
-//        set(nb) {
-//            hour = nb / 60
-//            minutes = nb % 60
-//        }
-//
-//    override fun toString(): String =
-//        "${hour.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}"
-//}
-
 @Composable
 fun Background(startHour: Int, endHour: Int) {
     Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.SpaceAround) {
-        (startHour..endHour * 2).forEachIndexed { _, nb ->
+        (startHour * 2..endHour * 2).forEachIndexed { _, nb ->
             if (nb % 2 == 0) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
