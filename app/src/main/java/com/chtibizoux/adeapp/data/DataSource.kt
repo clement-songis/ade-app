@@ -1,8 +1,6 @@
 package com.chtibizoux.adeapp.data
 
 import android.icu.text.SimpleDateFormat
-import com.chtibizoux.adeapp.data.ics.MyCalendar
-import com.chtibizoux.adeapp.data.ics.Parser
 import com.chtibizoux.adeapp.data.xml.Calendar
 import com.chtibizoux.adeapp.data.xml.CalendarParser
 import com.chtibizoux.adeapp.data.xml.Day
@@ -13,7 +11,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.BufferedReader
 import java.io.IOException
-import java.io.InputStream
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
@@ -108,38 +105,33 @@ class DataSource {
         }
     }
 
-//        $ADE_BASE/jsp/webapi?function=${getResources}&projectId=$PROJECT_ID&detail=${3}&data=$data
+//    $ADE_BASE/jsp/webapi?function=${getResources}&projectId=$PROJECT_ID&detail=${3}&data=$data
 
-    //        $ADE_BASE/jsp/webapi?function=imageET&displayConfId=2&detail=2&weeks=20&days=0,1,2,3,4,5,6&width=1920&height=1080&resources=67&projectId=3&data=$data
-//        $ADE_BASE/jsp/webapi?function=imageET&displayConfId=2&weeks=20&days=0&width=540&height=960&resources=67&projectId=3&data=$data
-    private fun getIcs(resourceId: Int): String {
-        val url = URL("$INTRANET_BASE/ICS_ADE/$resourceId.ics")
-//        $ADE_BASE/jsp/custom/modules/plannings/anonymous_cal.jsp?resources=$resourceId&projectId=$PROJECT_ID&calType=ical&firstDate=2024-01-22&lastDate=2024-01-26
-//        val url = URL("$ADE_BASE/jsp/custom/modules/plannings/anonymous_cal.jsp?data=$data&projectId=$PROJECT_ID&nbWeeks=4&resources=$resourceId")
-        val connection = url.openConnection() as HttpURLConnection
-        connection.run {
-            return BufferedReader(InputStreamReader(inputStream)).use(BufferedReader::readText)
-        }
-    }
+//    $ADE_BASE/jsp/webapi?function=imageET&displayConfId=2&detail=2&weeks=20&days=0,1,2,3,4,5,6&width=1920&height=1080&resources=67&projectId=3&data=$data
+//    $ADE_BASE/jsp/webapi?function=imageET&displayConfId=2&weeks=20&days=0&width=540&height=960&resources=67&projectId=3&data=$data
 
-    private val dateFormat: SimpleDateFormat = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
-//    private fun getEvents(
-//        user: User,
-//        date: Date? = null/*, week: Int? = null, day: Int? = null*/
-//    ): InputStream {
-//        var query = ""
-//        if (date != null) {
-//            query += "&date=${dateFormat.format(date)}"
-//        }
-//        val url =
-//            URL("$ADE_BASE/jsp/webapi?function=getEvents&detail=8$query&resources=${user.resourceId}&projectId=$PROJECT_ID&data=${user.data}")
+//    private fun getIcs(resourceId: Int): String {
+//        val url = URL("$INTRANET_BASE/ICS_ADE/$resourceId.ics")
+////        $ADE_BASE/jsp/custom/modules/plannings/anonymous_cal.jsp?resources=$resourceId&projectId=$PROJECT_ID&calType=ical&firstDate=2024-01-22&lastDate=2024-01-26
+////        val url = URL("$ADE_BASE/jsp/custom/modules/plannings/anonymous_cal.jsp?data=$data&projectId=$PROJECT_ID&nbWeeks=4&resources=$resourceId")
 //        val connection = url.openConnection() as HttpURLConnection
 //        connection.run {
-//            readTimeout = 10000
-//            connectTimeout = 15000
-//            return inputStream
+//            return BufferedReader(InputStreamReader(inputStream)).use(BufferedReader::readText)
 //        }
 //    }
+
+    private val dateFormat: SimpleDateFormat = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
+    private fun getEvents(user: User): Calendar {
+        val url =
+            URL("$ADE_BASE/jsp/webapi?function=getEvents&detail=8&resources=${user.resourceId}&projectId=$PROJECT_ID&data=${user.data}")
+        val connection = url.openConnection() as HttpURLConnection
+        connection.run {
+            readTimeout = 10000
+            connectTimeout = 15000
+            val parser = CalendarParser()
+            return parser.parse(inputStream)
+        }
+    }
 
     private fun getSimpleEvents(
         user: User,
@@ -172,19 +164,17 @@ class DataSource {
 //        }
 //    }
 //
-//    suspend fun getCalendar(user: User): Result<Calendar> = withContext(Dispatchers.IO) {
-//        try {
-//            val stream = getEvents(user)
-//            val parser = CalendarParser()
-//            val calendar = parser.parse(stream)
-//            return@withContext Result.Success(calendar)
-//        } catch (e: Throwable) {
-//            println(e)
-//            return@withContext Result.Error(IOException("Error getting calendar", e))
-//        }
-//    }
+    suspend fun getCalendar(user: User): Result<Calendar> = withContext(Dispatchers.IO) {
+        try {
+            val calendar = getEvents(user)
+            return@withContext Result.Success(calendar)
+        } catch (e: Throwable) {
+            println(e)
+            return@withContext Result.Error(IOException("Error getting calendar", e))
+        }
+    }
 
-    private fun startingHours(days: List<Day<SimpleEvent>>): List<String> {
+    private fun startingTimes(days: List<Day<SimpleEvent>>): List<String> {
         val hours = mutableListOf<String>()
         for (day in days) {
             val events = day.events.map { it.startHour }.sorted()
@@ -193,10 +183,10 @@ class DataSource {
         return hours.toSet().sorted()
     }
 
-    suspend fun getStartingHour(user: User, date: Date): Result<String> = withContext(Dispatchers.IO) {
+    suspend fun getStartingTime(user: User, date: Date): Result<String> = withContext(Dispatchers.IO) {
         try {
             val (days) = getSimpleEvents(user, date)
-            val hours = startingHours(days)
+            val hours = startingTimes(days)
             if (hours.size != 1) {
                 throw Error("Bad days number ${hours.size}")
             }
@@ -207,10 +197,10 @@ class DataSource {
         }
     }
 
-    suspend fun getStartingHours(user: User): Result<List<String>> = withContext(Dispatchers.IO) {
+    suspend fun getStartingTimes(user: User): Result<List<String>> = withContext(Dispatchers.IO) {
         try {
             val (days) = getSimpleEvents(user)
-            val hours = startingHours(days)
+            val hours = startingTimes(days)
             return@withContext Result.Success(hours.filter { it < "12:00" })
         } catch (e: Throwable) {
             println(e)

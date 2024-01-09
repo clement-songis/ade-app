@@ -16,23 +16,24 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.chtibizoux.adeapp.R
+import com.chtibizoux.adeapp.data.Result
 import com.chtibizoux.adeapp.ui.SettingsViewModel
 import com.chtibizoux.adeapp.ui.atLeast
 
 @Composable
-fun Startup(viewModel: SettingsViewModel) {
-    if (viewModel.alarms.isEmpty()) {
-//        TODO: Retry
-        throw Error("No calendar")
-    }
-
+fun Startup(
+    settingsViewModel: SettingsViewModel,
+    startupViewModel: StartupViewModel = viewModel(factory = StartupViewModelFactory(settingsViewModel.startingTimes))
+) {
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Column(
             modifier = Modifier.verticalScroll(rememberScrollState()),
@@ -43,19 +44,19 @@ fun Startup(viewModel: SettingsViewModel) {
             Column {
                 // TODO: Better ui, fields, focus, animations
                 OutlinedTextField(
-                    value = viewModel.defaultAlarmRepeat,
+                    value = startupViewModel.defaultAlarmRepeat,
                     onValueChange = {
-                        viewModel.setAlarmRepeat(it)
+                        startupViewModel.setAlarmRepeat(it)
                     },
                     modifier = Modifier.padding(bottom = 20.dp),
                     label = { Text(stringResource(R.string.repeat_interval)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                 )
-                if (viewModel.defaultAlarmRepeat.atLeast(1) > 1) {
+                if (startupViewModel.defaultAlarmRepeat.atLeast(1) > 1) {
                     OutlinedTextField(
-                        value = viewModel.defaultInterval,
+                        value = startupViewModel.defaultInterval,
                         onValueChange = {
-                            viewModel.setInterval(it)
+                            startupViewModel.setInterval(it)
                         },
                         modifier = Modifier.padding(bottom = 20.dp),
                         label = { Text(stringResource(R.string.default_interval)) },
@@ -63,9 +64,9 @@ fun Startup(viewModel: SettingsViewModel) {
                     )
                 }
                 OutlinedTextField(
-                    value = viewModel.defaultAlarmInterval,
+                    value = startupViewModel.defaultAlarmInterval,
                     onValueChange = {
-                        viewModel.setAlarmInterval(it)
+                        startupViewModel.setAlarmInterval(it)
                     },
                     modifier = Modifier.padding(bottom = 20.dp),
                     label = { Text(stringResource(R.string.default_alarm_interval)) },
@@ -73,7 +74,7 @@ fun Startup(viewModel: SettingsViewModel) {
                 )
             }
             Column {
-                viewModel.alarms.forEach { alarm ->
+                startupViewModel.alarms.forEach { alarm ->
                     Text(
                         text = "${alarm.forHour} ➜ ${alarm.hours.joinToString { it.toString() }}",
                         modifier = Modifier.padding(10.dp)
@@ -87,11 +88,14 @@ fun Startup(viewModel: SettingsViewModel) {
                 horizontalArrangement = Arrangement.End
             ) {
                 TextButton(onClick = {
-                    viewModel.noAlarm()
+                    settingsViewModel.noAlarm()
                 }) {
                     Text(stringResource(R.string.cancel))
                 }
-                Button(onClick = { viewModel.setAlarms() }, enabled = viewModel.canSubmit) {
+                Button(
+                    onClick = { settingsViewModel.setAlarms(startupViewModel.alarms) },
+                    enabled = startupViewModel.canSubmit
+                ) {
                     Text(stringResource(R.string.add))
                 }
             }

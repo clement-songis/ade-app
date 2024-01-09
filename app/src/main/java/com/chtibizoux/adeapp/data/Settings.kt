@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.datastore.core.CorruptionException
 import androidx.datastore.core.Serializer
 import androidx.datastore.dataStore
+import com.chtibizoux.adeapp.data.xml.Calendar
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
@@ -15,6 +16,7 @@ data class Settings(
     val user: User? = null,
     val firstTime: Boolean = true,
     val alarms: List<Alarm> = listOf(),
+    val calendar: Calendar? = null,
     val defaultAlarmRepeat: Int = 1,
     val defaultInterval: Int = 0,
 //    val defaultRingTone: String,
@@ -54,8 +56,7 @@ data class Time(val hour: Int, val minute: Int) {
 data class Alarm(
     val forHour: String,
     val hours: List<Time>,
-    val summary: String = "",
-    val description: String = "",
+    val label: String = "",
     //  val ringTone: String, uri or "silent"
     //  val vibration: bool,
 )

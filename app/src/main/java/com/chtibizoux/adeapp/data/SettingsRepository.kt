@@ -1,25 +1,24 @@
 package com.chtibizoux.adeapp.data
 
 import androidx.datastore.core.DataStore
-import kotlinx.coroutines.flow.Flow
 import java.util.Date
 
 class SettingsRepository(
     private val dataStore: DataStore<Settings>,
     private val dataSource: DataSource
 ) {
-    val settings: Flow<Settings> = dataStore.data
+    val settings = dataStore.data
 
     suspend fun logout() {
-        dataStore.updateData { settings -> settings.copy(user = null) }
+        dataStore.updateData { Settings() }
     }
 
-    suspend fun login(username: String, password: String): Result<User> {
+    suspend fun login(username: String, password: String): Boolean {
         val result = dataSource.login(username, password)
         if (result is Result.Success) {
             setUser(result.data)
         }
-        return result
+        return result is Result.Success
     }
 
     private suspend fun setUser(user: User) {
@@ -34,13 +33,19 @@ class SettingsRepository(
         dataStore.updateData { settings -> settings.copy(alarms = alarms, firstTime = false) }
     }
 
-    suspend fun getStartingHours(user: User): Result<List<String>> {
-        return dataSource.getStartingHours(user)
+    suspend fun getStartingTimes(user: User): Result<List<String>> {
+        return dataSource.getStartingTimes(user)
     }
 
-    suspend fun getStartingHour(user: User, date: Date): Result<String> {
-        return dataSource.getStartingHour(user, date)
+    suspend fun getStartingTime(user: User, date: Date): Result<String> {
+        return dataSource.getStartingTime(user, date)
     }
 
-//    getStartingHour
+    suspend fun updateCalendar(user: User): Boolean {
+        val result = dataSource.getCalendar(user)
+        if (result is Result.Success) {
+            dataStore.updateData { settings -> settings.copy(calendar = result.data) }
+        }
+        return result is Result.Success
+    }
 }

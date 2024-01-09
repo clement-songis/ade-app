@@ -1,9 +1,11 @@
 package com.chtibizoux.adeapp.ui.login
 
+import android.content.Context
 import androidx.annotation.StringRes
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import com.chtibizoux.adeapp.R
 import com.chtibizoux.adeapp.ui.SettingsViewModel
@@ -34,12 +36,9 @@ class LoginViewModel : ViewModel() {
         passwordError = if (!isPasswordValid(password)) R.string.invalid_password else null
     }
 
-    fun login(viewModel: SettingsViewModel) {
+    fun tryLogin() {
         usernameError = if (!isUserNameValid(username)) R.string.invalid_username else null
         passwordError = if (!isPasswordValid(password)) R.string.invalid_password else null
-        if (canLogin) {
-            viewModel.login(username, password)
-        }
     }
 
     private fun isUserNameValid(username: String): Boolean {

@@ -23,6 +23,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -32,7 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
+import com.chtibizoux.adeapp.ui.SettingsViewModel
 import java.text.DateFormat
 import java.util.Date
 import java.util.Locale
@@ -75,8 +76,25 @@ fun MyDatePickerDialog(initialDate: Long, onDateSelected: (Long?) -> Unit) {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun Timetable(navController: NavHostController) {
+fun Timetable(viewModel: SettingsViewModel) {
+    val calendar by viewModel.calendar.collectAsState()
     val pagerState = rememberPagerState(pageCount = { 10 })
+//    val refreshScope = rememberCoroutineScope()
+//    var refreshing by remember { mutableStateOf(false) }
+//    val context = LocalContext.current
+//    fun refresh() = refreshScope.launch {
+//        refreshing = true
+//        val success = viewModel.refreshCalendar()
+//        if (!success) {
+//            Toast.makeText(context, "Unable to update calendar from ADE", Toast.LENGTH_LONG).show()
+//        }
+//        refreshing = false
+//    }
+//    val state = rememberPullRefreshState(refreshing, ::refresh)
+//    Box(Modifier.pullRefresh(state)) {
+//        /*Content*/
+//        PullRefreshIndicator(refreshing, state, Modifier.align(Alignment.TopCenter))
+//    }
     HorizontalPager(pagerState) { page ->
 //            days[page]
         Day()

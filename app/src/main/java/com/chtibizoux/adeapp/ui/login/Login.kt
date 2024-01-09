@@ -1,6 +1,7 @@
 package com.chtibizoux.adeapp.ui.login
 
 import android.view.KeyEvent.ACTION_DOWN
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -31,6 +32,7 @@ import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalAutofill
 import androidx.compose.ui.platform.LocalAutofillTree
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -47,6 +49,15 @@ import com.chtibizoux.adeapp.ui.SettingsViewModel
 @Composable
 fun Login(settingsViewModel: SettingsViewModel, loginViewModel: LoginViewModel = viewModel()) {
     val focusManager = LocalFocusManager.current
+
+    val context = LocalContext.current
+    fun login() {
+        loginViewModel.tryLogin()
+        settingsViewModel.login(loginViewModel.username, loginViewModel.password) {
+            Toast.makeText(context, R.string.login_failed, Toast.LENGTH_LONG).show()
+        }
+    }
+
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Column(
             modifier = Modifier
@@ -92,7 +103,7 @@ fun Login(settingsViewModel: SettingsViewModel, loginViewModel: LoginViewModel =
                     .fillMaxWidth()
                     .onPreviewKeyEvent {
                         if (it.key == Key.Enter){
-                            loginViewModel.login(settingsViewModel)
+                            login()
                             true
                         } else {
                             false
@@ -103,14 +114,12 @@ fun Login(settingsViewModel: SettingsViewModel, loginViewModel: LoginViewModel =
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 keyboardActions = KeyboardActions(
-                    onDone = { loginViewModel.login(settingsViewModel) }
+                    onDone = { login() }
                 ),
                 singleLine = true
             )
 
-            Button(onClick = {
-                loginViewModel.login(settingsViewModel)
-            }, enabled = loginViewModel.canLogin) {
+            Button(onClick = { login() }, enabled = loginViewModel.canLogin) {
                 Text(stringResource(R.string.login))
             }
 

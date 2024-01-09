@@ -9,11 +9,13 @@ import android.content.Intent
 import android.provider.AlarmClock
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
+import com.chtibizoux.adeapp.data.Alarm
 import com.chtibizoux.adeapp.data.DataSource
 import com.chtibizoux.adeapp.data.Result
 import com.chtibizoux.adeapp.data.Settings
 import com.chtibizoux.adeapp.data.SettingsRepository
 import com.chtibizoux.adeapp.data.Time
+import com.chtibizoux.adeapp.data.User
 import com.chtibizoux.adeapp.data.dataStore
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -37,23 +39,23 @@ class AlarmReceiver : BroadcastReceiver() {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
-//            alarmManager?.setInexactRepeating(
-//                AlarmManager.RTC_WAKEUP,
-//                Date().time,
-//                AlarmManager.INTERVAL_FIFTEEN_MINUTES,
-//                alarmIntent
-//            )
-            val calendar: Calendar = Calendar.getInstance().apply {
-                timeInMillis = System.currentTimeMillis()
-                set(Calendar.HOUR_OF_DAY, UPDATE_HOUR)
-                // set(Calendar.MINUTES, 0)
-            }
             alarmManager?.setInexactRepeating(
                 AlarmManager.RTC_WAKEUP,
-                calendar.timeInMillis,
-                AlarmManager.INTERVAL_DAY,
+                Date().time,
+                AlarmManager.INTERVAL_FIFTEEN_MINUTES,
                 alarmIntent
             )
+//            val calendar: Calendar = Calendar.getInstance().apply {
+//                timeInMillis = System.currentTimeMillis()
+//                set(Calendar.HOUR_OF_DAY, UPDATE_HOUR)
+//                // set(Calendar.MINUTES, 0)
+//            }
+//            alarmManager?.setInexactRepeating(
+//                AlarmManager.RTC_WAKEUP,
+//                calendar.timeInMillis,
+//                AlarmManager.INTERVAL_DAY,
+//                alarmIntent
+//            )
         }
 
         fun removeBackgroundWork(context: Context) {
@@ -72,7 +74,8 @@ class AlarmReceiver : BroadcastReceiver() {
         suspend fun setAlarmAndNotifyUser(
             context: Context,
             repository: SettingsRepository,
-            settings: Settings
+            user: User,
+            alarms: List<Alarm>
         ) {
             Toast.makeText(context, "test", Toast.LENGTH_LONG).show()
 //            TODO: Attention no today trigger
@@ -83,10 +86,9 @@ class AlarmReceiver : BroadcastReceiver() {
                 val tomorrow = Calendar.getInstance()
                 tomorrow.time = Date()
                 tomorrow.add(Calendar.DATE, 1)
-                if (settings.user == null) throw Error(context.getString(R.string.no_user))
-                val result = repository.getStartingHour(settings.user, tomorrow.time)
+                val result = repository.getStartingTime(user, tomorrow.time)
                 if (result is Result.Success) {
-                    val alarm = settings.alarms.find { it.forHour == result.data }
+                    val alarm = alarms.find { it.forHour == result.data }
                     if (alarm != null) {
                         for (time in alarm.hours) {
                             setAlarm(context, time)
@@ -169,7 +171,8 @@ class AlarmReceiver : BroadcastReceiver() {
                     notificationManager.notify(1, builder.build())
 
 //                    Retry
-                    val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager
+                    val alarmManager =
+                        context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager
                     val intent = Intent(context, AlarmReceiver::class.java)
                     val alarmIntent = PendingIntent.getBroadcast(
                         context,
@@ -205,7 +208,7 @@ class AlarmReceiver : BroadcastReceiver() {
                     .setPriority(NotificationCompat.PRIORITY_HIGH)
                     .addAction(
                         R.drawable.ic_sync,
-                        context.getString(R.string.add),
+                        context.getString(R.string.retry),
                         retryPendingIntent
                     )
 //                    .setContentIntent(viewPendingIntent)
@@ -251,8 +254,8 @@ class AlarmReceiver : BroadcastReceiver() {
         runBlocking {
             val repository = SettingsRepository(context.dataStore, DataSource())
             val settings = repository.settings.first()
-            if (settings.alarms.isNotEmpty()) {
-                setAlarmAndNotifyUser(context, repository, settings)
+            if (settings.alarms.isNotEmpty() && settings.user != null) {
+                setAlarmAndNotifyUser(context, repository, settings.user, settings.alarms)
             } else {
                 removeBackgroundWork(context)
             }

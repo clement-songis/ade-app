@@ -24,7 +24,10 @@
     <string name="alarm_success">Alarm Success</string>
     <string name="alarm_error">Erreur de l\'alarme</string>
     <string name="get_alarm_error">Erreur lors de l\'obtention de l\'heure de début du cours à partir de l\'API ADE</string>
+    <string name="get_starting_times_error">Erreur lors de l\'obtention des heures de début des cours à partir de l\'API ADE</string>
     <string name="no_alarm_error">Aucune alarme réglée pour cette heure %1$s</string>
     <string name="alarm_success_text">%1$s alarme(s) réglée(s) pour %2$s</string>
     <string name="no_user">Aucun utilisateur connecté</string>
+    <string name="retry">réessayer</string>
+    <string name="unable_to_update_calendar">Impossible de mettre à jour le calendrier depuis l\'API ADE</string>
 </resources>

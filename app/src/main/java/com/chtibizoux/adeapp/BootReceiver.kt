@@ -35,13 +35,12 @@ class BootReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == "android.intent.action.BOOT_COMPLETED") {
-            Toast.makeText(context, "Not implemented", Toast.LENGTH_LONG).show()
             runBlocking {
                 val repository = SettingsRepository(context.dataStore, DataSource())
                 val settings = repository.settings.first()
-                if (settings.alarms.isNotEmpty()) {
+                if (settings.alarms.isNotEmpty() && settings.user != null) {
                     AlarmReceiver.setBackgroundWork(context)
-                    AlarmReceiver.setAlarmAndNotifyUser(context, repository, settings)
+                    AlarmReceiver.setAlarmAndNotifyUser(context, repository, settings.user, settings.alarms)
                 } else {
                     disable(context)
                 }
