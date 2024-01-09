@@ -31,4 +31,7 @@
     <string name="no_user">No users logged in</string>
     <string name="retry">try again</string>
     <string name="unable_to_update_calendar">Unable to update calendar from ADE API</string>
+    <string name="more">More</string>
+    <string name="update_label">Update label</string>
+    <string name="add_label">Add a label</string>
 </resources>

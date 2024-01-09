@@ -12,7 +12,6 @@ import androidx.core.app.NotificationCompat
 import com.chtibizoux.adeapp.data.Alarm
 import com.chtibizoux.adeapp.data.DataSource
 import com.chtibizoux.adeapp.data.Result
-import com.chtibizoux.adeapp.data.Settings
 import com.chtibizoux.adeapp.data.SettingsRepository
 import com.chtibizoux.adeapp.data.Time
 import com.chtibizoux.adeapp.data.User
@@ -113,7 +112,7 @@ class AlarmReceiver : BroadcastReceiver() {
 //                                PendingIntent.FLAG_IMMUTABLE
 //                            )
                         val builder = NotificationCompat.Builder(context, ALARMS_CHANNEL_ID)
-//                            .setSmallIcon(R.drawable.ic_launcher_foreground)
+                            .setSmallIcon(R.drawable.ic_launcher_foreground)
                             .setContentTitle(context.getString(R.string.alarm_success))
                             .setContentText(
                                 context.getString(
@@ -150,7 +149,7 @@ class AlarmReceiver : BroadcastReceiver() {
 //                            PendingIntent.FLAG_IMMUTABLE
 //                        )
                         val builder = NotificationCompat.Builder(context, ALARMS_CHANNEL_ID)
-//                            .setSmallIcon(R.drawable.ic_launcher_foreground)
+                            .setSmallIcon(R.drawable.ic_launcher_foreground)
                             .setContentTitle(context.getString(R.string.alarm_error))
                             .setContentText(context.getString(R.string.no_alarm_error, result.data))
 //                            .addAction(
@@ -164,7 +163,7 @@ class AlarmReceiver : BroadcastReceiver() {
                     }
                 } else {
                     val builder = NotificationCompat.Builder(context, ALARMS_CHANNEL_ID)
-//                        .setSmallIcon(R.drawable.ic_launcher_foreground)
+                        .setSmallIcon(R.drawable.ic_launcher_foreground)
                         .setContentTitle(context.getString(R.string.alarm_error))
                         .setContentText(context.getString(R.string.get_alarm_error))
                         .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -202,7 +201,7 @@ class AlarmReceiver : BroadcastReceiver() {
                         PendingIntent.FLAG_IMMUTABLE
                     )
                 val builder = NotificationCompat.Builder(context, ALARMS_CHANNEL_ID)
-//                    .setSmallIcon(R.drawable.ic_launcher_foreground)
+                    .setSmallIcon(R.drawable.ic_launcher_foreground)
                     .setContentTitle(context.getString(R.string.alarm_error))
                     .setContentText(e.toString())
                     .setPriority(NotificationCompat.PRIORITY_HIGH)

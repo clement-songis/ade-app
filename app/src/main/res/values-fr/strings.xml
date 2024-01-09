@@ -30,4 +30,7 @@
     <string name="no_user">Aucun utilisateur connecté</string>
     <string name="retry">réessayer</string>
     <string name="unable_to_update_calendar">Impossible de mettre à jour le calendrier depuis l\'API ADE</string>
+    <string name="more">Plus</string>
+    <string name="update_label">Mettre à jour l\'étiquette</string>
+    <string name="add_label">Ajouter un libellé</string>
 </resources>

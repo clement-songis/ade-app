@@ -1,8 +1,12 @@
 package com.chtibizoux.adeapp.ui.home.alarms
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -14,13 +18,18 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.Label
+import androidx.compose.material.icons.outlined.Label
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -36,36 +45,134 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.chtibizoux.adeapp.R
 import com.chtibizoux.adeapp.data.Time
 import com.chtibizoux.adeapp.ui.SettingsViewModel
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun Alarms(viewModel: SettingsViewModel) {
     val alarms by viewModel.alarms.collectAsState()
-    val selected by remember { mutableIntStateOf(-1) }
+    var selected by remember { mutableIntStateOf(-1) }
     Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background
+        modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
     ) {
         Column(
             modifier = Modifier
                 .verticalScroll(rememberScrollState())
-                .padding(30.dp, 30.dp, 30.dp, 135.dp),
+                .padding(24.dp, 24.dp, 24.dp, 135.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("test")
             // TODO: alarm ui add delete modify
-            alarms.forEachIndexed {i, alarm ->
-                Surface(color = MaterialTheme.colorScheme.surface) {
-                    Text("test")
-                    if (selected == i || alarm.label.isNotEmpty()) {
-                        Text(alarm.label)
+            alarms.forEachIndexed { i, alarm ->
+                Surface(tonalElevation = 3.dp,
+                    shape = RoundedCornerShape(24.dp),
+                    onClick = { selected = if (selected == i) -1 else i }) {
+                    Column(
+                        modifier = Modifier.padding(
+                            start = 20.dp, end = 20.dp, bottom = 20.dp
+                        )
+                    ) {
+                        Row(
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                if (selected == i || alarm.label.isNotEmpty()) {
+                                    Surface(
+                                        onClick = {
+                                            if (selected == i) {
+//                            updateLabel
+                                            }
+                                        }, modifier = Modifier
+                                            .height(60.dp)
+                                            .fillMaxWidth()
+                                    ) {
+                                        Row(
+                                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            if (selected == i) {
+                                                Icon(
+                                                    Icons.Outlined.Label,
+                                                    stringResource(R.string.update_label)
+                                                )
+                                            }
+                                            Text(
+                                                alarm.label.ifEmpty { stringResource(R.string.add_label) },
+                                                color = if (alarm.label.isEmpty()) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.onBackground
+                                            )
+                                        }
+                                    }
+                                }
+                                Row(
+                                    verticalAlignment = Alignment.Bottom,
+                                    modifier = Modifier.padding(
+                                        top = if (selected == i || alarm.label.isNotEmpty()) 0.dp else 20.dp,
+                                        bottom = 20.dp
+                                    )
+                                ) {
+                                    Text(
+                                        "Pour ",
+                                        modifier = Modifier.padding(bottom = 8.dp),
+                                        fontSize = 18.sp,
+                                    )
+                                    Text(alarm.forHour,
+                                        fontSize = 44.sp,
+                                        modifier = Modifier.clickable {
+
+                                        })
+                                }
+                            }
+                            Surface {
+                                Icon(
+                                    Icons.Filled.KeyboardArrowDown,
+                                    stringResource(R.string.more),
+                                    modifier = Modifier
+                                        .padding(
+                                            start = 20.dp, top = 20.dp, bottom = 20.dp
+                                        )
+                                        .background(
+                                            MaterialTheme.colorScheme.primary,
+                                            RoundedCornerShape(50)
+                                        )
+                                        .rotate(if (selected == i) 180f else 0f)
+                                )
+                            }
+                        }
+                        if (selected == i) {
+                            Text(
+                                "Réveils :",
+                            )
+                            FlowRow(verticalArrangement = Arrangement.Center) {
+                                alarm.hours.forEach {
+                                    Text(
+                                        it.toString(),
+                                        fontSize = 30.sp,
+                                        modifier = Modifier.clickable {
+//                                            viewModel.addAlarm()
+                                        }
+                                    )
+                                }
+                                IconButton(onClick = { /*TODO*/ }) {
+                                    Icon(Icons.Filled.Add, stringResource(R.string.alarm_add))
+                                }
+                            }
+                        } else {
+                            Text(
+                                "Réveils : ${alarm.hours.joinToString()}",
+                            )
+                        }
                     }
+
                 }
             }
 //            Row(
@@ -128,7 +235,6 @@ fun Alarms(viewModel: SettingsViewModel) {
 
 @Composable
 fun TimePickerButton(initialTime: Time, time: Time?, updateTime: (time: Time) -> Unit) {
-
     var showTimePicker by remember { mutableStateOf(false) }
 
     Button(onClick = { showTimePicker = true }) {

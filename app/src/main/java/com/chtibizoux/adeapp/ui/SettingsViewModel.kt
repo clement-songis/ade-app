@@ -15,6 +15,8 @@ import com.chtibizoux.adeapp.data.DataSource
 import com.chtibizoux.adeapp.data.Result
 import com.chtibizoux.adeapp.data.Settings
 import com.chtibizoux.adeapp.data.SettingsRepository
+import com.chtibizoux.adeapp.data.User
+import com.chtibizoux.adeapp.data.xml.Calendar
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -31,12 +33,12 @@ class SettingsViewModel(private val repository: SettingsRepository) : ViewModel(
         private set
 
     private val user = repository.settings.map { it.user }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     val alarms = repository.settings.map { it.alarms }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), listOf())
+        .stateIn(viewModelScope, SharingStarted.Eagerly, listOf())
     val calendar = repository.settings.map { it.calendar }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     lateinit var startingTimes: List<String>
         private set
@@ -128,7 +130,7 @@ class SettingsViewModel(private val repository: SettingsRepository) : ViewModel(
             if (alarms.value.isNotEmpty()) {
                 BootReceiver.enable(context)
                 AlarmReceiver.setBackgroundWork(context)
-                AlarmReceiver.setAlarmAndNotifyUser(context, repository, user.value!!, alarms.value)
+//                AlarmReceiver.setAlarmAndNotifyUser(context, repository, user.value!!, alarms.value)
             } else {
                 BootReceiver.disable(context)
                 AlarmReceiver.removeBackgroundWork(context)

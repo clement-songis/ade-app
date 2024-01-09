@@ -17,6 +17,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -69,8 +70,8 @@ fun Home(viewModel: SettingsViewModel) {
         topBar = {
             CenterAlignedTopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary,
+//                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+//                    titleContentColor = MaterialTheme.colorScheme.primary,
                 ),
                 title = {
                     screens.find { it.route == currentDestination?.route }?.title?.invoke() ?: Text(
@@ -80,7 +81,7 @@ fun Home(viewModel: SettingsViewModel) {
             )
         },
         bottomBar = {
-            NavigationBar {
+            NavigationBar(tonalElevation = 0.dp) {
                 screens.forEach { screen ->
                     NavigationBarItem(
                         icon = {
