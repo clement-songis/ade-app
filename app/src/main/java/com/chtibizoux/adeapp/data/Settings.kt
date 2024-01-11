@@ -26,7 +26,7 @@ data class Settings(
 data class DefaultAlarmSettings(
     val repeat: Int = 1,
     val interval: Int = 1,
-    val alarmInterval: Int = 60,
+    val timeUntilEvent: Int = 60,
 )
 
 @Serializable

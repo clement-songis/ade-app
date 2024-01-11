@@ -24,7 +24,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.chtibizoux.adeapp.R
-import com.chtibizoux.adeapp.data.DefaultAlarmSettings
 import com.chtibizoux.adeapp.ui.SettingsViewModel
 import com.chtibizoux.adeapp.ui.atLeast
 
@@ -50,7 +49,7 @@ fun Startup(
                 OutlinedTextField(
                     value = startupViewModel.repeat,
                     onValueChange = {
-                        startupViewModel.setAlarmRepeat(it)
+                        startupViewModel.updateRepeat(it)
                     },
                     modifier = Modifier.padding(bottom = 20.dp),
                     label = { Text(stringResource(R.string.repeat_interval)) },
@@ -60,7 +59,7 @@ fun Startup(
                     OutlinedTextField(
                         value = startupViewModel.interval,
                         onValueChange = {
-                            startupViewModel.setInterval(it)
+                            startupViewModel.updateInterval(it)
                         },
                         modifier = Modifier.padding(bottom = 20.dp),
                         label = { Text(stringResource(R.string.default_interval)) },
@@ -68,9 +67,9 @@ fun Startup(
                     )
                 }
                 OutlinedTextField(
-                    value = startupViewModel.alarmInterval,
+                    value = startupViewModel.timeUntilEvent,
                     onValueChange = {
-                        startupViewModel.setAlarmInterval(it)
+                        startupViewModel.updateTimeUntilEvent(it)
                     },
                     modifier = Modifier.padding(bottom = 20.dp),
                     label = { Text(stringResource(R.string.default_alarm_interval)) },

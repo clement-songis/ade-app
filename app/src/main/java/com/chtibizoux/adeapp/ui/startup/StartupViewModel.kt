@@ -14,7 +14,7 @@ import com.chtibizoux.adeapp.ui.atLeast
 class StartupViewModel(startingTimes: List<String>, default: DefaultAlarmSettings) : ViewModel() {
     val alarms = mutableStateListOf<Alarm>()
 
-    var alarmInterval by mutableStateOf(default.alarmInterval.toString())
+    var timeUntilEvent by mutableStateOf(default.timeUntilEvent.toString())
         private set
     var repeat by mutableStateOf(default.repeat.toString())
         private set
@@ -23,39 +23,39 @@ class StartupViewModel(startingTimes: List<String>, default: DefaultAlarmSetting
 
     val alarmSettings
         get() = DefaultAlarmSettings(
-            repeat.atLeast(1), interval.atLeast(0), alarmInterval.atLeast(0)
+            repeat.atLeast(1), interval.atLeast(0), timeUntilEvent.atLeast(0)
         )
 
     val canSubmit
         get() = run {
             val repeatInt = repeat.atLeast(1)
-            val alarmIntervalInt = alarmInterval.atLeast(0)
+            val alarmIntervalInt = timeUntilEvent.atLeast(0)
             val intervalInt = interval.atLeast(0)
-            repeatInt == repeat.toIntOrNull() && alarmIntervalInt == alarmInterval.toIntOrNull() && intervalInt == interval.toIntOrNull()
+            repeatInt == repeat.toIntOrNull() && alarmIntervalInt == timeUntilEvent.toIntOrNull() && intervalInt == interval.toIntOrNull()
         }
 
-    fun setAlarmInterval(text: String) {
-        alarmInterval = text
+    fun updateTimeUntilEvent(text: String) {
+        timeUntilEvent = text
         updateAlarms()
     }
 
-    fun setAlarmRepeat(text: String) {
+    fun updateRepeat(text: String) {
         repeat = text
         updateAlarms()
     }
 
-    fun setInterval(text: String) {
+    fun updateInterval(text: String) {
         interval = text
         updateAlarms()
     }
 
     private fun updateAlarms() {
         val repeatInt = repeat.atLeast(1)
-        val alarmIntervalInt = alarmInterval.atLeast(0)
+        val timeUntilEventInt = timeUntilEvent.atLeast(0)
         val intervalInt = interval.atLeast(0)
         alarms.replaceAll { alarm ->
             Alarm(alarm.forHour, (0..<repeatInt).map {
-                Time(alarm.forHour.getMinutesNumber() - alarmIntervalInt + it * intervalInt)
+                Time(alarm.forHour.getMinutesNumber() - timeUntilEventInt + it * intervalInt)
             })
         }
     }
@@ -64,7 +64,7 @@ class StartupViewModel(startingTimes: List<String>, default: DefaultAlarmSetting
         alarms.addAll(startingTimes.map { startingTime ->
             val time = Time.fromString(startingTime)!!
             Alarm(time, (0..<default.repeat).map {
-                Time(time.getMinutesNumber() - default.alarmInterval + it * default.interval)
+                Time(time.getMinutesNumber() - default.timeUntilEvent + it * default.interval)
             })
         })
     }
