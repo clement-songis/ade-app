@@ -31,7 +31,8 @@
     <string name="retry">réessayer</string>
     <string name="unable_to_update_calendar">Impossible de mettre à jour le calendrier depuis l\'API ADE</string>
     <string name="more">Plus</string>
-    <string name="update_label">Mettre à jour l\'étiquette</string>
+    <string name="label">Titre</string>
     <string name="add_label">Ajouter un libellé</string>
     <string name="close">Fermer</string>
+    <string name="delete">Supprimer</string>
 </resources>

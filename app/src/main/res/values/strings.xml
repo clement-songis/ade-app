@@ -32,7 +32,8 @@
     <string name="retry">try again</string>
     <string name="unable_to_update_calendar">Unable to update calendar from ADE API</string>
     <string name="more">More</string>
-    <string name="update_label">Update label</string>
+    <string name="label">Label</string>
     <string name="add_label">Add a label</string>
     <string name="close">Close</string>
+    <string name="delete">Delete</string>
 </resources>

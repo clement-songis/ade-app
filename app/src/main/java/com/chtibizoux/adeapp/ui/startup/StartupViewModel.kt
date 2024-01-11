@@ -7,72 +7,76 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.chtibizoux.adeapp.data.Alarm
+import com.chtibizoux.adeapp.data.DefaultAlarmSettings
 import com.chtibizoux.adeapp.data.Time
 import com.chtibizoux.adeapp.ui.atLeast
 
-class StartupViewModel(startingTimes: List<String>) : ViewModel() {
+class StartupViewModel(startingTimes: List<String>, default: DefaultAlarmSettings) : ViewModel() {
     val alarms = mutableStateListOf<Alarm>()
 
-    var defaultAlarmInterval by mutableStateOf("60")
+    var alarmInterval by mutableStateOf(default.alarmInterval.toString())
         private set
-    var defaultAlarmRepeat by mutableStateOf("1")
+    var repeat by mutableStateOf(default.repeat.toString())
         private set
-    var defaultInterval by mutableStateOf("1")
+    var interval by mutableStateOf(default.interval.toString())
         private set
+
+    val alarmSettings
+        get() = DefaultAlarmSettings(
+            repeat.atLeast(1), interval.atLeast(0), alarmInterval.atLeast(0)
+        )
 
     val canSubmit
         get() = run {
-            val alarmRepeat = defaultAlarmRepeat.atLeast(1)
-            val alarmInterval = defaultAlarmInterval.atLeast(0)
-            val interval = defaultInterval.atLeast(0)
-            alarmRepeat == defaultAlarmRepeat.toIntOrNull() && alarmInterval == defaultAlarmInterval.toIntOrNull() && interval == defaultInterval.toIntOrNull()
+            val repeatInt = repeat.atLeast(1)
+            val alarmIntervalInt = alarmInterval.atLeast(0)
+            val intervalInt = interval.atLeast(0)
+            repeatInt == repeat.toIntOrNull() && alarmIntervalInt == alarmInterval.toIntOrNull() && intervalInt == interval.toIntOrNull()
         }
 
-    fun setAlarmInterval(interval: String) {
-        defaultAlarmInterval = interval
+    fun setAlarmInterval(text: String) {
+        alarmInterval = text
         updateAlarms()
     }
 
-    fun setAlarmRepeat(repeat: String) {
-        defaultAlarmRepeat = repeat
+    fun setAlarmRepeat(text: String) {
+        repeat = text
         updateAlarms()
     }
 
-    fun setInterval(interval: String) {
-        defaultInterval = interval
+    fun setInterval(text: String) {
+        interval = text
         updateAlarms()
     }
 
     private fun updateAlarms() {
-        val alarmRepeat = defaultAlarmRepeat.atLeast(1)
-        val alarmInterval = defaultAlarmInterval.atLeast(0)
-        val interval = defaultInterval.atLeast(0)
+        val repeatInt = repeat.atLeast(1)
+        val alarmIntervalInt = alarmInterval.atLeast(0)
+        val intervalInt = interval.atLeast(0)
         alarms.replaceAll { alarm ->
-            Alarm(alarm.forHour, (0..<alarmRepeat).map {
-                val time = Time.fromString(alarm.forHour)!!
-                Time(time.getMinutesNumber() - alarmInterval + it * interval)
+            Alarm(alarm.forHour, (0..<repeatInt).map {
+                Time(alarm.forHour.getMinutesNumber() - alarmIntervalInt + it * intervalInt)
             })
         }
     }
 
     init {
-        val alarmRepeat = defaultAlarmRepeat.atLeast(1)
-        val alarmInterval = defaultAlarmInterval.atLeast(0)
-        val interval = defaultInterval.atLeast(0)
         alarms.addAll(startingTimes.map { startingTime ->
-            Alarm(startingTime, (0..<alarmRepeat).map {
-                val time = Time.fromString(startingTime)!!
-                Time(time.getMinutesNumber() - alarmInterval + it * interval)
+            val time = Time.fromString(startingTime)!!
+            Alarm(time, (0..<default.repeat).map {
+                Time(time.getMinutesNumber() - default.alarmInterval + it * default.interval)
             })
         })
     }
 }
 
-class StartupViewModelFactory(private val startingTimes: List<String>) : ViewModelProvider.Factory {
+class StartupViewModelFactory(
+    private val startingTimes: List<String>, private val default: DefaultAlarmSettings
+) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(StartupViewModel::class.java)) {
-            return StartupViewModel(startingTimes) as T
+            return StartupViewModel(startingTimes, default) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

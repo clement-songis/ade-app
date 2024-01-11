@@ -87,7 +87,7 @@ class AlarmReceiver : BroadcastReceiver() {
                 tomorrow.add(Calendar.DATE, 1)
                 val result = repository.getStartingTime(user, tomorrow.time)
                 if (result is Result.Success) {
-                    val alarm = alarms.find { it.forHour == result.data }
+                    val alarm = alarms.find { it.forHour.toString() == result.data }
                     if (alarm != null) {
                         for (time in alarm.hours) {
                             setAlarm(context, time)

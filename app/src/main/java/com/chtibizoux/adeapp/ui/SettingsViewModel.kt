@@ -12,9 +12,11 @@ import com.chtibizoux.adeapp.AlarmReceiver
 import com.chtibizoux.adeapp.BootReceiver
 import com.chtibizoux.adeapp.data.Alarm
 import com.chtibizoux.adeapp.data.DataSource
+import com.chtibizoux.adeapp.data.DefaultAlarmSettings
 import com.chtibizoux.adeapp.data.Result
 import com.chtibizoux.adeapp.data.Settings
 import com.chtibizoux.adeapp.data.SettingsRepository
+import com.chtibizoux.adeapp.data.Time
 import com.chtibizoux.adeapp.data.User
 import com.chtibizoux.adeapp.data.xml.Calendar
 import kotlinx.coroutines.flow.SharingStarted
@@ -34,6 +36,9 @@ class SettingsViewModel(private val repository: SettingsRepository) : ViewModel(
 
     private val user = repository.settings.map { it.user }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    val defaultAlarmSettings = repository.settings.map { it.defaultAlarmSettings }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, DefaultAlarmSettings())
 
     val alarms = repository.settings.map { it.alarms }
         .stateIn(viewModelScope, SharingStarted.Eagerly, listOf())
@@ -67,6 +72,54 @@ class SettingsViewModel(private val repository: SettingsRepository) : ViewModel(
         viewModelScope.launch {
             repository.logout()
             appState = AppState.DISCONNECTED
+        }
+    }
+
+    fun setDefaultAlarmSettings(settings: DefaultAlarmSettings) {
+        viewModelScope.launch {
+            repository.setDefaultAlarmSettings(settings)
+        }
+    }
+
+    fun addAlarm(alarm: Alarm) {
+        viewModelScope.launch {
+            repository.addAlarm(alarm)
+        }
+    }
+
+    fun updateLabel(i: Int, time: String) {
+        viewModelScope.launch {
+            repository.updateLabel(i, time)
+        }
+    }
+
+    fun addTime(i: Int, time: Time) {
+        viewModelScope.launch {
+            repository.addTime(i, time)
+        }
+    }
+
+    fun updateTime(i: Int, hourIndex: Int, time: Time) {
+        viewModelScope.launch {
+            repository.updateTime(i, hourIndex, time)
+        }
+    }
+
+    fun removeTime(i: Int, time: Time) {
+        viewModelScope.launch {
+            repository.removeTime(i, time)
+        }
+    }
+
+    fun updateForHour(i: Int, time: Time) {
+        viewModelScope.launch {
+            repository.updateForHour(i, time)
+        }
+    }
+
+    fun removeAlarm(alarm: Alarm) {
+        viewModelScope.launch {
+            repository.removeAlarm(alarm)
         }
     }
 
@@ -144,10 +197,10 @@ class SettingsViewModel(private val repository: SettingsRepository) : ViewModel(
         viewModelScope.launch {
             val settings = repository.settings.first()
             if (settings.user == null) {
-//                Remove all settings if they are set
+//              TODO: Maybe remove all settings if they are set
                 appState = AppState.DISCONNECTED
             } else if (settings.firstTime) {
-//                Remove alarms and calendar if they are set
+//              TODO: Maybe remove alarms and calendar if they are set
                 firstTime()
             } else {
                 goToMain()

@@ -17,10 +17,16 @@ data class Settings(
     val firstTime: Boolean = true,
     val alarms: List<Alarm> = listOf(),
     val calendar: Calendar? = null,
-    val defaultAlarmRepeat: Int = 1,
-    val defaultInterval: Int = 0,
+    val defaultAlarmSettings: DefaultAlarmSettings = DefaultAlarmSettings(),
 //    val defaultRingTone: String,
 //    val defaultVibration: Boolean,
+)
+
+@Serializable
+data class DefaultAlarmSettings(
+    val repeat: Int = 1,
+    val interval: Int = 1,
+    val alarmInterval: Int = 60,
 )
 
 @Serializable
@@ -55,7 +61,7 @@ data class Time(val hour: Int, val minute: Int) {
 
 @Serializable
 data class Alarm(
-    val forHour: String,
+    val forHour: Time,
     val hours: List<Time>,
     val label: String = "",
     //  val ringTone: String, uri or "silent"

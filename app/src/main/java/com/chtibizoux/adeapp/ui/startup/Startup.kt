@@ -16,7 +16,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -25,14 +24,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.chtibizoux.adeapp.R
-import com.chtibizoux.adeapp.data.Result
+import com.chtibizoux.adeapp.data.DefaultAlarmSettings
 import com.chtibizoux.adeapp.ui.SettingsViewModel
 import com.chtibizoux.adeapp.ui.atLeast
 
 @Composable
 fun Startup(
     settingsViewModel: SettingsViewModel,
-    startupViewModel: StartupViewModel = viewModel(factory = StartupViewModelFactory(settingsViewModel.startingTimes))
+    startupViewModel: StartupViewModel = viewModel(
+        factory = StartupViewModelFactory(
+            settingsViewModel.startingTimes,
+            settingsViewModel.defaultAlarmSettings.value
+        )
+    )
 ) {
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Column(
@@ -44,7 +48,7 @@ fun Startup(
             Column {
                 // TODO: Better ui, fields, focus, animations
                 OutlinedTextField(
-                    value = startupViewModel.defaultAlarmRepeat,
+                    value = startupViewModel.repeat,
                     onValueChange = {
                         startupViewModel.setAlarmRepeat(it)
                     },
@@ -52,9 +56,9 @@ fun Startup(
                     label = { Text(stringResource(R.string.repeat_interval)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                 )
-                if (startupViewModel.defaultAlarmRepeat.atLeast(1) > 1) {
+                if (startupViewModel.repeat.atLeast(1) > 1) {
                     OutlinedTextField(
-                        value = startupViewModel.defaultInterval,
+                        value = startupViewModel.interval,
                         onValueChange = {
                             startupViewModel.setInterval(it)
                         },
@@ -64,7 +68,7 @@ fun Startup(
                     )
                 }
                 OutlinedTextField(
-                    value = startupViewModel.defaultAlarmInterval,
+                    value = startupViewModel.alarmInterval,
                     onValueChange = {
                         startupViewModel.setAlarmInterval(it)
                     },
@@ -93,7 +97,10 @@ fun Startup(
                     Text(stringResource(R.string.cancel))
                 }
                 Button(
-                    onClick = { settingsViewModel.setAlarms(startupViewModel.alarms) },
+                    onClick = {
+                        settingsViewModel.setDefaultAlarmSettings(startupViewModel.alarmSettings)
+                        settingsViewModel.setAlarms(startupViewModel.alarms)
+                    },
                     enabled = startupViewModel.canSubmit
                 ) {
                     Text(stringResource(R.string.add))
