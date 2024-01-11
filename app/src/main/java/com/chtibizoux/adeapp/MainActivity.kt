@@ -9,14 +9,10 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Alarm
-import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -26,7 +22,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -38,7 +33,6 @@ import com.chtibizoux.adeapp.ui.AppState
 import com.chtibizoux.adeapp.ui.SettingsViewModel
 import com.chtibizoux.adeapp.ui.SettingsViewModelFactory
 import com.chtibizoux.adeapp.ui.home.Home
-import com.chtibizoux.adeapp.ui.home.timetable.TimetableTitle
 import com.chtibizoux.adeapp.ui.login.Login
 import com.chtibizoux.adeapp.ui.startup.Startup
 import com.chtibizoux.adeapp.ui.theme.ADEAppTheme
@@ -78,31 +72,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
-sealed class Screen(
-    val route: String,
-    @StringRes val label: Int,
-    val icon: ImageVector,
-    val title: (@Composable () -> Unit)?
-) {
-    constructor(route: String, title: Int, icon: ImageVector) : this(route, title, icon, {
-        Text(stringResource(title))
-    })
-
-    data object Timetable : Screen(
-        "timetable",
-        R.string.title_timetable,
-        Icons.Filled.CalendarMonth,
-        { TimetableTitle() }
-    )
-
-    data object Alarms : Screen("alarms", R.string.title_alarms, Icons.Filled.Alarm)
-}
-
-val screens = listOf(
-    Screen.Timetable,
-    Screen.Alarms,
-)
 
 @Composable
 fun Application(

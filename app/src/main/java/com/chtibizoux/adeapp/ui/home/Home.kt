@@ -1,11 +1,14 @@
 package com.chtibizoux.adeapp.ui.home
 
 import android.widget.Toast
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Alarm
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
@@ -15,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -25,14 +29,27 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.chtibizoux.adeapp.AlarmReceiver
-import com.chtibizoux.adeapp.BootReceiver
 import com.chtibizoux.adeapp.R
-import com.chtibizoux.adeapp.Screen
-import com.chtibizoux.adeapp.screens
 import com.chtibizoux.adeapp.ui.SettingsViewModel
 import com.chtibizoux.adeapp.ui.home.alarms.Alarms
 import com.chtibizoux.adeapp.ui.home.timetable.Timetable
+import com.chtibizoux.adeapp.ui.home.timetable.TimetableTitle
+
+sealed class Screen(
+    val route: String,
+    @StringRes val label: Int,
+    val icon: ImageVector
+) {
+    data object Timetable :
+        Screen("timetable", R.string.title_timetable, Icons.Filled.CalendarMonth)
+
+    data object Alarms : Screen("alarms", R.string.title_alarms, Icons.Filled.Alarm)
+}
+
+val screens = listOf(
+    Screen.Timetable,
+    Screen.Alarms,
+)
 
 fun navigate(navController: NavController, route: String) {
     navController.navigate(route) {
@@ -44,7 +61,6 @@ fun navigate(navController: NavController, route: String) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Home(viewModel: SettingsViewModel) {
     val navController = rememberNavController()
@@ -59,7 +75,8 @@ fun Home(viewModel: SettingsViewModel) {
         }
         if (viewModel.updateCalendar) {
             viewModel.tryUpdateCalendar {
-                Toast.makeText(context, R.string.unable_to_update_calendar, Toast.LENGTH_LONG).show()
+                Toast.makeText(context, R.string.unable_to_update_calendar, Toast.LENGTH_LONG)
+                    .show()
             }
             viewModel.updateCalendar = false
         }
@@ -67,19 +84,6 @@ fun Home(viewModel: SettingsViewModel) {
     }
 
     Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(
-                colors = TopAppBarDefaults.topAppBarColors(
-//                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-//                    titleContentColor = MaterialTheme.colorScheme.primary,
-                ),
-                title = {
-                    screens.find { it.route == currentDestination?.route }?.title?.invoke() ?: Text(
-                        stringResource(R.string.app_name)
-                    )
-                }
-            )
-        },
         bottomBar = {
             NavigationBar(tonalElevation = 0.dp) {
                 screens.forEach { screen ->

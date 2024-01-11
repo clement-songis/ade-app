@@ -38,23 +38,23 @@ class AlarmReceiver : BroadcastReceiver() {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
-            alarmManager?.setInexactRepeating(
-                AlarmManager.RTC_WAKEUP,
-                Date().time,
-                AlarmManager.INTERVAL_FIFTEEN_MINUTES,
-                alarmIntent
-            )
-//            val calendar: Calendar = Calendar.getInstance().apply {
-//                timeInMillis = System.currentTimeMillis()
-//                set(Calendar.HOUR_OF_DAY, UPDATE_HOUR)
-//                // set(Calendar.MINUTES, 0)
-//            }
 //            alarmManager?.setInexactRepeating(
 //                AlarmManager.RTC_WAKEUP,
-//                calendar.timeInMillis,
-//                AlarmManager.INTERVAL_DAY,
+//                Date().time,
+//                AlarmManager.INTERVAL_FIFTEEN_MINUTES,
 //                alarmIntent
 //            )
+            val calendar: Calendar = Calendar.getInstance().apply {
+                timeInMillis = System.currentTimeMillis()
+                set(Calendar.HOUR_OF_DAY, UPDATE_HOUR)
+                // set(Calendar.MINUTES, 0)
+            }
+            alarmManager?.setInexactRepeating(
+                AlarmManager.RTC_WAKEUP,
+                calendar.timeInMillis,
+                AlarmManager.INTERVAL_DAY,
+                alarmIntent
+            )
         }
 
         fun removeBackgroundWork(context: Context) {

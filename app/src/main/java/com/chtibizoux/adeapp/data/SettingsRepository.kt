@@ -1,6 +1,7 @@
 package com.chtibizoux.adeapp.data
 
 import androidx.datastore.core.DataStore
+import com.chtibizoux.adeapp.data.xml.Calendar
 import java.util.Date
 
 class SettingsRepository(
@@ -44,7 +45,7 @@ class SettingsRepository(
     suspend fun updateCalendar(user: User): Boolean {
         val result = dataSource.getCalendar(user)
         if (result is Result.Success) {
-            dataStore.updateData { settings -> settings.copy(calendar = result.data) }
+            dataStore.updateData { settings -> settings.copy(calendar = Calendar(result.data.days.sortedBy { it.getDate() })) }
         }
         return result is Result.Success
     }

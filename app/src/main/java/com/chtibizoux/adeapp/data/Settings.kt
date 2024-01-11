@@ -41,6 +41,7 @@ data class Time(val hour: Int, val minute: Int) {
     }
 
     fun getMinutesNumber() = hour * 60 + minute
+    fun getHourNumber() = hour + minute / 60f
 
     override fun toString(): String {
         return "${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}"

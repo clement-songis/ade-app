@@ -90,8 +90,8 @@ class CalendarParser {
     private fun readResource(parser: XmlPullParser): Resource {
         parser.require(XmlPullParser.START_TAG, ns, "resource")
         val resource = Resource(
+            parser.getAttributeValue(ns, "name"),
             parser.getAttributeValue(ns, "category"),
-            parser.getAttributeValue(ns, "name")
         )
         parser.nextTag()
         parser.require(XmlPullParser.END_TAG, ns, "resource")

@@ -121,6 +121,8 @@ class SettingsViewModel(private val repository: SettingsRepository) : ViewModel(
             val success = repository.updateCalendar(user.value!!)
             if (!success) {
                 onError()
+            } else {
+                println("Calendar updated")
             }
         }
     }

@@ -120,7 +120,6 @@ class DataSource {
 //        }
 //    }
 
-    private val dateFormat: SimpleDateFormat = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
     private fun getEvents(user: User): Calendar {
         val url =
             URL("$ADE_BASE/jsp/webapi?function=getEvents&detail=8&resources=${user.resourceId}&projectId=$PROJECT_ID&data=${user.data}")
@@ -133,6 +132,7 @@ class DataSource {
         }
     }
 
+    private val dateFormat = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
     private fun getSimpleEvents(
         user: User,
         date: Date? = null/*, week: Int? = null, day: Int? = null*/
