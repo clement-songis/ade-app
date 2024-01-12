@@ -6,9 +6,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
@@ -32,6 +34,7 @@ import androidx.navigation.compose.rememberNavController
 import com.chtibizoux.adeapp.R
 import com.chtibizoux.adeapp.ui.SettingsViewModel
 import com.chtibizoux.adeapp.ui.home.alarms.Alarms
+import com.chtibizoux.adeapp.ui.home.settings.Settings
 import com.chtibizoux.adeapp.ui.home.timetable.Timetable
 import com.chtibizoux.adeapp.ui.home.timetable.TimetableTitle
 
@@ -44,6 +47,7 @@ sealed class Screen(
         Screen("timetable", R.string.title_timetable, Icons.Filled.CalendarMonth)
 
     data object Alarms : Screen("alarms", R.string.title_alarms, Icons.Filled.Alarm)
+    data object Settings : Screen("settings", R.string.settings, Icons.Filled.Settings)
 }
 
 val screens = listOf(
@@ -101,8 +105,16 @@ fun Home(viewModel: SettingsViewModel) {
         NavHost(
             navController, startDestination = Screen.Timetable.route, Modifier.padding(padding)
         ) {
-            composable(Screen.Timetable.route) { Timetable(viewModel) }
-            composable(Screen.Alarms.route) { Alarms(viewModel) }
+            composable(Screen.Timetable.route) { Timetable(navController, viewModel) }
+            composable(Screen.Alarms.route) { Alarms(navController, viewModel) }
+            composable(Screen.Settings.route) { Settings(navController, viewModel) }
         }
+    }
+}
+
+@Composable
+fun SettingsButton(navController: NavController) {
+    IconButton(onClick = { navController.navigate(Screen.Settings.route) }) {
+        Icon(Icons.Filled.Settings, stringResource(R.string.settings))
     }
 }

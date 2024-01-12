@@ -40,7 +40,7 @@ class BootReceiver : BroadcastReceiver() {
                 val settings = repository.settings.first()
                 if (settings.alarms.isNotEmpty() && settings.user != null) {
                     AlarmReceiver.setBackgroundWork(context)
-                    AlarmReceiver.setAlarmAndNotifyUser(context, repository, settings.user, settings.alarms)
+                    AlarmReceiver.setAlarmAndNotifyUser(context, repository, settings.user, settings.alarms, settings.usePreviousAlarm)
                 } else {
                     disable(context)
                 }

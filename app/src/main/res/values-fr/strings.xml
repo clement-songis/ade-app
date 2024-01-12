@@ -10,7 +10,6 @@
     <string name="login_explanation">L\'application s\'en servira juste pour récupèrer l\'acces à ton emploi du temps et ne sauvegardera pas tes identifiants</string>
     <string name="login_text">Pour commencer, connecte toi avec les identifiants de l\'intranet</string>
     <string name="login">Se connecter</string>
-    <string name="title_edt">EDT</string>
     <string name="invalid_username">Nom d\'utilisateur invalide</string>
     <string name="invalid_password">Mot de passe invalide</string>
     <string name="login_failed">La connexion a échoué</string>
@@ -35,4 +34,12 @@
     <string name="add_label">Ajouter un libellé</string>
     <string name="close">Fermer</string>
     <string name="delete">Supprimer</string>
+    <string name="alarms">Réveils : %1$s</string>
+    <string name="alarms_empty">Réveils :</string>
+    <string name="for_alarm">"Pour "</string>
+    <string name="no_calendar">Pas de calendrier</string>
+    <string name="settings">Paramètres</string>
+    <string name="ok">OK</string>
+    <string name="back">retour</string>
+    <string name="use_previous_alarm">Utiliser l\'alarme précédente lorsqu\'il n\'y en a pas à configurer :</string>
 </resources>

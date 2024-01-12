@@ -1,6 +1,5 @@
 package com.chtibizoux.adeapp.ui.login
 
-import android.view.KeyEvent.ACTION_DOWN
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -8,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -23,11 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.autofill.AutofillNode
 import androidx.compose.ui.autofill.AutofillType
 import androidx.compose.ui.composed
-import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalAutofill
@@ -44,12 +38,14 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.chtibizoux.adeapp.R
 import com.chtibizoux.adeapp.ui.SettingsViewModel
+import com.chtibizoux.adeapp.ui.nextFocus
+import com.chtibizoux.adeapp.ui.nextFocusKeyboardAction
+import com.chtibizoux.adeapp.ui.submitOnEnter
+import com.chtibizoux.adeapp.ui.submitKeyboardAction
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun Login(settingsViewModel: SettingsViewModel, loginViewModel: LoginViewModel = viewModel()) {
-    val focusManager = LocalFocusManager.current
-
     val context = LocalContext.current
     fun login() {
         loginViewModel.tryLogin()
@@ -79,20 +75,11 @@ fun Login(settingsViewModel: SettingsViewModel, loginViewModel: LoginViewModel =
                 onValueChange = { loginViewModel.updateUsername(it) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .onPreviewKeyEvent {
-                        if (it.key == Key.Tab && it.nativeKeyEvent.action == ACTION_DOWN){
-                            focusManager.moveFocus(FocusDirection.Down)
-                            true
-                        } else {
-                            false
-                        }
-                    }
+                    .nextFocus()
                     .autofill(listOf(AutofillType.Username)) { loginViewModel.updateUsername(it) },
                 label = { Text(stringResource(R.string.username)) },
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                keyboardActions = KeyboardActions(
-                    onNext = { focusManager.moveFocus(FocusDirection.Down) }
-                ),
+                keyboardActions = nextFocusKeyboardAction(),
                 singleLine = true
             )
 
@@ -101,21 +88,12 @@ fun Login(settingsViewModel: SettingsViewModel, loginViewModel: LoginViewModel =
                 onValueChange = { loginViewModel.updatePassword(it) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .onPreviewKeyEvent {
-                        if (it.key == Key.Enter){
-                            login()
-                            true
-                        } else {
-                            false
-                        }
-                    }
+                    .submitOnEnter(::login)
                     .autofill(listOf(AutofillType.Password)) { loginViewModel.updatePassword(it) },
                 label = { Text(stringResource(R.string.password)) },
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                keyboardActions = KeyboardActions(
-                    onDone = { login() }
-                ),
+                keyboardActions = submitKeyboardAction(::login),
                 singleLine = true
             )
 

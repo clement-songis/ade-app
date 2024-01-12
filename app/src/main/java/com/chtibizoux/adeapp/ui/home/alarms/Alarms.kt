@@ -5,8 +5,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -24,7 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.filled.RemoveCircleOutline
 import androidx.compose.material.icons.outlined.Label
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -39,6 +37,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -55,15 +54,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.navigation.NavController
 import com.chtibizoux.adeapp.R
 import com.chtibizoux.adeapp.data.Alarm
 import com.chtibizoux.adeapp.data.DefaultAlarmSettings
 import com.chtibizoux.adeapp.data.Time
 import com.chtibizoux.adeapp.ui.SettingsViewModel
+import com.chtibizoux.adeapp.ui.home.SettingsButton
+import java.util.Calendar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Alarms(viewModel: SettingsViewModel) {
+fun Alarms(navController: NavController, viewModel: SettingsViewModel) {
     val alarms by viewModel.alarms.collectAsState()
     val alarmSettings by viewModel.defaultAlarmSettings.collectAsState()
     var selected by remember { mutableIntStateOf(-1) }
@@ -74,6 +76,8 @@ fun Alarms(viewModel: SettingsViewModel) {
 //                    titleContentColor = MaterialTheme.colorScheme.primary,
             ), title = {
                 Text(stringResource(R.string.title_alarms))
+            }, actions = {
+                SettingsButton(navController)
             })
         },
     ) { padding ->
@@ -90,59 +94,49 @@ fun Alarms(viewModel: SettingsViewModel) {
                 verticalArrangement = Arrangement.spacedBy(10.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // TODO: alarm ui add delete modify
                 alarms.forEachIndexed { i, alarm ->
-                    AlarmComponent(alarm, i, selected, viewModel, alarmSettings.interval) {
+                    AlarmComponent(alarm, i, selected, viewModel, alarmSettings) {
                         selected = if (selected == i) -1 else i
                     }
                 }
-//                        TimePickerButton(
-//                            Time.fromString(forHour)!!.add(dafaultAlarmInterval),
-//                            viewModel.alarms.find { it.forHour == forHour }?.hours?.first()
-//                        ) { t ->
-//                            val hours = persistentListOf(t, )
-//                            val i = viewModel.alarms.indexOfFirst { it.forHour == forHour }
-//                            if (i == -1) {
-//                                viewModel.alarms.add(Alarm(forHour, hours))
-//                            } else {
-//                                viewModel.alarms[i] = Alarm(forHour, hours)
-//                            }
-//                        }
-//                        if (viewModel.alarms.find { it.forHour == forHour } != null) {
-//                            TextButton(onClick = {
-//                                viewModel.alarms.remove(viewModel.alarms.find { it.forHour == forHour })
-//                            }) {
-//                                Text("-")
-//                            }
-//                        }
             }
-            AddAlarmButton(alarmSettings) {
+            AddAlarmButton(
+                if (alarms.isEmpty()) {
+                    Time(Calendar.getInstance().get(Calendar.HOUR_OF_DAY), 0)
+                } else {
+                    alarms.last().forHour + 60
+                }, alarmSettings
+            ) {
                 viewModel.addAlarm(it)
             }
         }
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun AlarmComponent(
-    alarm: Alarm, i: Int, selected: Int, viewModel: SettingsViewModel, interval: Int, onClick: () -> Unit
+    alarm: Alarm,
+    i: Int,
+    selected: Int,
+    viewModel: SettingsViewModel,
+    alarmSettings: DefaultAlarmSettings,
+    onClick: () -> Unit
 ) {
     Surface(
         tonalElevation = 3.dp, shape = RoundedCornerShape(24.dp), onClick = onClick
     ) {
         Column(
             modifier = Modifier.padding(
-                start = 20.dp, end = 20.dp, bottom = 20.dp
+                start = 20.dp, end = 20.dp
             )
         ) {
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Label(selected == i, alarm.label) {
+                    Label(selected == i, alarm.label, onClick, {
                         viewModel.updateLabel(i, it)
-                    }
+                    })
                     ForTime(alarm.forHour, selected == i || alarm.label.isNotEmpty()) {
                         viewModel.updateForHour(i, it)
                     }
@@ -153,19 +147,18 @@ fun AlarmComponent(
                     modifier = Modifier
                         .padding(start = 20.dp, top = 20.dp, bottom = 20.dp)
                         .background(
-                            MaterialTheme.colorScheme.primary, RoundedCornerShape(50)
+                            MaterialTheme.colorScheme.secondaryContainer, RoundedCornerShape(50)
                         )
                         .rotate(if (selected == i) 180f else 0f)
                 )
             }
             if (selected == i) {
                 Text(
-                    "Réveils :",
+                    stringResource(R.string.alarms_empty),
                 )
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(
-                        10.dp, Alignment.CenterHorizontally
-                    ), verticalArrangement = Arrangement.Center
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     alarm.hours.forEachIndexed { index, time ->
                         AlarmHour(time, {
@@ -174,16 +167,29 @@ fun AlarmComponent(
                             viewModel.removeTime(i, time)
                         })
                     }
-                    AddTimeButton(alarm.hours.last().add(interval)) {
+                    AddTimeButton(
+                        if (alarm.hours.isEmpty()) {
+                            alarm.forHour - alarmSettings.timeUntilEvent
+                        } else {
+                            alarm.hours.last() + alarmSettings.interval
+                        }
+                    ) {
                         viewModel.addTime(i, it)
                     }
                 }
-                TextButton(onClick = { viewModel.removeAlarm(alarm) }) {
+                Row(modifier = Modifier
+                    .clickable { viewModel.removeAlarm(alarm) }
+                    .fillMaxWidth()
+                    .minimumInteractiveComponentSize(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     Icon(Icons.Filled.Delete, stringResource(R.string.delete))
+                    Text(stringResource(R.string.delete))
                 }
             } else {
                 Text(
-                    "Réveils : ${alarm.hours.joinToString()}",
+                    stringResource(R.string.alarms, alarm.hours.joinToString()),
+                    modifier = Modifier.padding(bottom = 20.dp)
                 )
             }
         }
@@ -201,7 +207,7 @@ fun ForTime(forHour: Time, padding: Boolean, updateTime: (time: Time) -> Unit) {
         )
     ) {
         Text(
-            "Pour ",
+            stringResource(R.string.for_alarm),
             modifier = Modifier.padding(bottom = 8.dp),
             fontSize = 18.sp,
         )
@@ -220,13 +226,20 @@ fun ForTime(forHour: Time, padding: Boolean, updateTime: (time: Time) -> Unit) {
 }
 
 @Composable
-fun Label(isSelected: Boolean, label: String, onChange: (label: String) -> Unit) {
+fun Label(
+    isSelected: Boolean,
+    label: String,
+    onClick: () -> Unit,
+    onChange: (label: String) -> Unit
+) {
     var showLabelPicker by remember { mutableStateOf(false) }
     if (isSelected || label.isNotEmpty()) {
         Surface(
             onClick = {
                 if (isSelected) {
                     showLabelPicker = true
+                } else {
+                    onClick()
                 }
             }, modifier = Modifier
                 .height(60.dp)
@@ -263,11 +276,17 @@ fun Label(isSelected: Boolean, label: String, onChange: (label: String) -> Unit)
 fun AlarmHour(hour: Time, updateTime: (Time) -> Unit, deleteTime: () -> Unit) {
     var showTimePicker by remember { mutableStateOf(false) }
 
-    Text(hour.toString(), fontSize = 30.sp, modifier = Modifier.clickable {
-        showTimePicker = true
-    })
-    IconButton(onClick = deleteTime) {
-        Icon(Icons.Filled.Remove, "Remove")
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(hour.toString(), fontSize = 28.sp, modifier = Modifier.clickable {
+            showTimePicker = true
+        })
+        IconButton(onClick = deleteTime) {
+            Icon(Icons.Filled.RemoveCircleOutline, stringResource(R.string.delete))
+        }
     }
 
     if (showTimePicker) {
@@ -285,7 +304,7 @@ fun AddTimeButton(initial: Time, onClick: (Time) -> Unit) {
     var showTimePicker by remember { mutableStateOf(false) }
 
     IconButton(onClick = { showTimePicker = true }) {
-        Icon(Icons.Filled.Add, stringResource(R.string.alarm_add))
+        Icon(Icons.Filled.Add, stringResource(R.string.alarm_add), modifier = Modifier.size(36.dp))
     }
 
     if (showTimePicker) {
@@ -299,8 +318,8 @@ fun AddTimeButton(initial: Time, onClick: (Time) -> Unit) {
 }
 
 @Composable
-fun AddAlarmButton(alarmSettings: DefaultAlarmSettings, onClick: (Alarm) -> Unit) {
-    var showAlarmPicker by remember { mutableStateOf(false) }
+fun AddAlarmButton(initial: Time, alarmSettings: DefaultAlarmSettings, onClick: (Alarm) -> Unit) {
+    var showTimePicker by remember { mutableStateOf(false) }
 
     Box(contentAlignment = Alignment.BottomCenter) {
         FloatingActionButton(
@@ -308,15 +327,22 @@ fun AddAlarmButton(alarmSettings: DefaultAlarmSettings, onClick: (Alarm) -> Unit
                 .padding(30.dp)
                 .size(75.dp),
             onClick = {
-                showAlarmPicker = true
+                showTimePicker = true
             },
             shape = CircleShape,
         ) {
             Icon(Icons.Filled.Add, stringResource(R.string.alarm_add))
         }
     }
-    if (showAlarmPicker) {
-//    TODO: Alarm Picker
+    if (showTimePicker) {
+        TimePickerDialog(initial) { time ->
+            showTimePicker = false
+            if (time != null) {
+                onClick(Alarm(time, (0..<alarmSettings.repeat).map {
+                    Time(time.getMinutesNumber() - alarmSettings.timeUntilEvent + it * alarmSettings.interval)
+                }))
+            }
+        }
     }
 }
 
@@ -353,7 +379,7 @@ fun TimePickerDialog(initial: Time, onTimeSelected: (Time?) -> Unit) {
                     Spacer(modifier = Modifier.weight(1f))
                     TextButton(onClick = {
                         onTimeSelected(Time(timePickerState.hour, timePickerState.minute))
-                    }) { Text("OK") }
+                    }) { Text(stringResource(R.string.ok)) }
                 }
             }
         }
@@ -397,7 +423,7 @@ fun TextPicker(initial: String, label: String, onClose: (String?) -> Unit) {
                     Spacer(modifier = Modifier.weight(1f))
                     TextButton(onClick = {
                         onClose(text)
-                    }) { Text("OK") }
+                    }) { Text(stringResource(R.string.ok)) }
                 }
             }
         }

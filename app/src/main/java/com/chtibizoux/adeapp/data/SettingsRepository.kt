@@ -5,8 +5,7 @@ import com.chtibizoux.adeapp.data.xml.Calendar
 import java.util.Date
 
 class SettingsRepository(
-    private val dataStore: DataStore<Settings>,
-    private val dataSource: DataSource
+    private val dataStore: DataStore<Settings>, private val dataSource: DataSource
 ) {
     val settings = dataStore.data
 
@@ -32,7 +31,7 @@ class SettingsRepository(
 
     suspend fun addAlarm(alarm: Alarm) {
         dataStore.updateData { settings ->
-            settings.copy(alarms = settings.alarms + alarm)
+            settings.copy(alarms = (settings.alarms + alarm).sortedBy { it.forHour.getMinutesNumber() })
         }
     }
 
@@ -55,7 +54,8 @@ class SettingsRepository(
     suspend fun addTime(i: Int, time: Time) {
         dataStore.updateData { settings ->
             val alarms = settings.alarms.toMutableList()
-            alarms[i] = alarms[i].copy(hours = alarms[i].hours + time)
+            alarms[i] =
+                alarms[i].copy(hours = (alarms[i].hours + time).sortedBy { it.getMinutesNumber() })
             settings.copy(alarms = alarms)
         }
     }
@@ -88,11 +88,11 @@ class SettingsRepository(
         dataStore.updateData { settings -> settings.copy(alarms = alarms, firstTime = false) }
     }
 
-    suspend fun getStartingTimes(user: User): Result<List<String>> {
+    suspend fun getStartingTimes(user: User): Result<List<Time>> {
         return dataSource.getStartingTimes(user)
     }
 
-    suspend fun getStartingTime(user: User, date: Date): Result<String> {
+    suspend fun getStartingTime(user: User, date: Date): Result<Time> {
         return dataSource.getStartingTime(user, date)
     }
 
@@ -107,6 +107,30 @@ class SettingsRepository(
     suspend fun setDefaultAlarmSettings(alarmSettings: DefaultAlarmSettings) {
         dataStore.updateData { settings ->
             settings.copy(defaultAlarmSettings = alarmSettings)
+        }
+    }
+
+    suspend fun setUsePreviousAlarm(active: Boolean) {
+        dataStore.updateData { settings ->
+            settings.copy(usePreviousAlarm = active)
+        }
+    }
+
+    suspend fun updateRepeat(repeat: Int) {
+        dataStore.updateData { settings ->
+            settings.copy(defaultAlarmSettings = settings.defaultAlarmSettings.copy(repeat = repeat))
+        }
+    }
+
+    suspend fun updateInterval(interval: Int) {
+        dataStore.updateData { settings ->
+            settings.copy(defaultAlarmSettings = settings.defaultAlarmSettings.copy(interval = interval))
+        }
+    }
+
+    suspend fun updateTimeUntilEvent(timeUntilEvent: Int) {
+        dataStore.updateData { settings ->
+            settings.copy(defaultAlarmSettings = settings.defaultAlarmSettings.copy(timeUntilEvent = timeUntilEvent))
         }
     }
 }

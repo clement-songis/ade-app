@@ -18,8 +18,7 @@ data class Settings(
     val alarms: List<Alarm> = listOf(),
     val calendar: Calendar? = null,
     val defaultAlarmSettings: DefaultAlarmSettings = DefaultAlarmSettings(),
-//    val defaultRingTone: String,
-//    val defaultVibration: Boolean,
+    val usePreviousAlarm: Boolean = false
 )
 
 @Serializable
@@ -27,6 +26,8 @@ data class DefaultAlarmSettings(
     val repeat: Int = 1,
     val interval: Int = 1,
     val timeUntilEvent: Int = 60,
+//    val ringTone: String,
+//    val vibration: Boolean,
 )
 
 @Serializable
@@ -53,8 +54,13 @@ data class Time(val hour: Int, val minute: Int) {
         return "${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}"
     }
 
-    fun add(minutes: Int): Time {
+    operator fun plus(minutes: Int): Time {
         val minutesNumber = hour * 60 + minute + minutes
+        return Time(minutesNumber / 60, minutesNumber % 60)
+    }
+
+    operator fun minus(minutes: Int): Time {
+        val minutesNumber = hour * 60 + minute - minutes
         return Time(minutesNumber / 60, minutesNumber % 60)
     }
 }

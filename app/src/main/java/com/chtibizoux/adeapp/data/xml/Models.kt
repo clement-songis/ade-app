@@ -1,6 +1,7 @@
 package com.chtibizoux.adeapp.data.xml
 
 import android.icu.text.SimpleDateFormat
+import com.chtibizoux.adeapp.data.Time
 import kotlinx.serialization.Serializable
 import java.util.Date
 import java.util.Locale
@@ -36,18 +37,18 @@ data class Day<T>(
 data class SimpleEvent(
     val name: String,
     val date: String,
-    val startHour: String,
-    val endHour: String,
+    val startHour: Time,
+    val endHour: Time,
 )
 
 @Serializable
 data class Event(
     val name: String,
-    val date: String,
+    val date: String,// TODO: Parse date
     val duration: Int,
-    val startHour: String,
-    val endHour: String,
-    val color: String,
+    val startHour: Time,
+    val endHour: Time,
+    val color: String,// TODO: Parse color
     val resources: List<Resource>,
 )
 

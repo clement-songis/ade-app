@@ -2,7 +2,6 @@
 <resources>
     <string name="app_name" translatable="false">&appname;</string>
     <string name="title_timetable">Timetable</string>
-    <string name="title_edt">Timetable</string>
     <string name="title_alarms">Alarms</string>
     <string name="title_notifications">Notifications</string>
     <string name="welcome_message">Welcome to &appname; !</string>
@@ -36,4 +35,12 @@
     <string name="add_label">Add a label</string>
     <string name="close">Close</string>
     <string name="delete">Delete</string>
+    <string name="alarms">Alarms : %1$s</string>
+    <string name="alarms_empty">Alarms :</string>
+    <string name="for_alarm">"For "</string>
+    <string name="no_calendar">No calendar</string>
+    <string name="settings">Settings</string>
+    <string name="ok">OK</string>
+    <string name="back">back</string>
+    <string name="use_previous_alarm">uUse the previous alarm when there is none to configure:</string>
 </resources>

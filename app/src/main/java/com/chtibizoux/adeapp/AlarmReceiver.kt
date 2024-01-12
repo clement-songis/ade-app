@@ -74,7 +74,8 @@ class AlarmReceiver : BroadcastReceiver() {
             context: Context,
             repository: SettingsRepository,
             user: User,
-            alarms: List<Alarm>
+            alarms: List<Alarm>,
+            usePreviousAlarm: Boolean
         ) {
             Toast.makeText(context, "test", Toast.LENGTH_LONG).show()
 //            TODO: Attention no today trigger
@@ -87,7 +88,12 @@ class AlarmReceiver : BroadcastReceiver() {
                 tomorrow.add(Calendar.DATE, 1)
                 val result = repository.getStartingTime(user, tomorrow.time)
                 if (result is Result.Success) {
-                    val alarm = alarms.find { it.forHour.toString() == result.data }
+                    val alarm = if (usePreviousAlarm) {
+                        alarms.sortedBy { it.forHour.getMinutesNumber() }.reversed()
+                            .find { it.forHour.getMinutesNumber() <= result.data.getMinutesNumber() }
+                    } else {
+                        alarms.find { it.forHour.toString() == result.data.toString() }
+                    }
                     if (alarm != null) {
                         for (time in alarm.hours) {
                             setAlarm(context, time)
@@ -98,10 +104,7 @@ class AlarmReceiver : BroadcastReceiver() {
                                 Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK
                         }
                         val viewIntent = PendingIntent.getActivity(
-                            context,
-                            0,
-                            intent,
-                            PendingIntent.FLAG_IMMUTABLE
+                            context, 0, intent, PendingIntent.FLAG_IMMUTABLE
                         )
 //                        val cancelIntent = Intent(context, CancelAlarmReceiver::class.java)
 //                        val cancelPendingIntent =
@@ -181,9 +184,7 @@ class AlarmReceiver : BroadcastReceiver() {
                     )
 
                     alarmManager?.set(
-                        AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                        30000,
-                        alarmIntent
+                        AlarmManager.ELAPSED_REALTIME_WAKEUP, 30000, alarmIntent
                     )
                 }
             } catch (e: Exception) {
@@ -193,22 +194,15 @@ class AlarmReceiver : BroadcastReceiver() {
 //                val viewPendingIntent =
 //                    PendingIntent.getActivity(context, 0, viewIntent, PendingIntent.FLAG_IMMUTABLE)
                 val retryIntent = Intent(context, AlarmReceiver::class.java)
-                val retryPendingIntent =
-                    PendingIntent.getBroadcast(
-                        context,
-                        0,
-                        retryIntent,
-                        PendingIntent.FLAG_IMMUTABLE
-                    )
+                val retryPendingIntent = PendingIntent.getBroadcast(
+                    context, 0, retryIntent, PendingIntent.FLAG_IMMUTABLE
+                )
                 val builder = NotificationCompat.Builder(context, ALARMS_CHANNEL_ID)
                     .setSmallIcon(R.drawable.ic_launcher_foreground)
                     .setContentTitle(context.getString(R.string.alarm_error))
-                    .setContentText(e.toString())
-                    .setPriority(NotificationCompat.PRIORITY_HIGH)
+                    .setContentText(e.toString()).setPriority(NotificationCompat.PRIORITY_HIGH)
                     .addAction(
-                        R.drawable.ic_sync,
-                        context.getString(R.string.retry),
-                        retryPendingIntent
+                        R.drawable.ic_sync, context.getString(R.string.retry), retryPendingIntent
                     )
 //                    .setContentIntent(viewPendingIntent)
                 notificationManager.notify(1, builder.build())
@@ -254,7 +248,7 @@ class AlarmReceiver : BroadcastReceiver() {
             val repository = SettingsRepository(context.dataStore, DataSource())
             val settings = repository.settings.first()
             if (settings.alarms.isNotEmpty() && settings.user != null) {
-                setAlarmAndNotifyUser(context, repository, settings.user, settings.alarms)
+                setAlarmAndNotifyUser(context, repository, settings.user, settings.alarms, settings.usePreviousAlarm)
             } else {
                 removeBackgroundWork(context)
             }

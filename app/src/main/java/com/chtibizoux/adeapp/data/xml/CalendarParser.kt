@@ -1,6 +1,7 @@
 package com.chtibizoux.adeapp.data.xml
 
 import android.util.Xml
+import com.chtibizoux.adeapp.data.Time
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
 import java.io.IOException
@@ -50,8 +51,8 @@ class CalendarParser {
         val name = parser.getAttributeValue(ns, "name")
         val date = parser.getAttributeValue(ns, "date")
         val duration = parser.getAttributeValue(ns, "duration").toInt()
-        val startHour = parser.getAttributeValue(ns, "startHour")
-        val endHour = parser.getAttributeValue(ns, "endHour")
+        val startHour = Time.fromString(parser.getAttributeValue(ns, "startHour"))!!
+        val endHour = Time.fromString(parser.getAttributeValue(ns, "endHour"))!!
         val color = parser.getAttributeValue(ns, "color")
 //        absoluteSlot slot day week
         var resources = listOf<Resource>()

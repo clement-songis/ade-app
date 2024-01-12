@@ -174,16 +174,16 @@ class DataSource {
         }
     }
 
-    private fun startingTimes(days: List<Day<SimpleEvent>>): List<String> {
-        val hours = mutableListOf<String>()
+    private fun startingTimes(days: List<Day<SimpleEvent>>): List<Time> {
+        val hours = mutableListOf<Time>()
         for (day in days) {
-            val events = day.events.map { it.startHour }.sorted()
+            val events = day.events.map { it.startHour }.sortedBy { it.getMinutesNumber() }
             hours.add(events[0])
         }
-        return hours.toSet().sorted()
+        return hours.toSet().sortedBy { it.getMinutesNumber() }
     }
 
-    suspend fun getStartingTime(user: User, date: Date): Result<String> = withContext(Dispatchers.IO) {
+    suspend fun getStartingTime(user: User, date: Date): Result<Time> = withContext(Dispatchers.IO) {
         try {
             val (days) = getSimpleEvents(user, date)
             val hours = startingTimes(days)
@@ -197,11 +197,11 @@ class DataSource {
         }
     }
 
-    suspend fun getStartingTimes(user: User): Result<List<String>> = withContext(Dispatchers.IO) {
+    suspend fun getStartingTimes(user: User): Result<List<Time>> = withContext(Dispatchers.IO) {
         try {
             val (days) = getSimpleEvents(user)
             val hours = startingTimes(days)
-            return@withContext Result.Success(hours.filter { it < "12:00" })
+            return@withContext Result.Success(hours.filter { it.getHourNumber() < 12 })
         } catch (e: Throwable) {
             println(e)
             return@withContext Result.Error(IOException("Error getting calendar", e))

@@ -17,8 +17,6 @@ import com.chtibizoux.adeapp.data.Result
 import com.chtibizoux.adeapp.data.Settings
 import com.chtibizoux.adeapp.data.SettingsRepository
 import com.chtibizoux.adeapp.data.Time
-import com.chtibizoux.adeapp.data.User
-import com.chtibizoux.adeapp.data.xml.Calendar
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -40,12 +38,15 @@ class SettingsViewModel(private val repository: SettingsRepository) : ViewModel(
     val defaultAlarmSettings = repository.settings.map { it.defaultAlarmSettings }
         .stateIn(viewModelScope, SharingStarted.Eagerly, DefaultAlarmSettings())
 
+    val usePreviousAlarm = repository.settings.map { it.usePreviousAlarm }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
     val alarms = repository.settings.map { it.alarms }
         .stateIn(viewModelScope, SharingStarted.Eagerly, listOf())
     val calendar = repository.settings.map { it.calendar }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    lateinit var startingTimes: List<String>
+    lateinit var startingTimes: List<Time>
         private set
 
     var updateCalendar = false
@@ -75,9 +76,33 @@ class SettingsViewModel(private val repository: SettingsRepository) : ViewModel(
         }
     }
 
+    fun setUsePreviousAlarm(active: Boolean) {
+        viewModelScope.launch {
+            repository.setUsePreviousAlarm(active)
+        }
+    }
+
     fun setDefaultAlarmSettings(settings: DefaultAlarmSettings) {
         viewModelScope.launch {
             repository.setDefaultAlarmSettings(settings)
+        }
+    }
+
+    fun updateRepeat(repeat: Int) {
+        viewModelScope.launch {
+            repository.updateRepeat(repeat)
+        }
+    }
+
+    fun updateInterval(interval: Int) {
+        viewModelScope.launch {
+            repository.updateInterval(interval)
+        }
+    }
+
+    fun updateTimeUntilEvent(timeUntilEvent: Int) {
+        viewModelScope.launch {
+            repository.updateTimeUntilEvent(timeUntilEvent)
         }
     }
 
@@ -185,7 +210,13 @@ class SettingsViewModel(private val repository: SettingsRepository) : ViewModel(
             if (alarms.value.isNotEmpty()) {
                 BootReceiver.enable(context)
                 AlarmReceiver.setBackgroundWork(context)
-//                AlarmReceiver.setAlarmAndNotifyUser(context, repository, user.value!!, alarms.value)
+//                AlarmReceiver.setAlarmAndNotifyUser(
+//                    context,
+//                    repository,
+//                    user.value!!,
+//                    alarms.value,
+//                    usePreviousAlarm.value
+//                )
             } else {
                 BootReceiver.disable(context)
                 AlarmReceiver.removeBackgroundWork(context)

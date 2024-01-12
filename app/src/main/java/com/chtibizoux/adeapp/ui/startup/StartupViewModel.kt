@@ -11,7 +11,7 @@ import com.chtibizoux.adeapp.data.DefaultAlarmSettings
 import com.chtibizoux.adeapp.data.Time
 import com.chtibizoux.adeapp.ui.atLeast
 
-class StartupViewModel(startingTimes: List<String>, default: DefaultAlarmSettings) : ViewModel() {
+class StartupViewModel(startingTimes: List<Time>, default: DefaultAlarmSettings) : ViewModel() {
     val alarms = mutableStateListOf<Alarm>()
 
     var timeUntilEvent by mutableStateOf(default.timeUntilEvent.toString())
@@ -61,8 +61,7 @@ class StartupViewModel(startingTimes: List<String>, default: DefaultAlarmSetting
     }
 
     init {
-        alarms.addAll(startingTimes.map { startingTime ->
-            val time = Time.fromString(startingTime)!!
+        alarms.addAll(startingTimes.map { time ->
             Alarm(time, (0..<default.repeat).map {
                 Time(time.getMinutesNumber() - default.timeUntilEvent + it * default.interval)
             })
@@ -71,7 +70,7 @@ class StartupViewModel(startingTimes: List<String>, default: DefaultAlarmSetting
 }
 
 class StartupViewModelFactory(
-    private val startingTimes: List<String>, private val default: DefaultAlarmSettings
+    private val startingTimes: List<Time>, private val default: DefaultAlarmSettings
 ) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {

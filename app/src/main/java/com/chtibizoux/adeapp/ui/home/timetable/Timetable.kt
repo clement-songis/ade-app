@@ -58,6 +58,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.chtibizoux.adeapp.R
 import com.chtibizoux.adeapp.data.Time
 import com.chtibizoux.adeapp.data.dataStore
@@ -65,6 +66,7 @@ import com.chtibizoux.adeapp.data.xml.Day
 import com.chtibizoux.adeapp.data.xml.Event
 import com.chtibizoux.adeapp.ui.SettingsViewModel
 import com.chtibizoux.adeapp.ui.SettingsViewModelFactory
+import com.chtibizoux.adeapp.ui.home.SettingsButton
 import kotlinx.coroutines.launch
 import java.text.DateFormat
 import java.util.Date
@@ -81,7 +83,7 @@ const val BOX_HEIGHT = (MAIN_DIVIDER_HEIGHT + SECONDARY_DIVIDER_HEIGHT + SPACE *
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun Timetable(viewModel: SettingsViewModel) {
+fun Timetable(navController: NavController, viewModel: SettingsViewModel) {
     val calendar by viewModel.calendar.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     if (calendar == null) {
@@ -91,7 +93,7 @@ fun Timetable(viewModel: SettingsViewModel) {
                 .background(MaterialTheme.colorScheme.background),
             contentAlignment = Alignment.Center,
         ) {
-            Text("No calendar")
+            Text(stringResource(R.string.no_calendar))
         }
     } else {
         val pagerState = rememberPagerState(initialPage = calendar!!.getPage(),
@@ -125,9 +127,7 @@ fun Timetable(viewModel: SettingsViewModel) {
                         }
                     }
                 }, actions = {
-                    IconButton(onClick = { /*TODO*/ }) {
-                        Icon(Icons.Filled.Settings, "Settings")
-                    }
+                    SettingsButton(navController)
                 })
             },
         ) { padding ->
@@ -168,7 +168,7 @@ fun MyDatePickerDialog(initialDate: Long, onDateSelected: (Long?) -> Unit) {
         TextButton(onClick = {
             onDateSelected(datePickerState.selectedDateMillis)
         }) {
-            Text("Ok")
+            Text(stringResource(R.string.ok))
         }
     }) {
         DatePicker(datePickerState)
@@ -230,8 +230,8 @@ fun Background(startHour: Int, endHour: Int) {
 @Composable
 fun EventComponent(event: Event) {
     var showDialog by remember { mutableStateOf(false) }
-    val startHour = Time.fromString(event.startHour)!!.getHourNumber()
-//    val endHour = Time.fromString(event.endHour)!!.getHourNumber()
+    val startHour = event.startHour.getHourNumber()
+//    val endHour = event.endHour.getHourNumber()
 //    val height = endHour - startHour
     val height = event.duration / 2
     val (r, g, b) = event.color.split(",")
@@ -308,10 +308,4 @@ fun EventDialog(event: Event, onClose: () -> Unit) {
             }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun Layout(viewModel: SettingsViewModel = viewModel(factory = SettingsViewModelFactory(LocalContext.current.dataStore))) {
-    Timetable(viewModel)
 }

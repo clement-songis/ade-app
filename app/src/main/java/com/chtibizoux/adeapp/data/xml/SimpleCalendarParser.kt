@@ -1,6 +1,7 @@
 package com.chtibizoux.adeapp.data.xml
 
 import android.util.Xml
+import com.chtibizoux.adeapp.data.Time
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
 import java.io.IOException
@@ -48,8 +49,8 @@ class SimpleCalendarParser {
         parser.require(XmlPullParser.START_TAG, ns, "event")
         val name = parser.getAttributeValue(ns, "name")
         val date = parser.getAttributeValue(ns, "date")
-        val startHour = parser.getAttributeValue(ns, "startHour")
-        val endHour = parser.getAttributeValue(ns, "endHour")
+        val startHour = Time.fromString(parser.getAttributeValue(ns, "startHour"))!!
+        val endHour = Time.fromString(parser.getAttributeValue(ns, "endHour"))!!
         parser.nextTag()
         parser.require(XmlPullParser.END_TAG, ns, "event")
         return SimpleEvent(name, date, startHour, endHour)
