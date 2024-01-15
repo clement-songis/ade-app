@@ -194,14 +194,10 @@ class SettingsViewModel(private val repository: SettingsRepository) : ViewModel(
         appState = AppState.CONNECTED
     }
 
-    fun tryUpdateCalendar(onError: () -> Unit) {
+    fun tryUpdateCalendar(onEnd: (Boolean) -> Unit) {
         viewModelScope.launch {
             val success = repository.updateCalendar(user.value!!)
-            if (!success) {
-                onError()
-            } else {
-                println("Calendar updated")
-            }
+            onEnd(success)
         }
     }
 

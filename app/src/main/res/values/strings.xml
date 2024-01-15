@@ -43,4 +43,6 @@
     <string name="ok">OK</string>
     <string name="back">back</string>
     <string name="use_previous_alarm">uUse the previous alarm when there is none to configure:</string>
+    <string name="calendar_updated">Calendar updated</string>
+    <string name="confirm_alarm_delete">Are you sure you want to delete this alarm?\nThis action is irreversible!</string>
 </resources>

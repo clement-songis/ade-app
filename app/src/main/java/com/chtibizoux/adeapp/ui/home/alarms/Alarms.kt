@@ -134,9 +134,9 @@ fun AlarmComponent(
                 horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Label(selected == i, alarm.label, onClick, {
+                    Label(selected == i, alarm.label, onClick) {
                         viewModel.updateLabel(i, it)
-                    })
+                    }
                     ForTime(alarm.forHour, selected == i || alarm.label.isNotEmpty()) {
                         viewModel.updateForHour(i, it)
                     }
@@ -177,14 +177,8 @@ fun AlarmComponent(
                         viewModel.addTime(i, it)
                     }
                 }
-                Row(modifier = Modifier
-                    .clickable { viewModel.removeAlarm(alarm) }
-                    .fillMaxWidth()
-                    .minimumInteractiveComponentSize(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Icon(Icons.Filled.Delete, stringResource(R.string.delete))
-                    Text(stringResource(R.string.delete))
+                DeleteAlarmButton {
+                    viewModel.removeAlarm(alarm)
                 }
             } else {
                 Text(
@@ -194,6 +188,29 @@ fun AlarmComponent(
             }
         }
 
+    }
+}
+
+@Composable
+fun DeleteAlarmButton(onConfirm: () -> Unit) {
+    var showConfirmDialog by remember { mutableStateOf(false) }
+    Row(modifier = Modifier
+        .clickable { showConfirmDialog = true }
+        .fillMaxWidth()
+        .minimumInteractiveComponentSize(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        Icon(Icons.Filled.Delete, stringResource(R.string.delete))
+        Text(stringResource(R.string.delete))
+    }
+
+    if (showConfirmDialog) {
+        ConfirmDialog(stringResource(R.string.confirm_alarm_delete)) {
+            showConfirmDialog = false
+            if (it) {
+                onConfirm()
+            }
+        }
     }
 }
 
@@ -423,6 +440,46 @@ fun TextPicker(initial: String, label: String, onClose: (String?) -> Unit) {
                     Spacer(modifier = Modifier.weight(1f))
                     TextButton(onClick = {
                         onClose(text)
+                    }) { Text(stringResource(R.string.ok)) }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ConfirmDialog(confirmText: String, onClose: (Boolean) -> Unit) {
+    Dialog(
+        onDismissRequest = { onClose(false) },
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+    ) {
+        Surface(
+            shape = MaterialTheme.shapes.extraLarge,
+            tonalElevation = 6.dp,
+            modifier = Modifier
+                .width(IntrinsicSize.Min)
+                .height(IntrinsicSize.Min)
+                .background(
+                    shape = MaterialTheme.shapes.extraLarge,
+                    color = MaterialTheme.colorScheme.surface
+                ),
+        ) {
+            Column(
+                modifier = Modifier.padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(confirmText)
+                Row(
+                    modifier = Modifier
+                        .height(40.dp)
+                        .fillMaxWidth()
+                ) {
+                    TextButton(onClick = {
+                        onClose(false)
+                    }) { Text(stringResource(R.string.cancel)) }
+                    Spacer(modifier = Modifier.weight(1f))
+                    TextButton(onClick = {
+                        onClose(true)
                     }) { Text(stringResource(R.string.ok)) }
                 }
             }

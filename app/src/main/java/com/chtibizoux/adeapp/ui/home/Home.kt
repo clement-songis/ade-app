@@ -79,7 +79,11 @@ fun Home(viewModel: SettingsViewModel) {
         }
         if (viewModel.updateCalendar) {
             viewModel.tryUpdateCalendar {
-                Toast.makeText(context, R.string.unable_to_update_calendar, Toast.LENGTH_LONG)
+                Toast.makeText(
+                    context,
+                    if (it) R.string.calendar_updated else R.string.unable_to_update_calendar,
+                    Toast.LENGTH_LONG
+                )
                     .show()
             }
             viewModel.updateCalendar = false

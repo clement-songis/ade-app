@@ -184,7 +184,7 @@ private fun Day(day: Day<Event>) {
         color = MaterialTheme.colorScheme.background
     ) {
         Background(START_HOUR, END_HOUR)
-        // TODO: Add events, requests, change icon
+        // TODO: change icon
         day.events.forEach { event ->
             EventComponent(event)
         }
@@ -233,7 +233,7 @@ fun EventComponent(event: Event) {
     val startHour = event.startHour.getHourNumber()
 //    val endHour = event.endHour.getHourNumber()
 //    val height = endHour - startHour
-    val height = event.duration / 2
+    val height = event.duration / 2f
     val (r, g, b) = event.color.split(",")
     Surface(modifier = Modifier
         .offset(y = (PADDING + MAIN_DIVIDER_HEIGHT / 2 + (startHour - START_HOUR) * BOX_HEIGHT).dp)
