@@ -5,7 +5,6 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.widget.Toast
 import com.chtibizoux.adeapp.data.DataSource
 import com.chtibizoux.adeapp.data.SettingsRepository
 import com.chtibizoux.adeapp.data.dataStore
@@ -39,8 +38,8 @@ class BootReceiver : BroadcastReceiver() {
                 val repository = SettingsRepository(context.dataStore, DataSource())
                 val settings = repository.settings.first()
                 if (settings.alarms.isNotEmpty() && settings.user != null) {
-                    AlarmReceiver.setBackgroundWork(context)
-                    AlarmReceiver.setAlarmAndNotifyUser(context, repository, settings.user, settings.alarms, settings.usePreviousAlarm)
+                    SetAlarmReceiver.setBackgroundWork(context)
+                    SetAlarmReceiver.setAlarmAndNotifyUser(context, repository, settings.user, settings.alarms, settings.usePreviousAlarm)
                 } else {
                     disable(context)
                 }

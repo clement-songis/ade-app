@@ -1,21 +1,18 @@
 package com.chtibizoux.adeapp.ui.home
 
-import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -31,28 +28,30 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navDeepLink
+import com.chtibizoux.adeapp.NEW_ALARM_ACTION
 import com.chtibizoux.adeapp.R
+import com.chtibizoux.adeapp.VIEW_ALARMS_ACTION
+import com.chtibizoux.adeapp.ui.RootScreen
 import com.chtibizoux.adeapp.ui.SettingsViewModel
 import com.chtibizoux.adeapp.ui.home.alarms.Alarms
-import com.chtibizoux.adeapp.ui.home.settings.Settings
+import com.chtibizoux.adeapp.ui.home.resourceSelector.ResourceSelector
 import com.chtibizoux.adeapp.ui.home.timetable.Timetable
-import com.chtibizoux.adeapp.ui.home.timetable.TimetableTitle
 
-sealed class Screen(
-    val route: String,
-    @StringRes val label: Int,
-    val icon: ImageVector
+sealed class HomeScreen(
+    val route: String, @StringRes val label: Int, val icon: ImageVector
 ) {
     data object Timetable :
-        Screen("timetable", R.string.title_timetable, Icons.Filled.CalendarMonth)
+        HomeScreen("timetable", R.string.title_timetable, Icons.Filled.CalendarMonth)
 
-    data object Alarms : Screen("alarms", R.string.title_alarms, Icons.Filled.Alarm)
-    data object Settings : Screen("settings", R.string.settings, Icons.Filled.Settings)
+    data object Alarms : HomeScreen("alarms", R.string.title_alarms, Icons.Filled.Alarm)
+    data object ResourceSelector : HomeScreen("resourceSelector", R.string.other_timetables, Icons.Filled.CalendarToday)
 }
 
 val screens = listOf(
-    Screen.Timetable,
-    Screen.Alarms,
+    HomeScreen.Timetable,
+    HomeScreen.Alarms,
+    HomeScreen.ResourceSelector
 )
 
 fun navigate(navController: NavController, route: String) {
@@ -66,27 +65,16 @@ fun navigate(navController: NavController, route: String) {
 }
 
 @Composable
-fun Home(viewModel: SettingsViewModel) {
-    val navController = rememberNavController()
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
+fun Home(rootNavController: NavController, viewModel: SettingsViewModel) {
+    val homeNavController = rememberNavController()
+    val navBackStackEntry by homeNavController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
 
     val context = LocalContext.current
     LaunchedEffect(true) {
         if (viewModel.alarmPageFirst) {
-            navigate(navController, Screen.Alarms.route)
+            navigate(homeNavController, HomeScreen.Alarms.route)
             viewModel.alarmPageFirst = false
-        }
-        if (viewModel.updateCalendar) {
-            viewModel.tryUpdateCalendar {
-                Toast.makeText(
-                    context,
-                    if (it) R.string.calendar_updated else R.string.unable_to_update_calendar,
-                    Toast.LENGTH_LONG
-                )
-                    .show()
-            }
-            viewModel.updateCalendar = false
         }
         viewModel.initAlarms(context)
     }
@@ -95,30 +83,33 @@ fun Home(viewModel: SettingsViewModel) {
         bottomBar = {
             NavigationBar(tonalElevation = 0.dp) {
                 screens.forEach { screen ->
-                    NavigationBarItem(
-                        icon = {
-                            Icon(screen.icon, contentDescription = stringResource(screen.label))
-                        },
+                    NavigationBarItem(icon = {
+                        Icon(screen.icon, contentDescription = stringResource(screen.label))
+                    },
                         label = { Text(stringResource(screen.label)) },
                         selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
-                        onClick = { navigate(navController, screen.route) })
+                        onClick = { navigate(homeNavController, screen.route) })
                 }
             }
         },
     ) { padding ->
         NavHost(
-            navController, startDestination = Screen.Timetable.route, Modifier.padding(padding)
+            homeNavController, startDestination = HomeScreen.Timetable.route, Modifier.padding(padding)
         ) {
-            composable(Screen.Timetable.route) { Timetable(navController, viewModel) }
-            composable(Screen.Alarms.route) { Alarms(navController, viewModel) }
-            composable(Screen.Settings.route) { Settings(navController, viewModel) }
+            composable(HomeScreen.Timetable.route) { Timetable(rootNavController, viewModel) }
+            composable(
+                HomeScreen.Alarms.route,
+                deepLinks = listOf(navDeepLink { action = VIEW_ALARMS_ACTION },
+                    navDeepLink { action = NEW_ALARM_ACTION })
+            ) { Alarms(rootNavController, viewModel) }
+            composable(HomeScreen.ResourceSelector.route) { ResourceSelector(rootNavController, viewModel) }
         }
     }
 }
 
 @Composable
 fun SettingsButton(navController: NavController) {
-    IconButton(onClick = { navController.navigate(Screen.Settings.route) }) {
+    IconButton(onClick = { navController.navigate(RootScreen.Settings.name) }) {
         Icon(Icons.Filled.Settings, stringResource(R.string.settings))
     }
 }

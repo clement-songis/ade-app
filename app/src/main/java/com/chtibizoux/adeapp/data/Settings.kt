@@ -14,7 +14,7 @@ import java.io.OutputStream
 @Serializable
 data class Settings(
     val user: User? = null,
-    val firstTime: Boolean = true,
+    val setupAlarms: Boolean = true,
     val alarms: List<Alarm> = listOf(),
     val calendar: Calendar? = null,
     val defaultAlarmSettings: DefaultAlarmSettings = DefaultAlarmSettings(),

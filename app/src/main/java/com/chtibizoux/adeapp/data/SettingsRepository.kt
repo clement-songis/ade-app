@@ -9,8 +9,12 @@ class SettingsRepository(
 ) {
     val settings = dataStore.data
 
-    suspend fun logout() {
+    suspend fun clearAll() {
         dataStore.updateData { Settings() }
+    }
+
+    suspend fun logout() {
+        dataStore.updateData { settings -> settings.copy(user = null, calendar = null) }
     }
 
     suspend fun login(username: String, password: String): Boolean {
@@ -26,7 +30,7 @@ class SettingsRepository(
     }
 
     suspend fun closeStartup() {
-        dataStore.updateData { settings -> settings.copy(firstTime = false) }
+        dataStore.updateData { settings -> settings.copy(setupAlarms = false) }
     }
 
     suspend fun addAlarm(alarm: Alarm) {
@@ -85,7 +89,7 @@ class SettingsRepository(
     }
 
     suspend fun setAlarms(alarms: List<Alarm>) {
-        dataStore.updateData { settings -> settings.copy(alarms = alarms, firstTime = false) }
+        dataStore.updateData { settings -> settings.copy(alarms = alarms, setupAlarms = false) }
     }
 
     suspend fun getStartingTimes(user: User): Result<List<Time>> {
@@ -96,10 +100,14 @@ class SettingsRepository(
         return dataSource.getStartingTime(user, date)
     }
 
+    suspend fun getCalendar(resourceId: Int, data: String): Result<Calendar> {
+        return dataSource.getCalendar(User(resourceId, data))
+    }
+
     suspend fun updateCalendar(user: User): Boolean {
         val result = dataSource.getCalendar(user)
         if (result is Result.Success) {
-            dataStore.updateData { settings -> settings.copy(calendar = Calendar(result.data.days.sortedBy { it.getDate() })) }
+            dataStore.updateData { settings -> settings.copy(calendar = result.data) }
         }
         return result is Result.Success
     }

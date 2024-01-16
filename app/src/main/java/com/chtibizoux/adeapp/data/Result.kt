@@ -16,3 +16,5 @@ sealed class Result<out T : Any> {
         }
     }
 }
+
+class BadHoursError(message: String): Error(message)

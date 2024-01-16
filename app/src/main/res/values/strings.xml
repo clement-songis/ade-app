@@ -42,7 +42,13 @@
     <string name="settings">Settings</string>
     <string name="ok">OK</string>
     <string name="back">back</string>
-    <string name="use_previous_alarm">uUse the previous alarm when there is none to configure:</string>
+    <string name="use_previous_alarm">Use the previous alarm when there is none to configure:</string>
     <string name="calendar_updated">Calendar updated</string>
     <string name="confirm_alarm_delete">Are you sure you want to delete this alarm?\nThis action is irreversible!</string>
+    <string name="no_calendar_error">There are no classes tomorrow</string>
+    <string name="other_timetables">Other timetables</string>
+    <string name="logout">Logout</string>
+    <string name="no">No</string>
+    <string name="yes">Yes</string>
+    <string name="clear_data">Do you want to delete your alarm clocks?</string>
 </resources>

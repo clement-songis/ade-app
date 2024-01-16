@@ -1,14 +1,24 @@
-package com.chtibizoux.adeapp.ui.home.settings
+package com.chtibizoux.adeapp.ui.settings
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -19,6 +29,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -34,12 +45,18 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import com.chtibizoux.adeapp.R
+import com.chtibizoux.adeapp.ui.RootScreen
 import com.chtibizoux.adeapp.ui.SettingsViewModel
 import com.chtibizoux.adeapp.ui.atLeast
 import com.chtibizoux.adeapp.ui.clearFocusKeyboardAction
+import com.chtibizoux.adeapp.ui.home.alarms.ConfirmDialog
 import com.chtibizoux.adeapp.ui.nextFocus
 import com.chtibizoux.adeapp.ui.nextFocusKeyboardAction
 import com.chtibizoux.adeapp.ui.submitKeyboardAction
@@ -47,13 +64,6 @@ import com.chtibizoux.adeapp.ui.submitKeyboardAction
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Settings(navController: NavController, viewModel: SettingsViewModel) {
-    val defaultAlarm by viewModel.defaultAlarmSettings.collectAsState()
-    val usePreviousAlarm by viewModel.usePreviousAlarm.collectAsState()
-
-    var timeUntilEvent by remember { mutableStateOf(defaultAlarm.timeUntilEvent.toString()) }
-    var repeat by remember { mutableStateOf(defaultAlarm.repeat.toString()) }
-    var interval by remember { mutableStateOf(defaultAlarm.interval.toString()) }
-
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(colors = TopAppBarDefaults.topAppBarColors(
@@ -76,8 +86,16 @@ fun Settings(navController: NavController, viewModel: SettingsViewModel) {
         ) {
             Column(
                 modifier = Modifier.padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(20.dp)
+                verticalArrangement = Arrangement.spacedBy(20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                val defaultAlarm by viewModel.defaultAlarmSettings.collectAsState()
+                val usePreviousAlarm by viewModel.usePreviousAlarm.collectAsState()
+
+                var timeUntilEvent by remember { mutableStateOf(defaultAlarm.timeUntilEvent.toString()) }
+                var repeat by remember { mutableStateOf(defaultAlarm.repeat.toString()) }
+                var interval by remember { mutableStateOf(defaultAlarm.interval.toString()) }
+
                 OutlinedTextField(
                     value = repeat,
                     onValueChange = {
@@ -88,7 +106,10 @@ fun Settings(navController: NavController, viewModel: SettingsViewModel) {
                         .nextFocus()
                         .fillMaxWidth(),
                     label = { Text(stringResource(R.string.repeat_interval)) },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number,
+                        imeAction = ImeAction.Next
+                    ),
                     keyboardActions = nextFocusKeyboardAction(),
                     singleLine = true
                 )
@@ -103,7 +124,10 @@ fun Settings(navController: NavController, viewModel: SettingsViewModel) {
                             .nextFocus()
                             .fillMaxWidth(),
                         label = { Text(stringResource(R.string.default_interval)) },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Number,
+                            imeAction = ImeAction.Next
+                        ),
                         keyboardActions = nextFocusKeyboardAction(),
                         singleLine = true
                     )
@@ -133,6 +157,70 @@ fun Settings(navController: NavController, viewModel: SettingsViewModel) {
                         checked = usePreviousAlarm,
                         onCheckedChange = viewModel::setUsePreviousAlarm
                     )
+                }
+
+                LogoutButton { viewModel.logout(it) }
+            }
+        }
+    }
+}
+
+@Composable
+fun LogoutButton(onLogout: (Boolean) -> Unit) {
+    var showLogoutDialog by remember { mutableStateOf(false) }
+
+    Button(onClick = { showLogoutDialog = true }) {
+        Text(stringResource(R.string.logout))
+    }
+
+    if (showLogoutDialog) {
+        LogoutDialog { clearData ->
+            showLogoutDialog = false
+            if (clearData != null) {
+                onLogout(clearData)
+            }
+        }
+    }
+}
+
+@Composable
+fun LogoutDialog(onClose: (Boolean?) -> Unit) {
+    Dialog(
+        onDismissRequest = { onClose(null) },
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+    ) {
+        Surface(
+            shape = MaterialTheme.shapes.extraLarge,
+            tonalElevation = 6.dp,
+            modifier = Modifier
+                .width(IntrinsicSize.Max)
+                .height(IntrinsicSize.Max)
+                .padding(10.dp)
+                .background(
+                    shape = MaterialTheme.shapes.extraLarge,
+                    color = MaterialTheme.colorScheme.surface
+                ),
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(24.dp)
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Text(
+                    stringResource(R.string.clear_data),
+                    fontSize = 20.sp,
+                    textAlign = TextAlign.Center
+                )
+                Row(
+                    modifier = Modifier
+                        .height(40.dp)
+                        .fillMaxWidth()
+                ) {
+                    TextButton(onClick = { onClose(false) }) { Text(stringResource(R.string.no)) }
+                    Spacer(modifier = Modifier.weight(1f))
+                    TextButton(onClick = { onClose(true) }) { Text(stringResource(R.string.yes)) }
                 }
             }
         }

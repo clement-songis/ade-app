@@ -8,7 +8,7 @@ import androidx.datastore.core.DataStore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.chtibizoux.adeapp.AlarmReceiver
+import com.chtibizoux.adeapp.SetAlarmReceiver
 import com.chtibizoux.adeapp.BootReceiver
 import com.chtibizoux.adeapp.data.Alarm
 import com.chtibizoux.adeapp.data.DataSource
@@ -17,6 +17,7 @@ import com.chtibizoux.adeapp.data.Result
 import com.chtibizoux.adeapp.data.Settings
 import com.chtibizoux.adeapp.data.SettingsRepository
 import com.chtibizoux.adeapp.data.Time
+import com.chtibizoux.adeapp.data.xml.Calendar
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -32,6 +33,9 @@ class SettingsViewModel(private val repository: SettingsRepository) : ViewModel(
     var appState by mutableStateOf(AppState.LOADING)
         private set
 
+    private val setupAlarms = repository.settings.map { it.setupAlarms }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, true)
+
     private val user = repository.settings.map { it.user }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
@@ -43,13 +47,13 @@ class SettingsViewModel(private val repository: SettingsRepository) : ViewModel(
 
     val alarms = repository.settings.map { it.alarms }
         .stateIn(viewModelScope, SharingStarted.Eagerly, listOf())
-    val calendar = repository.settings.map { it.calendar }
+
+    val userCalendar = repository.settings.map { it.calendar }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     lateinit var startingTimes: List<Time>
         private set
 
-    var updateCalendar = false
     var alarmPageFirst = false
 
     suspend fun refreshCalendar(): Boolean {
@@ -61,7 +65,11 @@ class SettingsViewModel(private val repository: SettingsRepository) : ViewModel(
         viewModelScope.launch {
             val success = repository.login(username, password)
             if (success) {
-                firstTime()
+                if (setupAlarms.value) {
+                    showAlarmsSetup()
+                } else {
+                    appState = AppState.CONNECTED
+                }
             } else {
                 appState = AppState.DISCONNECTED
                 onFailed()
@@ -69,10 +77,25 @@ class SettingsViewModel(private val repository: SettingsRepository) : ViewModel(
         }
     }
 
-    fun logout() {
+    fun logout(clearData: Boolean) {
         viewModelScope.launch {
-            repository.logout()
+            if (clearData) {
+                repository.clearAll()
+            } else {
+                repository.logout()
+            }
             appState = AppState.DISCONNECTED
+        }
+    }
+
+    fun getCalendar(resourceId: Int, onEnd: (Calendar?) -> Unit) {
+        viewModelScope.launch {
+            val result = repository.getCalendar(resourceId, user.value!!.data)
+            if (result is Result.Success) {
+                onEnd(result.data)
+            } else {
+                onEnd(null)
+            }
         }
     }
 
@@ -152,7 +175,7 @@ class SettingsViewModel(private val repository: SettingsRepository) : ViewModel(
         appState = AppState.LOADING
         viewModelScope.launch {
             repository.closeStartup()
-            goToMain()
+            appState = AppState.CONNECTED
         }
     }
 
@@ -161,18 +184,18 @@ class SettingsViewModel(private val repository: SettingsRepository) : ViewModel(
         viewModelScope.launch {
             repository.setAlarms(alarms.toList())
             alarmPageFirst = true
-            goToMain()
+            appState = AppState.CONNECTED
         }
     }
 
     fun retry() {
         appState = AppState.LOADING
         viewModelScope.launch {
-            firstTime()
+            showAlarmsSetup()
         }
     }
 
-    private suspend fun firstTime() {
+    private suspend fun showAlarmsSetup() {
         val result = repository.getStartingTimes(user.value!!)
         if (result is Result.Success) {
             startingTimes = result.data
@@ -180,18 +203,6 @@ class SettingsViewModel(private val repository: SettingsRepository) : ViewModel(
         } else {
             appState = AppState.GET_STARTING_TIMES_FAILED
         }
-    }
-
-    private suspend fun goToMain() {
-        if (calendar.value == null) {
-            val success = repository.updateCalendar(user.value!!)
-            if (!success) {
-                updateCalendar = true
-            }
-        } else {
-            updateCalendar = true
-        }
-        appState = AppState.CONNECTED
     }
 
     fun tryUpdateCalendar(onEnd: (Boolean) -> Unit) {
@@ -205,7 +216,7 @@ class SettingsViewModel(private val repository: SettingsRepository) : ViewModel(
         viewModelScope.launch {
             if (alarms.value.isNotEmpty()) {
                 BootReceiver.enable(context)
-                AlarmReceiver.setBackgroundWork(context)
+                SetAlarmReceiver.setBackgroundWork(context)
 //                AlarmReceiver.setAlarmAndNotifyUser(
 //                    context,
 //                    repository,
@@ -215,7 +226,7 @@ class SettingsViewModel(private val repository: SettingsRepository) : ViewModel(
 //                )
             } else {
                 BootReceiver.disable(context)
-                AlarmReceiver.removeBackgroundWork(context)
+                SetAlarmReceiver.removeBackgroundWork(context)
             }
         }
     }
@@ -224,13 +235,11 @@ class SettingsViewModel(private val repository: SettingsRepository) : ViewModel(
         viewModelScope.launch {
             val settings = repository.settings.first()
             if (settings.user == null) {
-//              TODO: Maybe remove all settings if they are set
                 appState = AppState.DISCONNECTED
-            } else if (settings.firstTime) {
-//              TODO: Maybe remove alarms and calendar if they are set
-                firstTime()
+            } else if (settings.setupAlarms) {
+                showAlarmsSetup()
             } else {
-                goToMain()
+                appState = AppState.CONNECTED
             }
         }
     }

@@ -14,6 +14,8 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="com.android.alarm.permission.SET_ALARM" />
 
     <application
@@ -27,10 +29,13 @@
         android:theme="@style/Theme.ADEApp"
         tools:targetApi="31">
         <receiver
-            android:name=".AlarmReceiver"
+            android:name=".SetAlarmReceiver"
             android:enabled="true"
             android:exported="false">
-
+            <intent-filter>
+                <action android:name="com.chtibizoux.adeapp.SET_ALARM" />
+                <action android:name="com.chtibizoux.adeapp.CANCEL_ALARM" />
+            </intent-filter>
         </receiver>
 
         <receiver

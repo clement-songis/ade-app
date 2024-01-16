@@ -32,7 +32,7 @@ const val LOGIN_EXECUTION =
 // encodeURIComponent(document.querySelector("input[name='execution']").value)
 
 class DataSource {
-    private fun getTicket(username: String, password: String): String {
+    private fun fetchTicket(username: String, password: String): String {
 
         val encodedUsername = URLEncoder.encode(username, "UTF-8")
         val encodedPassword = URLEncoder.encode(password, "UTF-8")
@@ -58,7 +58,7 @@ class DataSource {
         }
     }
 
-    private fun getCookies(link: String): String {
+    private fun fetchCookies(link: String): String {
         val url = URL(link)
         val connection = url.openConnection() as HttpURLConnection
         connection.run {
@@ -71,7 +71,7 @@ class DataSource {
         }
     }
 
-    private fun getResourceId(cookie: String): Int {
+    private fun fetchResourceId(cookie: String): Int {
         val connection = URL(INTRANET_BASE).openConnection() as HttpURLConnection
         connection.run {
             setRequestProperty("Cookie", cookie)
@@ -87,7 +87,7 @@ class DataSource {
         }
     }
 
-    private fun getData(resourceId: Int, cookie: String): String {
+    private fun fetchData(resourceId: Int, cookie: String): String {
         val url = URL("$INTRANET_BASE/edt/$resourceId")
         val connection = url.openConnection() as HttpURLConnection
         connection.run {
@@ -110,7 +110,7 @@ class DataSource {
 //    $ADE_BASE/jsp/webapi?function=imageET&displayConfId=2&detail=2&weeks=20&days=0,1,2,3,4,5,6&width=1920&height=1080&resources=67&projectId=3&data=$data
 //    $ADE_BASE/jsp/webapi?function=imageET&displayConfId=2&weeks=20&days=0&width=540&height=960&resources=67&projectId=3&data=$data
 
-//    private fun getIcs(resourceId: Int): String {
+//    private fun fetchIcs(resourceId: Int): String {
 //        val url = URL("$INTRANET_BASE/ICS_ADE/$resourceId.ics")
 ////        $ADE_BASE/jsp/custom/modules/plannings/anonymous_cal.jsp?resources=$resourceId&projectId=$PROJECT_ID&calType=ical&firstDate=2024-01-22&lastDate=2024-01-26
 ////        val url = URL("$ADE_BASE/jsp/custom/modules/plannings/anonymous_cal.jsp?data=$data&projectId=$PROJECT_ID&nbWeeks=4&resources=$resourceId")
@@ -120,7 +120,7 @@ class DataSource {
 //        }
 //    }
 
-    private fun getEvents(user: User): Calendar {
+    private fun fetchEvents(user: User): Calendar {
         val url =
             URL("$ADE_BASE/jsp/webapi?function=getEvents&detail=8&resources=${user.resourceId}&projectId=$PROJECT_ID&data=${user.data}")
         val connection = url.openConnection() as HttpURLConnection
@@ -133,7 +133,7 @@ class DataSource {
     }
 
     private val dateFormat = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
-    private fun getSimpleEvents(
+    private fun fetchSimpleEvents(
         user: User,
         date: Date? = null/*, week: Int? = null, day: Int? = null*/
     ): SimpleCalendar {
@@ -152,6 +152,19 @@ class DataSource {
             return parser.parse(inputStream)
         }
     }
+
+//    private fun fetchResources(data: String): Resources {
+//        val url =
+//            URL("$ADE_BASE/jsp/webapi?function=getResources&detail=5&projectId=$PROJECT_ID&data=${data}")
+//        val connection = url.openConnection() as HttpURLConnection
+//        connection.run {
+//            readTimeout = 10000
+//            connectTimeout = 15000
+//            val parser = ResourcesParser()
+//            return parser.parse(inputStream)
+//        }
+//    }
+
 //    suspend fun getCalendar(resourceId: Int): Result<MyCalendar> = withContext(Dispatchers.IO) {
 //        try {
 //            val ics = getIcs(resourceId)
@@ -163,10 +176,10 @@ class DataSource {
 //            return@withContext Result.Error(IOException("Error getting calendar", e))
 //        }
 //    }
-//
+
     suspend fun getCalendar(user: User): Result<Calendar> = withContext(Dispatchers.IO) {
         try {
-            val calendar = getEvents(user)
+            val calendar = fetchEvents(user)
             return@withContext Result.Success(calendar)
         } catch (e: Throwable) {
             println(e)
@@ -174,32 +187,44 @@ class DataSource {
         }
     }
 
+//    suspend fun getResources(data: String): Result<Resources> = withContext(Dispatchers.IO) {
+//        try {
+//            val resources = fetchResources(data)
+//            return@withContext Result.Success(resources)
+//        } catch (e: Throwable) {
+//            println(e)
+//            return@withContext Result.Error(IOException("Error getting resources", e))
+//        }
+//    }
+
     private fun startingTimes(days: List<Day<SimpleEvent>>): List<Time> {
         val hours = mutableListOf<Time>()
         for (day in days) {
             val events = day.events.map { it.startHour }.sortedBy { it.getMinutesNumber() }
-            hours.add(events[0])
+            if (events.isNotEmpty()) {
+                hours.add(events.first())
+            }
         }
         return hours.toSet().sortedBy { it.getMinutesNumber() }
     }
 
     suspend fun getStartingTime(user: User, date: Date): Result<Time> = withContext(Dispatchers.IO) {
         try {
-            val (days) = getSimpleEvents(user, date)
+            val (days) = fetchSimpleEvents(user, date)
             val hours = startingTimes(days)
             if (hours.size != 1) {
-                throw Error("Bad days number ${hours.size}")
+                throw BadHoursError("Bad hours number ${hours.size}")
             }
             return@withContext Result.Success(hours.first())
         } catch (e: Throwable) {
             println(e)
-            return@withContext Result.Error(IOException("Error getting current day", e))
+            return@withContext Result.Error(IOException("Error getting current starting time", e))
         }
     }
 
     suspend fun getStartingTimes(user: User): Result<List<Time>> = withContext(Dispatchers.IO) {
         try {
-            val (days) = getSimpleEvents(user)
+            val (days) = fetchSimpleEvents(user)
             val hours = startingTimes(days)
             return@withContext Result.Success(hours.filter { it.getHourNumber() < 12 })
         } catch (e: Throwable) {
@@ -211,10 +236,10 @@ class DataSource {
     suspend fun login(username: String, password: String): Result<User> =
         withContext(Dispatchers.IO) {
             try {
-                val link = getTicket(username, password)
-                val cookie = getCookies(link)
-                val resourceId = getResourceId(cookie)
-                val data = getData(resourceId, cookie)
+                val link = fetchTicket(username, password)
+                val cookie = fetchCookies(link)
+                val resourceId = fetchResourceId(cookie)
+                val data = fetchData(resourceId, cookie)
 
                 return@withContext Result.Success(User(resourceId, data))
             } catch (e: Throwable) {

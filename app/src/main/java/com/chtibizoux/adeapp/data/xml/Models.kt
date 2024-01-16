@@ -56,4 +56,5 @@ data class Event(
 data class Resource(
     val name: String,
     val category: String,
+    val id: Int,
 )

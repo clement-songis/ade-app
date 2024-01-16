@@ -1,11 +1,14 @@
 package com.chtibizoux.adeapp
 
+import android.app.AlarmManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -30,9 +33,9 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.chtibizoux.adeapp.data.dataStore
 import com.chtibizoux.adeapp.ui.AppState
+import com.chtibizoux.adeapp.ui.Root
 import com.chtibizoux.adeapp.ui.SettingsViewModel
 import com.chtibizoux.adeapp.ui.SettingsViewModelFactory
-import com.chtibizoux.adeapp.ui.home.Home
 import com.chtibizoux.adeapp.ui.login.Login
 import com.chtibizoux.adeapp.ui.startup.Startup
 import com.chtibizoux.adeapp.ui.theme.ADEAppTheme
@@ -67,6 +70,16 @@ class MainActivity : ComponentActivity() {
             }
         }
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val alarmManager = getSystemService(Context.ALARM_SERVICE) as? AlarmManager
+            if (alarmManager?.canScheduleExactAlarms() == false) {
+                Intent().also { intent ->
+                    intent.action = Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM
+                    startActivity(intent)
+                }
+            }
+        }
+
         setContent {
             Application()
         }
@@ -81,7 +94,7 @@ fun Application(
 ) {
     ADEAppTheme {
         when (viewModel.appState) {
-            AppState.CONNECTED -> Home(viewModel)
+            AppState.CONNECTED -> Root(viewModel)
             AppState.FIRST_CONNECTION -> Startup(viewModel)
             AppState.LOADING -> Loading()
             AppState.GET_STARTING_TIMES_FAILED -> Retry(viewModel)
@@ -100,11 +113,6 @@ private fun Retry(viewModel: SettingsViewModel) {
                     Text(stringResource(R.string.retry))
                 }
             }
-            CircularProgressIndicator(
-                modifier = Modifier.size(80.dp),
-                strokeCap = StrokeCap.Round,
-                strokeWidth = 8.dp
-            )
         }
     }
 }

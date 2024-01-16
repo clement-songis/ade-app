@@ -42,7 +42,7 @@ class CalendarParser {
                 skip(parser)
             }
         }
-        return Calendar(days)
+        return Calendar(days.sortedBy { it.getDate() })
     }
 
     @Throws(XmlPullParserException::class, IOException::class)
@@ -90,13 +90,12 @@ class CalendarParser {
     @Throws(IOException::class, XmlPullParserException::class)
     private fun readResource(parser: XmlPullParser): Resource {
         parser.require(XmlPullParser.START_TAG, ns, "resource")
-        val resource = Resource(
-            parser.getAttributeValue(ns, "name"),
-            parser.getAttributeValue(ns, "category"),
-        )
+        val name = parser.getAttributeValue(ns, "name")
+        val category = parser.getAttributeValue(ns, "category")
+        val id = parser.getAttributeValue(ns, "id").toInt()
         parser.nextTag()
         parser.require(XmlPullParser.END_TAG, ns, "resource")
-        return resource
+        return Resource(name, category, id)
     }
 
     @Throws(XmlPullParserException::class, IOException::class)
