@@ -12,7 +12,7 @@ import com.chtibizoux.adeapp.ui.SettingsViewModel
 import com.chtibizoux.adeapp.ui.timetable.WaitForCalendar
 
 @Composable
-fun Timetable(navController: NavController, viewModel: SettingsViewModel) {
+fun UserTimetable(navController: NavController, viewModel: SettingsViewModel) {
     val calendar by viewModel.userCalendar.collectAsState()
     val context = LocalContext.current
     LaunchedEffect(true) {
@@ -24,5 +24,5 @@ fun Timetable(navController: NavController, viewModel: SettingsViewModel) {
             ).show()
         }
     }
-    WaitForCalendar(navController, calendar, true)
+    WaitForCalendar(navController, calendar)
 }

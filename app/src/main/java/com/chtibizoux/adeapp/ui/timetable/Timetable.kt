@@ -30,5 +30,5 @@ fun Timetable(resourceId: Int, navController: NavController, viewModel: Settings
             }
         }
     }
-    WaitForCalendar(navController, calendar)
+    WaitForCalendar(navController, calendar, true)
 }

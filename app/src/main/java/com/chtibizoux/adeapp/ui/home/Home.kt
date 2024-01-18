@@ -36,7 +36,7 @@ import com.chtibizoux.adeapp.ui.RootScreen
 import com.chtibizoux.adeapp.ui.SettingsViewModel
 import com.chtibizoux.adeapp.ui.home.alarms.Alarms
 import com.chtibizoux.adeapp.ui.home.resourceSelector.ResourceSelector
-import com.chtibizoux.adeapp.ui.home.timetable.Timetable
+import com.chtibizoux.adeapp.ui.home.timetable.UserTimetable
 
 sealed class HomeScreen(
     val route: String, @StringRes val label: Int, val icon: ImageVector
@@ -96,7 +96,7 @@ fun Home(rootNavController: NavController, viewModel: SettingsViewModel) {
         NavHost(
             homeNavController, startDestination = HomeScreen.Timetable.route, Modifier.padding(padding)
         ) {
-            composable(HomeScreen.Timetable.route) { Timetable(rootNavController, viewModel) }
+            composable(HomeScreen.Timetable.route) { UserTimetable(rootNavController, viewModel) }
             composable(
                 HomeScreen.Alarms.route,
                 deepLinks = listOf(navDeepLink { action = VIEW_ALARMS_ACTION },
