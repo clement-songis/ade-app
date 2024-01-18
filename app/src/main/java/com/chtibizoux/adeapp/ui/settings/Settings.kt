@@ -1,10 +1,8 @@
 package com.chtibizoux.adeapp.ui.settings
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -38,10 +36,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -52,14 +47,11 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import com.chtibizoux.adeapp.R
-import com.chtibizoux.adeapp.ui.RootScreen
 import com.chtibizoux.adeapp.ui.SettingsViewModel
 import com.chtibizoux.adeapp.ui.atLeast
 import com.chtibizoux.adeapp.ui.clearFocusKeyboardAction
-import com.chtibizoux.adeapp.ui.home.alarms.ConfirmDialog
 import com.chtibizoux.adeapp.ui.nextFocus
 import com.chtibizoux.adeapp.ui.nextFocusKeyboardAction
-import com.chtibizoux.adeapp.ui.submitKeyboardAction
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
