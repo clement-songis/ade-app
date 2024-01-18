@@ -1,14 +1,11 @@
 package com.chtibizoux.adeapp.ui.login
 
-import android.content.Context
 import androidx.annotation.StringRes
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import com.chtibizoux.adeapp.R
-import com.chtibizoux.adeapp.ui.SettingsViewModel
 
 class LoginViewModel : ViewModel() {
     var username by mutableStateOf("")

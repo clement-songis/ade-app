@@ -52,4 +52,9 @@
     <string name="clear_data">Veux tu supprimer tes réveils ?</string>
     <string name="unable_to_get_calendar">Impossible de récupérer le calendrier depuis l\'API ADE</string>
     <string name="unable_to_get_resources">Impossible d\'obtenir les ressources depuis l\'API ADE</string>
+    <string name="students">Étudiants</string>
+    <string name="teachers">Professeurs</string>
+    <string name="classrooms">Salles de classe</string>
+    <string name="equipments">Équipements</string>
+    <string name="lessons">Cours</string>
 </resources>

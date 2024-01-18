@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 import java.util.Date
 import java.util.Locale
 
-
+private val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.FRANCE)
 
 @Serializable
 data class Calendar(val days: List<Day<Event>>) {
@@ -20,8 +20,6 @@ data class Calendar(val days: List<Day<Event>>) {
 data class SimpleCalendar(
     val days: List<Day<SimpleEvent>>,
 )
-
-val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.FRANCE)
 
 @Serializable
 data class Day<T>(
@@ -50,21 +48,6 @@ data class SimpleEvent(
     val date: String,// TODO: Parse date
     val startHour: Time,
     val endHour: Time,
-)
-
-data class ResourceTree(
-    val categories: List<Category>
-)
-
-data class Category(
-    val name: String,
-    val resources: List<Resource>
-)
-
-data class Resource(
-    val id: Int,
-    val name: String,
-    val children: List<Resource>
 )
 
 @Serializable
