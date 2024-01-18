@@ -72,7 +72,7 @@ fun Settings(navController: NavController, viewModel: SettingsViewModel) {
             ), title = {
                 Text(stringResource(R.string.settings))
             }, navigationIcon = {
-                IconButton(onClick = { navController.popBackStack() }) {
+                IconButton(onClick = { navController.navigateUp() }) {
                     Icon(Icons.Filled.ArrowBack, stringResource(R.string.back))
                 }
             })

@@ -34,14 +34,6 @@ data class Day<T>(
 }
 
 @Serializable
-data class SimpleEvent(
-    val name: String,
-    val date: String,
-    val startHour: Time,
-    val endHour: Time,
-)
-
-@Serializable
 data class Event(
     val name: String,
     val date: String,// TODO: Parse date
@@ -49,11 +41,34 @@ data class Event(
     val startHour: Time,
     val endHour: Time,
     val color: String,// TODO: Parse color
-    val resources: List<Resource>,
+    val resources: List<SimpleResource>,
 )
 
 @Serializable
+data class SimpleEvent(
+    val name: String,
+    val date: String,// TODO: Parse date
+    val startHour: Time,
+    val endHour: Time,
+)
+
+data class ResourceTree(
+    val categories: List<Category>
+)
+
+data class Category(
+    val name: String,
+    val resources: List<Resource>
+)
+
 data class Resource(
+    val id: Int,
+    val name: String,
+    val children: List<Resource>
+)
+
+@Serializable
+data class SimpleResource(
     val name: String,
     val category: String,
     val id: Int,

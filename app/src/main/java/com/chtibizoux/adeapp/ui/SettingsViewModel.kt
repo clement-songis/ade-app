@@ -18,6 +18,7 @@ import com.chtibizoux.adeapp.data.Settings
 import com.chtibizoux.adeapp.data.SettingsRepository
 import com.chtibizoux.adeapp.data.Time
 import com.chtibizoux.adeapp.data.xml.Calendar
+import com.chtibizoux.adeapp.data.xml.ResourceTree
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -91,6 +92,17 @@ class SettingsViewModel(private val repository: SettingsRepository) : ViewModel(
     fun getCalendar(resourceId: Int, onEnd: (Calendar?) -> Unit) {
         viewModelScope.launch {
             val result = repository.getCalendar(resourceId, user.value!!.data)
+            if (result is Result.Success) {
+                onEnd(result.data)
+            } else {
+                onEnd(null)
+            }
+        }
+    }
+
+    fun getResources(onEnd: (ResourceTree?) -> Unit) {
+        viewModelScope.launch {
+            val result = repository.getResources(user.value!!.data)
             if (result is Result.Success) {
                 onEnd(result.data)
             } else {

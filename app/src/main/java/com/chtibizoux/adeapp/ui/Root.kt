@@ -25,7 +25,7 @@ fun Root(viewModel: SettingsViewModel) {
         ) {
             val resourceId = it.arguments?.getInt("resourceId") ?: 0
             if (resourceId == 0) {
-//                navController.popBackStack()
+                navController.navigateUp()
             } else {
                 Timetable(resourceId, navController, viewModel)
             }

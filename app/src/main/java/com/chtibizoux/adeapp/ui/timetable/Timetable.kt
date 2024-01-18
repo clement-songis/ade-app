@@ -25,7 +25,7 @@ fun Timetable(resourceId: Int, navController: NavController, viewModel: Settings
             } else {
                 Toast.makeText(
                     context,
-                    R.string.unable_to_update_calendar,
+                    R.string.unable_to_get_calendar,
                     Toast.LENGTH_LONG
                 ).show()
             }

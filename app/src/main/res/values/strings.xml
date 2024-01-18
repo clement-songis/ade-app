@@ -51,4 +51,6 @@
     <string name="no">No</string>
     <string name="yes">Yes</string>
     <string name="clear_data">Do you want to delete your alarm clocks?</string>
+    <string name="unable_to_get_calendar">Impossible to retrieve the calendar from the ADE API</string>
+    <string name="unable_to_get_resources">unable to obtain resources from the ADE API</string>
 </resources>

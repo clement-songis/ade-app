@@ -4,6 +4,8 @@ import android.icu.text.SimpleDateFormat
 import com.chtibizoux.adeapp.data.xml.Calendar
 import com.chtibizoux.adeapp.data.xml.CalendarParser
 import com.chtibizoux.adeapp.data.xml.Day
+import com.chtibizoux.adeapp.data.xml.ResourceTree
+import com.chtibizoux.adeapp.data.xml.ResourcesParser
 import com.chtibizoux.adeapp.data.xml.SimpleCalendar
 import com.chtibizoux.adeapp.data.xml.SimpleCalendarParser
 import com.chtibizoux.adeapp.data.xml.SimpleEvent
@@ -153,17 +155,17 @@ class DataSource {
         }
     }
 
-//    private fun fetchResources(data: String): Resources {
-//        val url =
-//            URL("$ADE_BASE/jsp/webapi?function=getResources&detail=5&projectId=$PROJECT_ID&data=${data}")
-//        val connection = url.openConnection() as HttpURLConnection
-//        connection.run {
-//            readTimeout = 10000
-//            connectTimeout = 15000
-//            val parser = ResourcesParser()
-//            return parser.parse(inputStream)
-//        }
-//    }
+    private fun fetchResources(data: String): ResourceTree {
+        val url =
+            URL("$ADE_BASE/jsp/webapi?function=getResources&detail=2&tree=true&projectId=$PROJECT_ID&data=${data}")
+        val connection = url.openConnection() as HttpURLConnection
+        connection.run {
+            readTimeout = 10000
+            connectTimeout = 15000
+            val parser = ResourcesParser()
+            return parser.parse(inputStream)
+        }
+    }
 
 //    suspend fun getCalendar(resourceId: Int): Result<MyCalendar> = withContext(Dispatchers.IO) {
 //        try {
@@ -187,15 +189,15 @@ class DataSource {
         }
     }
 
-//    suspend fun getResources(data: String): Result<Resources> = withContext(Dispatchers.IO) {
-//        try {
-//            val resources = fetchResources(data)
-//            return@withContext Result.Success(resources)
-//        } catch (e: Throwable) {
-//            println(e)
-//            return@withContext Result.Error(IOException("Error getting resources", e))
-//        }
-//    }
+    suspend fun getResources(data: String): Result<ResourceTree> = withContext(Dispatchers.IO) {
+        try {
+            val resources = fetchResources(data)
+            return@withContext Result.Success(resources)
+        } catch (e: Throwable) {
+            println(e)
+            return@withContext Result.Error(IOException("Error getting resources", e))
+        }
+    }
 
     private fun startingTimes(days: List<Day<SimpleEvent>>): List<Time> {
         val hours = mutableListOf<Time>()

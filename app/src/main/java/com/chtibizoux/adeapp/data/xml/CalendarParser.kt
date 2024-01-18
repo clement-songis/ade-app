@@ -55,7 +55,7 @@ class CalendarParser {
         val endHour = Time.fromString(parser.getAttributeValue(ns, "endHour"))!!
         val color = parser.getAttributeValue(ns, "color")
 //        absoluteSlot slot day week
-        var resources = listOf<Resource>()
+        var resources = listOf<SimpleResource>()
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.eventType != XmlPullParser.START_TAG) {
                 continue
@@ -70,8 +70,8 @@ class CalendarParser {
     }
 
     @Throws(XmlPullParserException::class, IOException::class)
-    private fun readResources(parser: XmlPullParser): List<Resource> {
-        val resources = mutableListOf<Resource>()
+    private fun readResources(parser: XmlPullParser): List<SimpleResource> {
+        val resources = mutableListOf<SimpleResource>()
         parser.require(XmlPullParser.START_TAG, ns, "resources")
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.eventType != XmlPullParser.START_TAG) {
@@ -88,14 +88,14 @@ class CalendarParser {
     }
 
     @Throws(IOException::class, XmlPullParserException::class)
-    private fun readResource(parser: XmlPullParser): Resource {
+    private fun readResource(parser: XmlPullParser): SimpleResource {
         parser.require(XmlPullParser.START_TAG, ns, "resource")
         val name = parser.getAttributeValue(ns, "name")
         val category = parser.getAttributeValue(ns, "category")
         val id = parser.getAttributeValue(ns, "id").toInt()
         parser.nextTag()
         parser.require(XmlPullParser.END_TAG, ns, "resource")
-        return Resource(name, category, id)
+        return SimpleResource(name, category, id)
     }
 
     @Throws(XmlPullParserException::class, IOException::class)
