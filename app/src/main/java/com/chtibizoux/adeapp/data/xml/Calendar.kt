@@ -1,6 +1,7 @@
 package com.chtibizoux.adeapp.data.xml
 
 import android.icu.text.SimpleDateFormat
+import androidx.compose.ui.graphics.Color
 import com.chtibizoux.adeapp.data.Time
 import kotlinx.serialization.Serializable
 import java.util.Date
@@ -40,7 +41,12 @@ data class Event(
     val endHour: Time,
     val color: String,// TODO: Parse color
     val resources: List<SimpleResource>,
-)
+) {
+    fun getColor(): Color {
+        val (r, g, b) = color.split(",")
+        return Color(r.toInt(), g.toInt(), b.toInt())
+    }
+}
 
 @Serializable
 data class SimpleEvent(

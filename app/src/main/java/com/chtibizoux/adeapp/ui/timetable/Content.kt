@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -52,6 +53,7 @@ import com.chtibizoux.adeapp.R
 import com.chtibizoux.adeapp.data.xml.Calendar
 import com.chtibizoux.adeapp.data.xml.Day
 import com.chtibizoux.adeapp.data.xml.Event
+import com.chtibizoux.adeapp.data.xml.SimpleResource
 import com.chtibizoux.adeapp.ui.home.SettingsButton
 import kotlinx.coroutines.launch
 import java.text.DateFormat
@@ -69,7 +71,10 @@ const val BOX_HEIGHT = (MAIN_DIVIDER_HEIGHT + SECONDARY_DIVIDER_HEIGHT + SPACE *
 
 @Composable
 fun WaitForCalendar(
-    navController: NavController, calendar: Calendar?, previousButton: Boolean = false
+    navController: NavController,
+    calendar: Calendar?,
+    category: String? = null,
+    previousButton: Boolean = false
 ) {
     if (calendar == null) {
         Box(
@@ -84,23 +89,36 @@ fun WaitForCalendar(
             ) {
                 Text(stringResource(R.string.no_calendar), color = Color.White)
                 CircularProgressIndicator(
-                    modifier = Modifier.size(80.dp),
-                    strokeCap = StrokeCap.Round,
-                    strokeWidth = 8.dp
+                    modifier = Modifier.size(80.dp), strokeCap = StrokeCap.Round, strokeWidth = 8.dp
                 )
             }
         }
     } else {
-        TimetableContent(navController, calendar, previousButton)
+        TimetableContent(navController, calendar, category, previousButton)
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
-fun TimetableContent(navController: NavController, calendar: Calendar, previousButton: Boolean) {
-    val pagerState =
-        rememberPagerState(initialPage = calendar.getPage(), pageCount = { calendar.days.size })
-    val coroutineScope = rememberCoroutineScope()
+fun TimetableContent(
+    navController: NavController,
+    calendar: Calendar,
+    category: String? = null,
+    previousButton: Boolean = false
+) {
+    if (calendar.days.isEmpty()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(stringResource(R.string.no_calendar), color = Color.White)
+        }
+    } else {
+        val pagerState =
+            rememberPagerState(initialPage = calendar.getPage(), pageCount = { calendar.days.size })
+        val coroutineScope = rememberCoroutineScope()
 //    val refreshScope = rememberCoroutineScope()
 //    var refreshing by remember { mutableStateOf(false) }
 //    val context = LocalContext.current
@@ -118,34 +136,36 @@ fun TimetableContent(navController: NavController, calendar: Calendar, previousB
 //        PullRefreshIndicator(refreshing, state, Modifier.align(Alignment.TopCenter))
 //    }
 
-    Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    TimetableTitle(calendar.days[pagerState.currentPage].getDate()) {
-                        coroutineScope.launch {
-                            pagerState.scrollToPage(calendar.getPage(it))
+        Scaffold(
+            topBar = {
+                CenterAlignedTopAppBar(
+                    title = {
+                        TimetableTitle(calendar.days[pagerState.currentPage].getDate()) {
+                            coroutineScope.launch {
+                                pagerState.scrollToPage(calendar.getPage(it))
+                            }
                         }
-                    }
-                }, navigationIcon = {
-                    if (previousButton) {
-                        IconButton(onClick = { navController.navigateUp() }) {
-                            Icon(Icons.Filled.ArrowBack, stringResource(R.string.back))
+                    },
+                    navigationIcon = {
+                        if (previousButton) {
+                            IconButton(onClick = { navController.navigateUp() }) {
+                                Icon(Icons.Filled.ArrowBack, stringResource(R.string.back))
+                            }
                         }
-                    }
-                },
-                actions = {
-                    SettingsButton(navController)
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
+                    },
+                    actions = {
+                        SettingsButton(navController)
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
 //                containerColor = MaterialTheme.colorScheme.primaryContainer,
 //                titleContentColor = MaterialTheme.colorScheme.primary,
+                    )
                 )
-            )
-        },
-    ) { padding ->
-        HorizontalPager(pagerState, Modifier.padding(padding)) { page ->
-            Day(navController, calendar.days[page])
+            },
+        ) { padding ->
+            HorizontalPager(pagerState, Modifier.padding(padding)) { page ->
+                Day(navController, calendar.days[page], category)
+            }
         }
     }
 }
@@ -172,7 +192,7 @@ fun TimetableTitle(date: Date, goTo: (Date) -> Unit) {
 }
 
 @Composable
-private fun Day(navController: NavController, day: Day<Event>) {
+private fun Day(navController: NavController, day: Day<Event>, category: String?) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -180,8 +200,41 @@ private fun Day(navController: NavController, day: Day<Event>) {
             .background(MaterialTheme.colorScheme.background),
     ) {
         Background(START_HOUR, END_HOUR)
-        day.events.forEach { event ->
-            EventComponent(navController, event)
+        if (category == null) {
+            SingleColumn(day.events, navController)
+        } else {
+            val columns = day.events.groupBy { event ->
+                event.resources.filter { it.category == category }
+                    .joinToString { it.name }/*.single { it.category == category }*/
+            }
+            MultipleColumn(columns, navController)
+        }
+    }
+}
+
+@Composable
+fun SingleColumn(events: List<Event>, navController: NavController) {
+    Box(Modifier.padding(start = TIME_PADDING.dp)) {
+        events.forEach { event ->
+            EventElement(navController, event)
+        }
+    }
+}
+
+@Composable
+fun MultipleColumn(columns: Map<String, List<Event>>, navController: NavController) {
+    Row(Modifier.padding(start = TIME_PADDING.dp)) {
+        columns.forEach { (resource, events) ->
+            Box(
+                Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+            ) {
+                Text(resource)
+                events.forEach { event ->
+                    EventElement(navController, event)
+                }
+            }
         }
     }
 }
@@ -222,19 +275,19 @@ fun Background(startHour: Int, endHour: Int) {
 }
 
 @Composable
-fun EventComponent(navController: NavController, event: Event) {
+fun EventElement(navController: NavController, event: Event) {
     var showDialog by remember { mutableStateOf(false) }
+
     val startHour = event.startHour.getHourNumber()
 //    val endHour = event.endHour.getHourNumber()
 //    val height = endHour - startHour
     val height = event.duration / 2f
-    val (r, g, b) = event.color.split(",")
+
     Surface(modifier = Modifier
-        .offset(y = (PADDING + MAIN_DIVIDER_HEIGHT / 2 + (startHour - START_HOUR) * BOX_HEIGHT + 1).dp)
-        .padding(start = TIME_PADDING.dp)
         .fillMaxWidth()
+        .offset(y = (PADDING + MAIN_DIVIDER_HEIGHT / 2 + (startHour - START_HOUR) * BOX_HEIGHT + 1).dp)
         .height((height * BOX_HEIGHT - 1).dp),
-        color = Color(r.toInt(), g.toInt(), b.toInt()),
+        color = event.getColor(),
         contentColor = Color.Black,
         shape = RoundedCornerShape(10.dp),
         onClick = { showDialog = true }) {
@@ -255,6 +308,7 @@ fun EventComponent(navController: NavController, event: Event) {
             )
         }
     }
+
     if (showDialog) {
         EventDialog(navController, event) { showDialog = false }
     }

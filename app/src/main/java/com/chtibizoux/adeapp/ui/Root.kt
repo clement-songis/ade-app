@@ -20,14 +20,21 @@ fun Root(viewModel: SettingsViewModel) {
         navController, startDestination = RootScreen.Home.name
     ) {
         composable(RootScreen.Home.name) { Home(navController, viewModel) }
-        composable(RootScreen.Timetable.name + "/{resourceId}",
-            arguments = listOf(navArgument("resourceId") { type = NavType.IntType })
+        composable(
+            RootScreen.Timetable.name + "/{resourceId}?category={category}",
+            arguments = listOf(
+                navArgument("resourceId") { type = NavType.IntType },
+                navArgument("category") {
+                    type = NavType.StringType
+                    nullable = true
+                }
+            )
         ) {
             val resourceId = it.arguments?.getInt("resourceId") ?: 0
             if (resourceId == 0) {
                 navController.navigateUp()
             } else {
-                Timetable(resourceId, navController, viewModel)
+                Timetable(resourceId, it.arguments?.getString("category"), navController, viewModel)
             }
         }
         composable(RootScreen.Settings.name) { Settings(navController, viewModel) }
