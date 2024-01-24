@@ -54,7 +54,7 @@ fun Startup(
         ) {
             Text(stringResource(R.string.alarm_choice), Modifier.padding(20.dp), fontSize = 25.sp)
             Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
-                // TODO: Better ui, fields, focus, animations
+                // TODO: Better ui, fields, focus, animations, errors
                 OutlinedTextField(
                     value = startupViewModel.repeat,
                     onValueChange = {

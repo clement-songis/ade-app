@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import java.util.Calendar
 import java.util.Date
+import java.util.TimeZone
 
 const val UPDATE_HOUR = 14
 const val ALARM_MESSAGE = "ADE Alarm"
@@ -44,23 +45,29 @@ class SetAlarmReceiver : BroadcastReceiver() {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
-            alarmManager?.setRepeating(
-                AlarmManager.RTC_WAKEUP,
-                Date().time,
-                AlarmManager.INTERVAL_FIFTEEN_MINUTES,
-                alarmIntent
-            )
-//            val calendar: Calendar = Calendar.getInstance().apply {
-//                timeInMillis = System.currentTimeMillis()
-//                set(Calendar.HOUR_OF_DAY, UPDATE_HOUR)
-//                set(Calendar.MINUTES, 0)
-//            }
-//            alarmManager?.setRepeating(
+//            alarmManager?.setInexactRepeating(
 //                AlarmManager.RTC_WAKEUP,
-//                calendar.timeInMillis,
-//                AlarmManager.INTERVAL_DAY,
+//                Date().time,
+//                AlarmManager.INTERVAL_FIFTEEN_MINUTES,
 //                alarmIntent
 //            )
+            val calendar: Calendar = Calendar.getInstance().apply {
+//                set(Calendar.HOUR_OF_DAY, UPDATE_HOUR)
+//                set(Calendar.MINUTE, 0)
+                set(Calendar.HOUR_OF_DAY, 14)
+                set(Calendar.MINUTE, 0)
+
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+                timeZone = TimeZone.getTimeZone("UTC")
+            }
+
+            alarmManager?.setInexactRepeating(
+                AlarmManager.RTC_WAKEUP,
+                calendar.timeInMillis,
+                AlarmManager.INTERVAL_DAY,
+                alarmIntent
+            )
         }
 
         fun removeBackgroundWork(context: Context) {
@@ -84,11 +91,22 @@ class SetAlarmReceiver : BroadcastReceiver() {
             alarms: List<Alarm>,
             usePreviousAlarm: Boolean
         ) {
-            Toast.makeText(context, "test", Toast.LENGTH_LONG).show()
 //            TODO: Attention no today trigger
             // TODO: test multiple alarms and add delays if necessary
 //            if (!alarmAlreadyInUse) {
+
+            // ########### test ###########
             val notificationManager = MyNotificationManager(context)
+            val viewIntent = Intent(context, MainActivity::class.java)
+            val viewPendingIntent = PendingIntent.getActivity(
+                context, 0, viewIntent, PendingIntent.FLAG_IMMUTABLE
+            )
+            notificationManager.sendAlarm(1, Time(0, 0), viewPendingIntent)
+//            notificationManager.sendAlarmSuccess(1, Time(0, 0))
+            setAlarm(context, Time(0, 0))
+            // ########### test end ###########
+
+            return
             try {
                 val tomorrow = Calendar.getInstance()
                 tomorrow.time = Date()

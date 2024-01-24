@@ -68,7 +68,6 @@ fun Login(settingsViewModel: SettingsViewModel, loginViewModel: LoginViewModel =
                 fontSize = 17.sp,
                 textAlign = TextAlign.Center
             )
-
             OutlinedTextField(
                 value = loginViewModel.username,
                 onValueChange = { loginViewModel.updateUsername(it) },
@@ -79,6 +78,16 @@ fun Login(settingsViewModel: SettingsViewModel, loginViewModel: LoginViewModel =
                 label = { Text(stringResource(R.string.username)) },
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                 keyboardActions = nextFocusKeyboardAction(),
+                isError = loginViewModel.usernameError != null,
+                supportingText = {
+                    if (loginViewModel.usernameError != null) {
+                        Text(
+                            modifier = Modifier.fillMaxWidth(),
+                            text = stringResource(loginViewModel.usernameError!!),
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                },
                 singleLine = true
             )
 
@@ -93,6 +102,16 @@ fun Login(settingsViewModel: SettingsViewModel, loginViewModel: LoginViewModel =
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 keyboardActions = submitKeyboardAction(::login),
+                isError = loginViewModel.passwordError != null,
+                supportingText = {
+                    if (loginViewModel.passwordError != null) {
+                        Text(
+                            modifier = Modifier.fillMaxWidth(),
+                            text = stringResource(loginViewModel.passwordError!!),
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                },
                 singleLine = true
             )
 

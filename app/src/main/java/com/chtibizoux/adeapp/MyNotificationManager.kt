@@ -12,12 +12,12 @@ class MyNotificationManager(private val context: Context) {
     private val notificationManager =
         context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-    fun sendAlarmSuccess(alarmNumber: Number, forTime: Time) {
-        val intent = Intent(AlarmClock.ACTION_SHOW_ALARMS).apply {
+    fun sendAlarm(alarmNumber: Number, forTime: Time, fullscreenIntent: PendingIntent) {
+        val showIntent = Intent(AlarmClock.ACTION_SHOW_ALARMS).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK
         }
-        val viewIntent = PendingIntent.getActivity(
-            context, 0, intent, PendingIntent.FLAG_IMMUTABLE
+        val showPendingIntent = PendingIntent.getActivity(
+            context, 0, showIntent, PendingIntent.FLAG_IMMUTABLE
         )
         val cancelIntent = Intent(context, SetAlarmReceiver::class.java)
         cancelIntent.action = CANCEL_ALARM_ACTION
@@ -28,18 +28,41 @@ class MyNotificationManager(private val context: Context) {
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentTitle(context.getString(R.string.alarm_success))
             .setContentText(context.getString(R.string.alarm_success_text, alarmNumber, forTime))
-            .addAction(
-                R.drawable.ic_cancel, context.getString(R.string.cancel), cancelPendingIntent
-            ).setContentIntent(viewIntent).setPriority(NotificationCompat.PRIORITY_HIGH)
+            .addAction(R.drawable.ic_cancel, context.getString(R.string.cancel), cancelPendingIntent)
+            .setContentIntent(showPendingIntent)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setFullScreenIntent(fullscreenIntent, true)
+        notificationManager.notify(1, builder.build())
+    }
+
+    fun sendAlarmSuccess(alarmNumber: Number, forTime: Time) {
+        val showIntent = Intent(AlarmClock.ACTION_SHOW_ALARMS).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK
+        }
+        val showPendingIntent = PendingIntent.getActivity(
+            context, 0, showIntent, PendingIntent.FLAG_IMMUTABLE
+        )
+        val cancelIntent = Intent(context, SetAlarmReceiver::class.java)
+        cancelIntent.action = CANCEL_ALARM_ACTION
+        val cancelPendingIntent = PendingIntent.getBroadcast(
+            context, 0, cancelIntent, PendingIntent.FLAG_IMMUTABLE
+        )
+        val builder = NotificationCompat.Builder(context, ALARMS_CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setContentTitle(context.getString(R.string.alarm_success))
+            .setContentText(context.getString(R.string.alarm_success_text, alarmNumber, forTime))
+            .addAction(R.drawable.ic_cancel, context.getString(R.string.cancel), cancelPendingIntent)
+            .setContentIntent(showPendingIntent)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
         notificationManager.notify(1, builder.build())
     }
 
     fun sendNoAlarmError(time: Time) {
-        val viewIntent = Intent(context, MainActivity::class.java).apply {
+        val showIntent = Intent(context, MainActivity::class.java).apply {
             action = VIEW_ALARMS_ACTION
         }
-        val viewPendingIntent = PendingIntent.getActivity(
-            context, 0, viewIntent, PendingIntent.FLAG_IMMUTABLE
+        val showPendingIntent = PendingIntent.getActivity(
+            context, 0, showIntent, PendingIntent.FLAG_IMMUTABLE
         )
         val addIntent = Intent(context, MainActivity::class.java).apply {
             action = NEW_ALARM_ACTION
@@ -57,24 +80,24 @@ class MyNotificationManager(private val context: Context) {
                 context.getString(R.string.add),
                 addPendingIntent
             )
-            .setContentIntent(viewPendingIntent).setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setContentIntent(showPendingIntent).setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
         notificationManager.notify(1, builder.build())
     }
 
     fun sendBadHoursError() {
-        val intent = Intent(AlarmClock.ACTION_SHOW_ALARMS).apply {
+        val showIntent = Intent(AlarmClock.ACTION_SHOW_ALARMS).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK
         }
-        val viewIntent = PendingIntent.getActivity(
-            context, 0, intent, PendingIntent.FLAG_IMMUTABLE
+        val showPendingIntent = PendingIntent.getActivity(
+            context, 0, showIntent, PendingIntent.FLAG_IMMUTABLE
         )
 
         val builder = NotificationCompat.Builder(context, ALARMS_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentTitle(context.getString(R.string.alarm_error))
             .setContentText(context.getString(R.string.no_calendar_error))
-            .setContentIntent(viewIntent).setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setContentIntent(showPendingIntent).setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
         notificationManager.notify(1, builder.build())
     }
@@ -89,11 +112,11 @@ class MyNotificationManager(private val context: Context) {
     }
 
     fun sendAlarmError(e: Exception) {
-        val viewIntent = Intent(context, MainActivity::class.java).apply {
+        val showIntent = Intent(context, MainActivity::class.java).apply {
             action = VIEW_ALARMS_ACTION
         }
-        val viewPendingIntent =
-            PendingIntent.getActivity(context, 0, viewIntent, PendingIntent.FLAG_IMMUTABLE)
+        val showPendingIntent =
+            PendingIntent.getActivity(context, 0, showIntent, PendingIntent.FLAG_IMMUTABLE)
         val retryIntent = Intent(context, SetAlarmReceiver::class.java)
         val retryPendingIntent = PendingIntent.getBroadcast(
             context, 0, retryIntent, PendingIntent.FLAG_IMMUTABLE
@@ -103,7 +126,7 @@ class MyNotificationManager(private val context: Context) {
             .setContentTitle(context.getString(R.string.alarm_error)).setContentText(e.toString())
             .setPriority(NotificationCompat.PRIORITY_HIGH).addAction(
                 R.drawable.ic_sync, context.getString(R.string.retry), retryPendingIntent
-            ).setContentIntent(viewPendingIntent).setAutoCancel(true)
+            ).setContentIntent(showPendingIntent).setAutoCancel(true)
         notificationManager.notify(1, builder.build())
     }
 }

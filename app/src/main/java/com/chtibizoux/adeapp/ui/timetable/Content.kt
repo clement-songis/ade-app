@@ -53,7 +53,6 @@ import com.chtibizoux.adeapp.R
 import com.chtibizoux.adeapp.data.xml.Calendar
 import com.chtibizoux.adeapp.data.xml.Day
 import com.chtibizoux.adeapp.data.xml.Event
-import com.chtibizoux.adeapp.data.xml.SimpleResource
 import com.chtibizoux.adeapp.ui.home.SettingsButton
 import kotlinx.coroutines.launch
 import java.text.DateFormat
