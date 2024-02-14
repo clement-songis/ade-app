@@ -26,10 +26,13 @@ class StartupViewModel(startingTimes: List<Time>, default: DefaultAlarmSettings)
             repeat.atLeast(1), interval.atLeast(0), timeUntilEvent.atLeast(0)
         )
 
-    val canSubmit
-        get() = repeat.atLeast(1) == repeat.toIntOrNull()
-                && timeUntilEvent.atLeast(0) == timeUntilEvent.toIntOrNull()
-                && interval.atLeast(0) == interval.toIntOrNull()
+    val validRepeat get() = repeat.atLeast(1) == repeat.toIntOrNull()
+
+    val validTimeUntilEvent get() = timeUntilEvent.atLeast(0) == timeUntilEvent.toIntOrNull()
+
+    val validInterval get() = interval.atLeast(0) == interval.toIntOrNull()
+
+    val canSubmit get() = validRepeat && validTimeUntilEvent && validInterval
 
     fun updateTimeUntilEvent(text: String) {
         timeUntilEvent = text

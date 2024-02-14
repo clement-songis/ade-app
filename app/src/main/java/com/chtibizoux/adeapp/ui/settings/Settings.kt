@@ -103,6 +103,16 @@ fun Settings(navController: NavController, viewModel: SettingsViewModel) {
                         imeAction = ImeAction.Next
                     ),
                     keyboardActions = nextFocusKeyboardAction(),
+                    isError = repeat != defaultAlarm.repeat.toString(),
+                    supportingText = {
+                        if (defaultAlarm.repeat.toString() != repeat) {
+                            Text(
+                                modifier = Modifier.fillMaxWidth(),
+                                text = stringResource(R.string.number_error),
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    },
                     singleLine = true
                 )
                 if (repeat.atLeast(1) > 1) {
@@ -121,6 +131,16 @@ fun Settings(navController: NavController, viewModel: SettingsViewModel) {
                             imeAction = ImeAction.Next
                         ),
                         keyboardActions = nextFocusKeyboardAction(),
+                        isError = interval != defaultAlarm.interval.toString(),
+                        supportingText = {
+                            if (defaultAlarm.interval.toString() != interval) {
+                                Text(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    text = stringResource(R.string.number_error),
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        },
                         singleLine = true
                     )
                 }
@@ -136,6 +156,16 @@ fun Settings(navController: NavController, viewModel: SettingsViewModel) {
                     label = { Text(stringResource(R.string.default_alarm_interval)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     keyboardActions = clearFocusKeyboardAction(),
+                    isError = timeUntilEvent != defaultAlarm.timeUntilEvent.toString(),
+                    supportingText = {
+                        if (defaultAlarm.timeUntilEvent.toString() != timeUntilEvent) {
+                            Text(
+                                modifier = Modifier.fillMaxWidth(),
+                                text = stringResource(R.string.number_error),
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    },
                     singleLine = true
                 )
 

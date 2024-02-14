@@ -8,8 +8,7 @@
     <string name="app_description">A great app for easily managing a schedule.</string>
     <string name="username">Username</string>
     <string name="password">Password</string>
-    <string name="login_explanation">The application will only use it to gain access to your schedule and will not save your identifiers</string>
-    <string name="login_text">To get started, log in with your intranet credentials.</string>
+    <string name="login_text">To get started, please provide the link to access your ADE.</string>
     <string name="login">Login</string>
     <string name="invalid_username">Not a valid username</string>
     <string name="invalid_password">Password must be >5 characters</string>
@@ -58,4 +57,7 @@
     <string name="classrooms">Classrooms</string>
     <string name="equipments">Equipments</string>
     <string name="lessons">Lessons</string>
+    <string name="number_error">Wrong number</string>
+    <string name="invalid_url">Invalid URL</string>
+    <string name="link">Link</string>
 </resources>

@@ -65,6 +65,16 @@ fun Startup(
                     label = { Text(stringResource(R.string.repeat_interval)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
                     keyboardActions = nextFocusKeyboardAction(),
+                    isError = startupViewModel.validRepeat,
+                    supportingText = {
+                        if (startupViewModel.validRepeat) {
+                            Text(
+                                modifier = Modifier.fillMaxWidth(),
+                                text = stringResource(R.string.number_error),
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    },
                     singleLine = true
                 )
                 if (startupViewModel.repeat.atLeast(1) > 1) {
@@ -78,6 +88,16 @@ fun Startup(
                         label = { Text(stringResource(R.string.default_interval)) },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
                         keyboardActions = nextFocusKeyboardAction(),
+                        isError = startupViewModel.validInterval,
+                        supportingText = {
+                            if (startupViewModel.validInterval) {
+                                Text(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    text = stringResource(R.string.number_error),
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        },
                         singleLine = true
                     )
                 }
@@ -90,6 +110,16 @@ fun Startup(
                     label = { Text(stringResource(R.string.default_alarm_interval)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     keyboardActions = submitKeyboardAction(::submit),
+                    isError = startupViewModel.validTimeUntilEvent,
+                    supportingText = {
+                        if (startupViewModel.validTimeUntilEvent) {
+                            Text(
+                                modifier = Modifier.fillMaxWidth(),
+                                text = stringResource(R.string.number_error),
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    },
                     singleLine = true
                 )
             }
