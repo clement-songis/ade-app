@@ -26,8 +26,10 @@ class LoginViewModel : ViewModel() {
     fun checkLink(): User? {
         try {
             val url = URI(link)
-            if (!url.path.startsWith("/direct/") || !url.path.startsWith("/jsp/") || !url.path.startsWith("/ade/")) {
+            println(url.path)
+            if (!url.path.startsWith("/direct/") && !url.path.startsWith("/jsp/") && !url.path.startsWith("/ade/")) {
                 linkError = R.string.not_an_ade_url
+                return null
             }
             val dataMatchResult = Regex("data=([^&]+)").find(url.query)
             if (dataMatchResult == null) {
@@ -64,7 +66,7 @@ class LoginViewModel : ViewModel() {
                 return null
             }
 
-            val baseURL = url.scheme + "//" + url.authority
+            val baseURL = url.scheme + "://" + url.authority
             return User(baseURL, projectId, resourceId, data)
         } catch (e: URISyntaxException) {
             linkError = R.string.invalid_url

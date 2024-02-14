@@ -19,6 +19,7 @@ class SettingsRepository(
     }
 
     suspend fun login(user: User): Boolean {
+        // TODO: Check connection
         dataStore.updateData { settings -> settings.copy(user = user) }
         return true
     }
