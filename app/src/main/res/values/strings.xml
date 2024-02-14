@@ -60,4 +60,10 @@
     <string name="number_error">Wrong number</string>
     <string name="invalid_url">Invalid URL</string>
     <string name="link">Link</string>
+    <string name="not_an_ade_url">ADE URL path start with \'/direct/\', \'/jsp/\' or \'/ade/\'</string>
+    <string name="no_data_not_supported">ADE login is currently not implemented</string>
+    <string name="projectId_selection_not_supported">ADE project selection is currently not implemented</string>
+    <string name="wrong_projectId">The project id is not a number</string>
+    <string name="resourceId_selection_not_supported">ADE resource selection is currently not implemented</string>
+    <string name="wrong_resourceId">The resource id is not a number</string>
 </resources>

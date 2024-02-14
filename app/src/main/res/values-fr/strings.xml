@@ -59,4 +59,10 @@
     <string name="number_error">Mauvais numéro</string>
     <string name="invalid_url">URL invalide</string>
     <string name="link">Lien</string>
+    <string name="not_an_ade_url">Le chemin de l\'URL ADE commence par \'/direct/\', \'/jsp/\' ou \'/ade/\'</string>
+    <string name="no_data_not_supported">La connexion ADE n’est actuellement pas implémentée</string>
+    <string name="projectId_selection_not_supported">La sélection des projets ADE n\'est actuellement pas implémentée</string>
+    <string name="wrong_projectId">L\'identifiant du projet n\'est pas un numéro</string>
+    <string name="resourceId_selection_not_supported">La sélection des ressources ADE n\'est actuellement pas implémentée</string>
+    <string name="wrong_resourceId">L\'identifiant du projet n\'est pas un numéro</string>
 </resources>

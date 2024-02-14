@@ -31,7 +31,7 @@ data class DefaultAlarmSettings(
 )
 
 @Serializable
-data class User(val resourceId: Int, val data: String)
+data class User(val baseURL: String, val projectId: Int, val resourceId: Int, val data: String)
 
 @Serializable
 data class Time(val hour: Int, val minute: Int) {

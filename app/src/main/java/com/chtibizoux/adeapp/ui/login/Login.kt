@@ -16,21 +16,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.autofill.AutofillNode
-import androidx.compose.ui.autofill.AutofillType
-import androidx.compose.ui.composed
-import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.layout.boundsInWindow
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalAutofill
-import androidx.compose.ui.platform.LocalAutofillTree
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -39,17 +28,16 @@ import com.chtibizoux.adeapp.R
 import com.chtibizoux.adeapp.ui.SettingsViewModel
 import com.chtibizoux.adeapp.ui.nextFocus
 import com.chtibizoux.adeapp.ui.nextFocusKeyboardAction
-import com.chtibizoux.adeapp.ui.submitOnEnter
-import com.chtibizoux.adeapp.ui.submitKeyboardAction
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun Login(settingsViewModel: SettingsViewModel, loginViewModel: LoginViewModel = viewModel()) {
     val context = LocalContext.current
     fun login() {
-        loginViewModel.tryLogin()
-        settingsViewModel.login(loginViewModel.username, loginViewModel.password) {
-            Toast.makeText(context, R.string.login_failed, Toast.LENGTH_LONG).show()
+        val user = loginViewModel.checkLink()
+        if (user != null) {
+            settingsViewModel.login(user) {
+                Toast.makeText(context, R.string.login_failed, Toast.LENGTH_LONG).show()
+            }
         }
     }
 
@@ -68,22 +56,22 @@ fun Login(settingsViewModel: SettingsViewModel, loginViewModel: LoginViewModel =
                 fontSize = 17.sp,
                 textAlign = TextAlign.Center
             )
+
             OutlinedTextField(
-                value = loginViewModel.username,
-                onValueChange = { loginViewModel.updateUsername(it) },
+                value = loginViewModel.link,
+                onValueChange = { loginViewModel.updateLink(it) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .nextFocus()
-                    .autofill(listOf(AutofillType.Username)) { loginViewModel.updateUsername(it) },
-                label = { Text(stringResource(R.string.username)) },
+                    .nextFocus(),
+                label = { Text(stringResource(R.string.link)) },
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                 keyboardActions = nextFocusKeyboardAction(),
-                isError = loginViewModel.usernameError != null,
+                isError = loginViewModel.linkError != null,
                 supportingText = {
-                    if (loginViewModel.usernameError != null) {
+                    if (loginViewModel.linkError != null) {
                         Text(
                             modifier = Modifier.fillMaxWidth(),
-                            text = stringResource(loginViewModel.usernameError!!),
+                            text = stringResource(loginViewModel.linkError!!),
                             color = MaterialTheme.colorScheme.error
                         )
                     }
@@ -91,56 +79,9 @@ fun Login(settingsViewModel: SettingsViewModel, loginViewModel: LoginViewModel =
                 singleLine = true
             )
 
-            OutlinedTextField(
-                value = loginViewModel.password,
-                onValueChange = { loginViewModel.updatePassword(it) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .submitOnEnter(::login)
-                    .autofill(listOf(AutofillType.Password)) { loginViewModel.updatePassword(it) },
-                label = { Text(stringResource(R.string.password)) },
-                visualTransformation = PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                keyboardActions = submitKeyboardAction(::login),
-                isError = loginViewModel.passwordError != null,
-                supportingText = {
-                    if (loginViewModel.passwordError != null) {
-                        Text(
-                            modifier = Modifier.fillMaxWidth(),
-                            text = stringResource(loginViewModel.passwordError!!),
-                            color = MaterialTheme.colorScheme.error
-                        )
-                    }
-                },
-                singleLine = true
-            )
-
-            Button(onClick = { login() }, enabled = loginViewModel.canLogin) {
+            Button(onClick = { login() }, enabled = loginViewModel.linkError == null) {
                 Text(stringResource(R.string.login))
             }
-
-            Text(stringResource(R.string.login_explanation), textAlign = TextAlign.Center)
         }
     }
-}
-
-@OptIn(ExperimentalComposeUiApi::class)
-fun Modifier.autofill(autofillTypes: List<AutofillType>, onFill: ((String) -> Unit)) = composed {
-    val autofill = LocalAutofill.current
-    val autofillNode = AutofillNode(onFill = onFill, autofillTypes = autofillTypes)
-    LocalAutofillTree.current += autofillNode
-
-    this
-        .onGloballyPositioned {
-            autofillNode.boundingBox = it.boundsInWindow()
-        }
-        .onFocusChanged { focusState ->
-            autofill?.run {
-                if (focusState.isFocused) {
-                    requestAutofillForNode(autofillNode)
-                } else {
-                    cancelAutofillForNode(autofillNode)
-                }
-            }
-        }
 }

@@ -17,6 +17,7 @@ import com.chtibizoux.adeapp.data.Result
 import com.chtibizoux.adeapp.data.Settings
 import com.chtibizoux.adeapp.data.SettingsRepository
 import com.chtibizoux.adeapp.data.Time
+import com.chtibizoux.adeapp.data.User
 import com.chtibizoux.adeapp.data.xml.Calendar
 import com.chtibizoux.adeapp.data.xml.ResourceTree
 import kotlinx.coroutines.flow.SharingStarted
@@ -37,8 +38,8 @@ class SettingsViewModel(private val repository: SettingsRepository) : ViewModel(
     private val setupAlarms = repository.settings.map { it.setupAlarms }
         .stateIn(viewModelScope, SharingStarted.Eagerly, true)
 
-    private val user = repository.settings.map { it.user }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+    private val user =
+        repository.settings.map { it.user }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     val defaultAlarmSettings = repository.settings.map { it.defaultAlarmSettings }
         .stateIn(viewModelScope, SharingStarted.Eagerly, DefaultAlarmSettings())
@@ -61,10 +62,10 @@ class SettingsViewModel(private val repository: SettingsRepository) : ViewModel(
         return repository.updateCalendar(user.value!!)
     }
 
-    fun login(username: String, password: String, onFailed: () -> Unit) {
+    fun login(user: User, onFailed: () -> Unit) {
         appState = AppState.LOADING
         viewModelScope.launch {
-            val success = repository.login(username, password)
+            val success = repository.login(user)
             if (success) {
                 if (setupAlarms.value) {
                     showAlarmsSetup()
@@ -91,7 +92,7 @@ class SettingsViewModel(private val repository: SettingsRepository) : ViewModel(
 
     fun getCalendar(resourceId: Int, onEnd: (Calendar?) -> Unit) {
         viewModelScope.launch {
-            val result = repository.getCalendar(resourceId, user.value!!.data)
+            val result = repository.getCalendar(user.value!!, resourceId)
             if (result is Result.Success) {
                 onEnd(result.data)
             } else {
@@ -102,7 +103,7 @@ class SettingsViewModel(private val repository: SettingsRepository) : ViewModel(
 
     fun getResources(onEnd: (ResourceTree?) -> Unit) {
         viewModelScope.launch {
-            val result = repository.getResources(user.value!!.data)
+            val result = repository.getResources(user.value!!)
             if (result is Result.Success) {
                 onEnd(result.data)
             } else {

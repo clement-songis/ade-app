@@ -6,43 +6,69 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.chtibizoux.adeapp.R
+import com.chtibizoux.adeapp.data.User
+import java.net.URI
+import java.net.URISyntaxException
 
 class LoginViewModel : ViewModel() {
-    var username by mutableStateOf("")
-        private set
-    var password by mutableStateOf("")
+    var link by mutableStateOf("")
         private set
 
     @get:StringRes
-    var usernameError: Int? by mutableStateOf(null)
+    var linkError: Int? by mutableStateOf(null)
         private set
 
-    @get:StringRes
-    var passwordError: Int? by mutableStateOf(null)
-        private set
-
-    val canLogin get() = usernameError == null && passwordError == null
-
-    fun updateUsername(username: String) {
-        this.username = username
-        usernameError = if (!isUserNameValid(username)) R.string.invalid_username else null
+    fun updateLink(link: String) {
+        this.link = link
+        checkLink()
     }
 
-    fun updatePassword(password: String) {
-        this.password = password
-        passwordError = if (!isPasswordValid(password)) R.string.invalid_password else null
-    }
+    fun checkLink(): User? {
+        try {
+            val url = URI(link)
+            if (!url.path.startsWith("/direct/") || !url.path.startsWith("/jsp/") || !url.path.startsWith("/ade/")) {
+                linkError = R.string.not_an_ade_url
+            }
+            val dataMatchResult = Regex("data=([^&]+)").find(url.query)
+            if (dataMatchResult == null) {
+                linkError = R.string.no_data_not_supported
+                return null
+            }
+            val (data) = dataMatchResult.destructured
 
-    fun tryLogin() {
-        usernameError = if (!isUserNameValid(username)) R.string.invalid_username else null
-        passwordError = if (!isPasswordValid(password)) R.string.invalid_password else null
-    }
+            val projectIdMatchResult = Regex("projectId=([^&]+)").find(url.query)
+            if (projectIdMatchResult == null) {
+                linkError = R.string.projectId_selection_not_supported
+                return null
+            }
+            val (projectIdString) = projectIdMatchResult.destructured
+            val projectId = projectIdString.toIntOrNull()
+            if (projectId == null) {
+                linkError = R.string.wrong_projectId
+                return null
+            }
 
-    private fun isUserNameValid(username: String): Boolean {
-        return username.isNotBlank() && username.length <= 25
-    }
+            val resourcesMatchResult = Regex("resources=([^&]+)").find(url.query)
+            if (resourcesMatchResult == null) {
+                linkError = R.string.resourceId_selection_not_supported
+                return null
+            }
+            val (resources) = resourcesMatchResult.destructured
+            if (resources.contains(",")) {
+                linkError = R.string.resourceId_selection_not_supported
+                return null
+            }
+            val resourceId = resources.toIntOrNull()
+            if (resourceId == null) {
+                linkError = R.string.wrong_resourceId
+                return null
+            }
 
-    private fun isPasswordValid(password: String): Boolean {
-        return password.isNotBlank() && password.length <= 25
+            val baseURL = url.scheme + "//" + url.authority
+            return User(baseURL, projectId, resourceId, data)
+        } catch (e: URISyntaxException) {
+            linkError = R.string.invalid_url
+            return null
+        }
     }
 }

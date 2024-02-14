@@ -18,16 +18,9 @@ class SettingsRepository(
         dataStore.updateData { settings -> settings.copy(user = null, calendar = null) }
     }
 
-    suspend fun login(username: String, password: String): Boolean {
-        val result = dataSource.login(username, password)
-        if (result is Result.Success) {
-            setUser(result.data)
-        }
-        return result is Result.Success
-    }
-
-    private suspend fun setUser(user: User) {
+    suspend fun login(user: User): Boolean {
         dataStore.updateData { settings -> settings.copy(user = user) }
+        return true
     }
 
     suspend fun closeStartup() {
@@ -101,12 +94,12 @@ class SettingsRepository(
         return dataSource.getStartingTime(user, date)
     }
 
-    suspend fun getCalendar(resourceId: Int, data: String): Result<Calendar> {
-        return dataSource.getCalendar(User(resourceId, data))
+    suspend fun getCalendar(user: User, resourceId: Int): Result<Calendar> {
+        return dataSource.getCalendar(user.copy(resourceId = resourceId))
     }
 
-    suspend fun getResources(data: String): Result<ResourceTree> {
-        return dataSource.getResources(data)
+    suspend fun getResources(user: User): Result<ResourceTree> {
+        return dataSource.getResources(user)
     }
 
     suspend fun updateCalendar(user: User): Boolean {
