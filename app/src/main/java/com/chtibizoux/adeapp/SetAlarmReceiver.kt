@@ -91,6 +91,7 @@ class SetAlarmReceiver : BroadcastReceiver() {
             alarms: List<Alarm>,
             usePreviousAlarm: Boolean
         ) {
+            return
 //            TODO: Attention no today trigger
             // TODO: test multiple alarms and add delays if necessary
 //            if (!alarmAlreadyInUse) {
@@ -106,7 +107,6 @@ class SetAlarmReceiver : BroadcastReceiver() {
             setAlarm(context, Time(0, 0))
             // ########### test end ###########
 
-            return
             try {
                 val tomorrow = Calendar.getInstance()
                 tomorrow.time = Date()
