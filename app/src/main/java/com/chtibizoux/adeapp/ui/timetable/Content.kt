@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
@@ -24,8 +23,8 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -33,6 +32,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -53,6 +53,7 @@ import com.chtibizoux.adeapp.R
 import com.chtibizoux.adeapp.data.xml.Calendar
 import com.chtibizoux.adeapp.data.xml.Day
 import com.chtibizoux.adeapp.data.xml.Event
+import com.chtibizoux.adeapp.data.xml.Resource
 import com.chtibizoux.adeapp.ui.home.SettingsButton
 import kotlinx.coroutines.launch
 import java.text.DateFormat
@@ -72,7 +73,8 @@ const val BOX_HEIGHT = (MAIN_DIVIDER_HEIGHT + SECONDARY_DIVIDER_HEIGHT + SPACE *
 fun WaitForCalendar(
     navController: NavController,
     calendar: Calendar?,
-    category: String? = null,
+    children: List<Resource>,
+    category: String,
     previousButton: Boolean = false
 ) {
     if (calendar == null) {
@@ -93,7 +95,7 @@ fun WaitForCalendar(
             }
         }
     } else {
-        TimetableContent(navController, calendar, category, previousButton)
+        TimetableContent(navController, calendar, children, category, previousButton)
     }
 }
 
@@ -102,7 +104,8 @@ fun WaitForCalendar(
 fun TimetableContent(
     navController: NavController,
     calendar: Calendar,
-    category: String? = null,
+    children: List<Resource>,
+    category: String,
     previousButton: Boolean = false
 ) {
     if (calendar.days.isEmpty()) {
@@ -137,33 +140,29 @@ fun TimetableContent(
 
         Scaffold(
             topBar = {
-                CenterAlignedTopAppBar(
-                    title = {
-                        TimetableTitle(calendar.days[pagerState.currentPage].getDate()) {
-                            coroutineScope.launch {
-                                pagerState.scrollToPage(calendar.getPage(it))
-                            }
+                CenterAlignedTopAppBar(title = {
+                    TimetableTitle(calendar.days[pagerState.currentPage].getDate()) {
+                        coroutineScope.launch {
+                            pagerState.scrollToPage(calendar.getPage(it))
                         }
-                    },
-                    navigationIcon = {
-                        if (previousButton) {
-                            IconButton(onClick = { navController.navigateUp() }) {
-                                Icon(Icons.Filled.ArrowBack, stringResource(R.string.back))
-                            }
+                    }
+                }, navigationIcon = {
+                    if (previousButton) {
+                        IconButton(onClick = { navController.navigateUp() }) {
+                            Icon(Icons.Filled.ArrowBack, stringResource(R.string.back))
                         }
-                    },
-                    actions = {
-                        SettingsButton(navController)
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
+                    }
+                }, actions = {
+                    SettingsButton(navController)
+                }, colors = TopAppBarDefaults.topAppBarColors(
 //                containerColor = MaterialTheme.colorScheme.primaryContainer,
 //                titleContentColor = MaterialTheme.colorScheme.primary,
-                    )
+                )
                 )
             },
         ) { padding ->
             HorizontalPager(pagerState, Modifier.padding(padding)) { page ->
-                Day(navController, calendar.days[page], category)
+                Day(navController, calendar.days[page], children, category)
             }
         }
     }
@@ -191,7 +190,9 @@ fun TimetableTitle(date: Date, goTo: (Date) -> Unit) {
 }
 
 @Composable
-private fun Day(navController: NavController, day: Day<Event>, category: String?) {
+private fun Day(
+    navController: NavController, day: Day<Event>, children: List<Resource>, category: String
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -199,12 +200,13 @@ private fun Day(navController: NavController, day: Day<Event>, category: String?
             .background(MaterialTheme.colorScheme.background),
     ) {
         Background(START_HOUR, END_HOUR)
-        if (category == null) {
+        if (children.isEmpty()) {
             SingleColumn(day.events, navController)
         } else {
+            // Bruh le bordel
             val columns = day.events.groupBy { event ->
                 event.resources.filter { it.category == category }
-                    .joinToString { it.name }/*.single { it.category == category }*/
+                    .joinToString { it.id }/*.single { it.category == category }*/
             }
             MultipleColumn(columns, navController)
         }
@@ -255,21 +257,21 @@ fun Background(startHour: Int, endHour: Int) {
                         fontSize = 13.sp,
                         modifier = Modifier.padding(start = 15.dp, end = 10.dp)
                     )
-                    Divider(thickness = 1.dp)
+                    HorizontalDivider(thickness = 1.dp)
                 }
             } else {
-                Divider(
+                HorizontalDivider(
                     Modifier.padding(start = (TIME_PADDING + 20).dp, end = 20.dp),
                     thickness = SECONDARY_DIVIDER_HEIGHT.dp
                 )
             }
         }
     }
-    Divider(
+    VerticalDivider(
         modifier = Modifier
             .offset(x = TIME_PADDING.dp)
-            .height((BOX_HEIGHT * (endHour - startHour) + MAIN_DIVIDER_HEIGHT + PADDING * 2).dp)
-            .width(1.dp)
+//            .height((BOX_HEIGHT * (endHour - startHour) + MAIN_DIVIDER_HEIGHT + PADDING * 2).dp)
+//            .width(1.dp)
     )
 }
 
