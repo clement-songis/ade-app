@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -23,12 +25,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScrollableTabRow
+import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -41,12 +45,15 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.chtibizoux.adeapp.R
+import com.chtibizoux.adeapp.data.dataStore
 import com.chtibizoux.adeapp.data.xml.Resource
 import com.chtibizoux.adeapp.data.xml.ResourceTree
 import com.chtibizoux.adeapp.ui.RootScreen
 import com.chtibizoux.adeapp.ui.SettingsViewModel
+import com.chtibizoux.adeapp.ui.SettingsViewModelFactory
 import com.chtibizoux.adeapp.ui.home.SettingsButton
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -101,29 +108,62 @@ fun ResourceSelector(navController: NavController, viewModel: SettingsViewModel)
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ResourceSelectorContent(navController: NavController, resources: ResourceTree) {
-    var tabIndex by remember { mutableIntStateOf(0) }
-    Column {
-        ScrollableTabRow(
-            selectedTabIndex = tabIndex, edgePadding = 0.dp
-        ) {
-            resources.categories.forEachIndexed { index, category ->
-                Tab(text = { Text(category.name?.let { stringResource(it) } ?: category.category) },
-                    selected = tabIndex == index,
-                    onClick = { tabIndex = index })
-            }
-        }
+fun ResourceSelectorContent(navController: NavController, resources: ResourceTree, searchViewModel: SearchViewModel = viewModel(
+    factory = SearchViewModelFactory(resources)
+)) {
+    val searchText by searchViewModel.searchText.collectAsState()
+    val isSearching by searchViewModel.isSearching.collectAsState()
+    val resourceList by searchViewModel.resourceList.collectAsState()
 
-        Column(
+    Column {
+        SearchBar(
+            query = searchText,
+            onQueryChange = searchViewModel::onSearchTextChange,
+            placeholder = {
+                          Text(stringResource(R.string.search_resource))
+            },
+            onSearch = searchViewModel::onSearchTextChange,
+            active = isSearching,
+            onActiveChange = searchViewModel::onActiveChange,
             modifier = Modifier
                 .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
+                .padding(horizontal = if (isSearching) 0.dp else 16.dp)
         ) {
-            val category = resources.categories[tabIndex]
-            category.resources.sortedBy { it.name }.forEach { resource ->
-                ResourceComponent(navController, category.category, resource)
+            LazyColumn {
+                items(resourceList) { resource ->
+                    SimpleResourceComponent(navController, resource)
+                }
             }
+        }
+        if (!isSearching) {
+            ResourceCategories(navController, resources)
+        }
+    }
+}
+
+@Composable
+fun ResourceCategories(navController: NavController, resources: ResourceTree) {
+    var tabIndex by remember { mutableIntStateOf(0) }
+    ScrollableTabRow(
+        selectedTabIndex = tabIndex, edgePadding = 0.dp
+    ) {
+        resources.categories.forEachIndexed { index, category ->
+            Tab(text = { Text(category.name?.let { stringResource(it) } ?: category.category) },
+                selected = tabIndex == index,
+                onClick = { tabIndex = index })
+        }
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .verticalScroll(rememberScrollState())
+    ) {
+        val category = resources.categories[tabIndex]
+        category.resources.sortedBy { it.name }.forEach { resource ->
+            ResourceComponent(navController, category.category, resource)
         }
     }
 }
@@ -131,17 +171,7 @@ fun ResourceSelectorContent(navController: NavController, resources: ResourceTre
 @Composable
 fun ResourceComponent(navController: NavController, category: String, resource: Resource) {
     if (resource.children.isEmpty()) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable {
-                    navController.navigate("${RootScreen.Timetable.name}/${resource.id}")
-                }
-                .padding(10.dp),
-            contentAlignment = Alignment.CenterStart
-        ) {
-            Text(resource.name)
-        }
+        SimpleResourceComponent(navController, resource)
     } else {
         var opened by remember { mutableStateOf(false) }
         Column(modifier = Modifier.clickable { opened = !opened }) {
@@ -181,5 +211,20 @@ fun ResourceComponent(navController: NavController, category: String, resource: 
                 }
             }
         }
+    }
+}
+
+@Composable
+fun SimpleResourceComponent(navController: NavController, resource: Resource) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable {
+                navController.navigate("${RootScreen.Timetable.name}/${resource.id}")
+            }
+            .padding(10.dp),
+        contentAlignment = Alignment.CenterStart
+    ) {
+        Text(resource.name)
     }
 }

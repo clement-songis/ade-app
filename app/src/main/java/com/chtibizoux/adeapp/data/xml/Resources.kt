@@ -4,7 +4,26 @@ import com.chtibizoux.adeapp.R
 
 data class ResourceTree(
     val categories: List<Category>
-)
+) {
+
+    private fun getAllObjects(root: Resource): List<Resource> {
+        val result = mutableListOf(root)
+        for (child in root.children) {
+            result.addAll(getAllObjects(child))
+        }
+        return result
+    }
+
+    fun toList(): List<Resource> {
+        val resources: MutableList<Resource> = mutableListOf()
+        for (category in this.categories) {
+            for (resource in category.resources) {
+                resources.addAll(getAllObjects(resource))
+            }
+        }
+        return resources
+    }
+}
 
 data class Category(
     val category: String,
