@@ -48,27 +48,27 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.chtibizoux.adeapp.R
-import com.chtibizoux.adeapp.data.dataStore
 import com.chtibizoux.adeapp.data.xml.Resource
 import com.chtibizoux.adeapp.data.xml.ResourceTree
 import com.chtibizoux.adeapp.ui.RootScreen
 import com.chtibizoux.adeapp.ui.SettingsViewModel
-import com.chtibizoux.adeapp.ui.SettingsViewModelFactory
 import com.chtibizoux.adeapp.ui.home.SettingsButton
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ResourceSelector(navController: NavController, viewModel: SettingsViewModel) {
-    var resources: ResourceTree? by remember { mutableStateOf(null) }
+fun ResourceSelector(navController: NavController, viewModel: SettingsViewModel, selectorViewModel: ResourceSelectorViewModel = viewModel()) {
+    val resources by selectorViewModel.resourceTree.collectAsState()
     val context = LocalContext.current
     LaunchedEffect(true) {
-        viewModel.getResources {
-            if (it != null) {
-                resources = it
-            } else {
-                Toast.makeText(
-                    context, R.string.unable_to_get_resources, Toast.LENGTH_LONG
-                ).show()
+        if (resources == null) {
+            viewModel.getResources {
+                if (it != null) {
+                    selectorViewModel.setResources(it)
+                } else {
+                    Toast.makeText(
+                        context, R.string.unable_to_get_resources, Toast.LENGTH_LONG
+                    ).show()
+                }
             }
         }
     }
@@ -102,7 +102,7 @@ fun ResourceSelector(navController: NavController, viewModel: SettingsViewModel)
                     )
                 }
             } else {
-                ResourceSelectorContent(navController, resources!!)
+                ResourceSelectorContent(navController, resources!!, selectorViewModel)
             }
         }
     }
@@ -110,23 +110,21 @@ fun ResourceSelector(navController: NavController, viewModel: SettingsViewModel)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ResourceSelectorContent(navController: NavController, resources: ResourceTree, searchViewModel: SearchViewModel = viewModel(
-    factory = SearchViewModelFactory(resources)
-)) {
-    val searchText by searchViewModel.searchText.collectAsState()
-    val isSearching by searchViewModel.isSearching.collectAsState()
-    val resourceList by searchViewModel.resourceList.collectAsState()
+fun ResourceSelectorContent(navController: NavController, resources: ResourceTree, selectorViewModel: ResourceSelectorViewModel) {
+    val searchText by selectorViewModel.searchText.collectAsState()
+    val isSearching by selectorViewModel.isSearching.collectAsState()
+    val resourceList by selectorViewModel.resourceList.collectAsState()
 
     Column {
         SearchBar(
             query = searchText,
-            onQueryChange = searchViewModel::onSearchTextChange,
+            onQueryChange = selectorViewModel::onSearchTextChange,
             placeholder = {
                           Text(stringResource(R.string.search_resource))
             },
-            onSearch = searchViewModel::onSearchTextChange,
+            onSearch = selectorViewModel::onSearchTextChange,
             active = isSearching,
-            onActiveChange = searchViewModel::onActiveChange,
+            onActiveChange = selectorViewModel::onActiveChange,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = if (isSearching) 0.dp else 16.dp)

@@ -1,22 +1,21 @@
 package com.chtibizoux.adeapp.ui.home.resourceSelector
 
-import androidx.datastore.core.DataStore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.chtibizoux.adeapp.data.DataSource
-import com.chtibizoux.adeapp.data.Settings
-import com.chtibizoux.adeapp.data.SettingsRepository
 import com.chtibizoux.adeapp.data.xml.Resource
 import com.chtibizoux.adeapp.data.xml.ResourceTree
-import com.chtibizoux.adeapp.ui.SettingsViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
-class SearchViewModel(resources: List<Resource>) : ViewModel() {
+class ResourceSelectorViewModel : ViewModel() {
+    private val _resourceTree = MutableStateFlow<ResourceTree?>(null)
+    val resourceTree = _resourceTree.asStateFlow()
+
     private val _isSearching = MutableStateFlow(false)
     val isSearching = _isSearching.asStateFlow()
 
@@ -24,8 +23,8 @@ class SearchViewModel(resources: List<Resource>) : ViewModel() {
     val searchText = _searchText.asStateFlow()
 
 
-    private val _resourcesList = MutableStateFlow(resources)
-    val resourceList = searchText.combine(_resourcesList) { text, resources ->
+    val resourceList = searchText.combine(resourceTree) { text, resourceTree ->
+        val resources = resourceTree?.toList() ?: listOf()
         if (text.isBlank()) {
             resources
         }
@@ -35,7 +34,7 @@ class SearchViewModel(resources: List<Resource>) : ViewModel() {
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
-        initialValue = _resourcesList.value
+        initialValue = resourceTree.value?.toList() ?: listOf()
     )
 
     fun onSearchTextChange(text: String) {
@@ -48,16 +47,8 @@ class SearchViewModel(resources: List<Resource>) : ViewModel() {
             onSearchTextChange("")
         }
     }
-}
 
-class SearchViewModelFactory(
-    private val resources: ResourceTree
-) : ViewModelProvider.Factory {
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(SearchViewModel::class.java)) {
-            return SearchViewModel(resources.toList()) as T
-        }
-        throw IllegalArgumentException("Unknown ViewModel class")
+    fun setResources(resources: ResourceTree) {
+        _resourceTree.value = resources
     }
 }
