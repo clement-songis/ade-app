@@ -13,7 +13,7 @@ private val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.FRANCE)
 data class Calendar(val days: List<Day<Event>>) {
     fun getPage(date: Date = Date()): Int {
         val index = this.days.indexOfFirst { it.getDate() >= dateFormat.parse(dateFormat.format(date)) }
-        return if (index == -1) this.days.size else index
+        return if (index == -1) this.days.size - 1 else index
     }
 }
 

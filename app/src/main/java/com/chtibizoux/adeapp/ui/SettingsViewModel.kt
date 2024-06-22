@@ -19,6 +19,7 @@ import com.chtibizoux.adeapp.data.SettingsRepository
 import com.chtibizoux.adeapp.data.Time
 import com.chtibizoux.adeapp.data.User
 import com.chtibizoux.adeapp.data.xml.Calendar
+import com.chtibizoux.adeapp.data.xml.Resource
 import com.chtibizoux.adeapp.data.xml.ResourceTree
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.first
@@ -58,10 +59,6 @@ class SettingsViewModel(private val repository: SettingsRepository) : ViewModel(
 
     var alarmPageFirst = false
 
-    suspend fun refreshCalendar(): Boolean {
-        return repository.updateCalendar(user.value!!)
-    }
-
     fun login(user: User, onFailed: () -> Unit) {
         appState = AppState.LOADING
         viewModelScope.launch {
@@ -90,26 +87,28 @@ class SettingsViewModel(private val repository: SettingsRepository) : ViewModel(
         }
     }
 
-    fun getCalendar(resourceId: Int, onEnd: (Calendar?) -> Unit) {
-        viewModelScope.launch {
-            val result = repository.getCalendar(user.value!!, resourceId)
-            if (result is Result.Success) {
-                onEnd(result.data)
-            } else {
-                onEnd(null)
-            }
+    suspend fun getCalendar(resourceId: Int): Calendar? {
+        val result = repository.getCalendar(user.value!!, resourceId)
+        if (result is Result.Success) {
+            return result.data
         }
+        return null
     }
 
-    fun getResources(onEnd: (ResourceTree?) -> Unit) {
-        viewModelScope.launch {
-            val result = repository.getResources(user.value!!)
-            if (result is Result.Success) {
-                onEnd(result.data)
-            } else {
-                onEnd(null)
-            }
+    suspend fun getResources(): ResourceTree? {
+        val result = repository.getResources(user.value!!)
+        if (result is Result.Success) {
+            return result.data
         }
+        return null
+    }
+
+    suspend fun getChildren(father: Int): List<Resource>? {
+        val result = repository.getChildren(user.value!!, father)
+        if (result is Result.Success) {
+            return result.data
+        }
+        return null
     }
 
     fun setUsePreviousAlarm(active: Boolean) {
@@ -218,11 +217,8 @@ class SettingsViewModel(private val repository: SettingsRepository) : ViewModel(
         }
     }
 
-    fun tryUpdateCalendar(onEnd: (Boolean) -> Unit) {
-        viewModelScope.launch {
-            val success = repository.updateCalendar(user.value!!)
-            onEnd(success)
-        }
+    suspend fun tryUpdateCalendar(): Boolean {
+        return repository.updateCalendar(user.value!!)
     }
 
     fun initAlarms(context: Context) {

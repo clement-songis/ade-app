@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,7 +18,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
@@ -33,7 +32,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.VerticalDivider
+import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,6 +45,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -74,8 +77,8 @@ fun WaitForCalendar(
     navController: NavController,
     calendar: Calendar?,
     children: List<Resource>,
-    category: String,
-    previousButton: Boolean = false
+    previousButton: Boolean = false,
+    refreshCalendar: suspend () -> Unit
 ) {
     if (calendar == null) {
         Box(
@@ -95,7 +98,7 @@ fun WaitForCalendar(
             }
         }
     } else {
-        TimetableContent(navController, calendar, children, category, previousButton)
+        TimetableContent(navController, calendar, children, previousButton, refreshCalendar)
     }
 }
 
@@ -105,8 +108,8 @@ fun TimetableContent(
     navController: NavController,
     calendar: Calendar,
     children: List<Resource>,
-    category: String,
-    previousButton: Boolean = false
+    previousButton: Boolean = false,
+    refreshCalendar: suspend () -> Unit
 ) {
     if (calendar.days.isEmpty()) {
         Box(
@@ -121,22 +124,13 @@ fun TimetableContent(
         val pagerState =
             rememberPagerState(initialPage = calendar.getPage(), pageCount = { calendar.days.size })
         val coroutineScope = rememberCoroutineScope()
-//    val refreshScope = rememberCoroutineScope()
-//    var refreshing by remember { mutableStateOf(false) }
-//    val context = LocalContext.current
-//    fun refresh() = refreshScope.launch {
-//        refreshing = true
-//        val success = viewModel.refreshCalendar()
-//        if (!success) {
-//            Toast.makeText(context, "Unable to update calendar from ADE", Toast.LENGTH_LONG).show()
-//        }
-//        refreshing = false
-//    }
-//    val state = rememberPullRefreshState(refreshing, ::refresh)
-//    Box(Modifier.pullRefresh(state)) {
-//        /*Content*/
-//        PullRefreshIndicator(refreshing, state, Modifier.align(Alignment.TopCenter))
-//    }
+        val state = rememberPullToRefreshState()
+        if (state.isRefreshing) {
+            LaunchedEffect(true) {
+                refreshCalendar()
+                state.endRefresh()
+            }
+        }
 
         Scaffold(
             topBar = {
@@ -149,7 +143,10 @@ fun TimetableContent(
                 }, navigationIcon = {
                     if (previousButton) {
                         IconButton(onClick = { navController.navigateUp() }) {
-                            Icon(Icons.Filled.ArrowBack, stringResource(R.string.back))
+                            Icon(
+                                Icons.AutoMirrored.Filled.ArrowBack,
+                                stringResource(R.string.back)
+                            )
                         }
                     }
                 }, actions = {
@@ -161,8 +158,18 @@ fun TimetableContent(
                 )
             },
         ) { padding ->
-            HorizontalPager(pagerState, Modifier.padding(padding)) { page ->
-                Day(navController, calendar.days[page], children, category)
+            Box(
+                Modifier
+                    .padding(padding)
+                    .nestedScroll(state.nestedScrollConnection)
+            ) {
+                HorizontalPager(pagerState) { page ->
+                    Day(navController, calendar.days[page], children)
+                }
+                PullToRefreshContainer(
+                    modifier = Modifier.align(Alignment.TopCenter),
+                    state = state,
+                )
             }
         }
     }
@@ -191,7 +198,7 @@ fun TimetableTitle(date: Date, goTo: (Date) -> Unit) {
 
 @Composable
 private fun Day(
-    navController: NavController, day: Day<Event>, children: List<Resource>, category: String
+    navController: NavController, day: Day<Event>, children: List<Resource>
 ) {
     Box(
         modifier = Modifier
@@ -203,39 +210,7 @@ private fun Day(
         if (children.isEmpty()) {
             SingleColumn(day.events, navController)
         } else {
-            // Bruh le bordel
-            val columns = day.events.groupBy { event ->
-                event.resources.filter { it.category == category }
-                    .joinToString { it.id }/*.single { it.category == category }*/
-            }
-            MultipleColumn(columns, navController)
-        }
-    }
-}
-
-@Composable
-fun SingleColumn(events: List<Event>, navController: NavController) {
-    Box(Modifier.padding(start = TIME_PADDING.dp)) {
-        events.forEach { event ->
-            EventElement(navController, event)
-        }
-    }
-}
-
-@Composable
-fun MultipleColumn(columns: Map<String, List<Event>>, navController: NavController) {
-    Row(Modifier.padding(start = TIME_PADDING.dp)) {
-        columns.forEach { (resource, events) ->
-            Box(
-                Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-            ) {
-                Text(resource)
-                events.forEach { event ->
-                    EventElement(navController, event)
-                }
-            }
+            MultipleColumn(children, day.events, navController)
         }
     }
 }
@@ -273,6 +248,61 @@ fun Background(startHour: Int, endHour: Int) {
 //            .height((BOX_HEIGHT * (endHour - startHour) + MAIN_DIVIDER_HEIGHT + PADDING * 2).dp)
 //            .width(1.dp)
     )
+}
+
+@Composable
+fun SingleColumn(events: List<Event>, navController: NavController) {
+    Box(Modifier.padding(start = TIME_PADDING.dp)) {
+        events.forEach { event ->
+            EventElement(navController, event)
+        }
+    }
+}
+
+@Composable
+fun MultipleColumn(children: List<Resource>, events: List<Event>, navController: NavController) {
+    val leaves = getLeaves(children)
+    val allChildren = getAllChildren(children)
+    Column(Modifier.padding(start = TIME_PADDING.dp)) {
+        Row {
+            leaves.forEach {
+                Text(it.name)
+            }
+        }
+        Box {
+            events.forEach { event ->
+                val resource =
+                    allChildren.find { resource -> event.resources.find { resource.name == it.name && resource.id == it.id } != null }
+
+                if (resource != null) {
+                    val eventResourceLeaves = getLeaves(resource.children)
+                    val index = leaves.indexOf(eventResourceLeaves.first())
+                    val length = eventResourceLeaves.size
+                    println("${event.name} $index $length")
+                    EventElement(navController, event)
+                } else {
+                    EventElement(navController, event)
+                }
+            }
+        }
+    }
+
+}
+
+fun getLeaves(resources: List<Resource>): List<Resource> {
+    val leaves: MutableList<Resource> = mutableListOf()
+    resources.forEach {
+        if (it.children.isEmpty()) {
+            leaves.add(it)
+        } else {
+            leaves.addAll(getLeaves(resources))
+        }
+    }
+    return leaves
+}
+
+fun getAllChildren(resources: List<Resource>): List<Resource> {
+    return resources + resources.flatMap { getAllChildren(resources) }
 }
 
 @Composable

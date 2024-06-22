@@ -26,7 +26,6 @@ class LoginViewModel : ViewModel() {
     fun checkLink(): User? {
         try {
             val url = URI(link)
-            println(url.path)
             if (!url.path.startsWith("/direct/") && !url.path.startsWith("/jsp/") && !url.path.startsWith("/ade/")) {
                 linkError = R.string.not_an_ade_url
                 return null

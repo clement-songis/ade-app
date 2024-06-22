@@ -5,6 +5,8 @@ import androidx.datastore.core.CorruptionException
 import androidx.datastore.core.Serializer
 import androidx.datastore.dataStore
 import com.chtibizoux.adeapp.data.xml.Calendar
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
@@ -87,9 +89,11 @@ object SettingsSerializer : Serializer<Settings> {
     }
 
     override suspend fun writeTo(t: Settings, output: OutputStream) {
-        output.write(
-            Json.encodeToString(Settings.serializer(), t).encodeToByteArray()
-        )
+        withContext(Dispatchers.IO) {
+            output.write(
+                Json.encodeToString(Settings.serializer(), t).encodeToByteArray()
+            )
+        }
     }
 }
 

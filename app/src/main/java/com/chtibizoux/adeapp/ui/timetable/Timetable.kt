@@ -11,25 +11,43 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
 import com.chtibizoux.adeapp.R
 import com.chtibizoux.adeapp.data.xml.Calendar
+import com.chtibizoux.adeapp.data.xml.Resource
 import com.chtibizoux.adeapp.ui.SettingsViewModel
 
 @Composable
 fun Timetable(resourceId: Int, navController: NavController, viewModel: SettingsViewModel) {
+    var resources: List<Resource> by remember { mutableStateOf(listOf()) }
     var calendar: Calendar? by remember { mutableStateOf(null) }
     val context = LocalContext.current
     LaunchedEffect(true) {
-        // TODO: get resource children
-        viewModel.getCalendar(resourceId) {
-            if (it != null) {
-                calendar = it
-            } else {
-                Toast.makeText(
-                    context,
-                    R.string.unable_to_get_calendar,
-                    Toast.LENGTH_LONG
-                ).show()
-            }
+        resources = viewModel.getChildren(resourceId) ?: run {
+            Toast.makeText(
+                context,
+                R.string.unable_to_get_calendar,
+                Toast.LENGTH_LONG
+            ).show()
+            navController.navigateUp()
+            listOf()
+        }
+
+        calendar = viewModel.getCalendar(resourceId)
+        if (calendar == null) {
+            Toast.makeText(
+                context,
+                R.string.unable_to_get_calendar,
+                Toast.LENGTH_LONG
+            ).show()
+            navController.navigateUp()
         }
     }
-    WaitForCalendar(navController, calendar, listOf(), "")
+    WaitForCalendar(navController, calendar, resources) {
+        calendar = viewModel.getCalendar(resourceId)
+        if (calendar == null) {
+            Toast.makeText(
+                context,
+                R.string.unable_to_get_calendar,
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
 }

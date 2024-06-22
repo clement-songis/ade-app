@@ -2,6 +2,7 @@ package com.chtibizoux.adeapp.data
 
 import androidx.datastore.core.DataStore
 import com.chtibizoux.adeapp.data.xml.Calendar
+import com.chtibizoux.adeapp.data.xml.Resource
 import com.chtibizoux.adeapp.data.xml.ResourceTree
 import java.util.Date
 
@@ -101,6 +102,10 @@ class SettingsRepository(
 
     suspend fun getResources(user: User): Result<ResourceTree> {
         return dataSource.getResources(user)
+    }
+
+    suspend fun getChildren(user: User, father: Int): Result<List<Resource>> {
+        return dataSource.getChildren(user, father)
     }
 
     suspend fun updateCalendar(user: User): Boolean {

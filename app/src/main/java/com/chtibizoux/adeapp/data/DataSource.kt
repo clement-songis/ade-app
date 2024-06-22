@@ -4,6 +4,7 @@ import android.icu.text.SimpleDateFormat
 import com.chtibizoux.adeapp.data.xml.Calendar
 import com.chtibizoux.adeapp.data.xml.CalendarParser
 import com.chtibizoux.adeapp.data.xml.Day
+import com.chtibizoux.adeapp.data.xml.Resource
 import com.chtibizoux.adeapp.data.xml.ResourceTree
 import com.chtibizoux.adeapp.data.xml.ResourcesParser
 import com.chtibizoux.adeapp.data.xml.SimpleCalendar
@@ -75,6 +76,27 @@ class DataSource {
         }
     }
 
+    private fun fetchChildren(user: User, father: Int): List<Resource> {
+        val url =
+            URL("${user.baseURL}/jsp/webapi?function=getResources&detail=2&tree=true&fatherIds=${father}&projectId=${user.projectId}&data=${user.data}")
+        val connection = url.openConnection() as HttpURLConnection
+        connection.run {
+            readTimeout = 10000
+            connectTimeout = 15000
+            val parser = ResourcesParser()
+            val resourceTree = parser.parse(inputStream)
+
+            // Find the father
+            val category = resourceTree.categories.single { it.resources.isNotEmpty() }
+            var resource = category.resources.single()
+            while (resource.id != father) {
+                resource = resource.children.single()
+            }
+
+            return resource.children
+        }
+    }
+
 //    suspend fun getCalendar(resourceId: Int): Result<MyCalendar> = withContext(Dispatchers.IO) {
 //        try {
 //            val ics = getIcs(resourceId)
@@ -104,6 +126,16 @@ class DataSource {
         } catch (e: Throwable) {
             println(e)
             return@withContext Result.Error(IOException("Error getting resources", e))
+        }
+    }
+
+    suspend fun getChildren(user: User, father: Int): Result<List<Resource>> = withContext(Dispatchers.IO) {
+        try {
+            val resource = fetchChildren(user, father)
+            return@withContext Result.Success(resource)
+        } catch (e: Throwable) {
+            println(e)
+            return@withContext Result.Error(IOException("Error getting children", e))
         }
     }
 

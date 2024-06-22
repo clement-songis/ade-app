@@ -19,11 +19,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.Label
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.RemoveCircleOutline
-import androidx.compose.material.icons.outlined.Label
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -273,7 +273,7 @@ fun Label(
             ) {
                 if (isSelected) {
                     Icon(
-                        Icons.Outlined.Label, stringResource(R.string.label)
+                        Icons.AutoMirrored.Outlined.Label, stringResource(R.string.label)
                     )
                 }
                 Text(

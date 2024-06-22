@@ -1,15 +1,12 @@
 package com.chtibizoux.adeapp.ui.home.resourceSelector
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.chtibizoux.adeapp.data.xml.Resource
 import com.chtibizoux.adeapp.data.xml.ResourceTree
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 class ResourceSelectorViewModel : ViewModel() {
@@ -26,7 +23,7 @@ class ResourceSelectorViewModel : ViewModel() {
     val resourceList = searchText.combine(resourceTree) { text, resourceTree ->
         val resources = resourceTree?.toList() ?: listOf()
         if (text.isBlank()) {
-            resources
+            return@combine resources
         }
         resources.filter { resource ->
             resource.name.uppercase().contains(text.trim().uppercase())

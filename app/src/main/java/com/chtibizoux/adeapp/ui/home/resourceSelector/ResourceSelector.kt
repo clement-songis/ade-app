@@ -30,6 +30,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -42,6 +44,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -56,20 +59,25 @@ import com.chtibizoux.adeapp.ui.home.SettingsButton
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ResourceSelector(navController: NavController, viewModel: SettingsViewModel, selectorViewModel: ResourceSelectorViewModel = viewModel()) {
+fun ResourceSelector(
+    navController: NavController,
+    viewModel: SettingsViewModel,
+    selectorViewModel: ResourceSelectorViewModel = viewModel()
+) {
     val resources by selectorViewModel.resourceTree.collectAsState()
     val context = LocalContext.current
-    LaunchedEffect(true) {
-        if (resources == null) {
-            viewModel.getResources {
-                if (it != null) {
-                    selectorViewModel.setResources(it)
-                } else {
-                    Toast.makeText(
-                        context, R.string.unable_to_get_resources, Toast.LENGTH_LONG
-                    ).show()
-                }
+    val state = rememberPullToRefreshState()
+    if (resources == null || state.isRefreshing) {
+        LaunchedEffect(true) {
+            val newResources = viewModel.getResources()
+            if (newResources != null) {
+                selectorViewModel.setResources(newResources)
+            } else {
+                Toast.makeText(
+                    context, R.string.unable_to_get_resources, Toast.LENGTH_LONG
+                ).show()
             }
+            state.endRefresh()
         }
     }
     Scaffold(
@@ -102,7 +110,13 @@ fun ResourceSelector(navController: NavController, viewModel: SettingsViewModel,
                     )
                 }
             } else {
-                ResourceSelectorContent(navController, resources!!, selectorViewModel)
+                Box(Modifier.nestedScroll(state.nestedScrollConnection)) {
+                    ResourceSelectorContent(navController, resources!!, selectorViewModel)
+                    PullToRefreshContainer(
+                        modifier = Modifier.align(Alignment.TopCenter),
+                        state = state,
+                    )
+                }
             }
         }
     }
@@ -110,7 +124,11 @@ fun ResourceSelector(navController: NavController, viewModel: SettingsViewModel,
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ResourceSelectorContent(navController: NavController, resources: ResourceTree, selectorViewModel: ResourceSelectorViewModel) {
+fun ResourceSelectorContent(
+    navController: NavController,
+    resources: ResourceTree,
+    selectorViewModel: ResourceSelectorViewModel
+) {
     val searchText by selectorViewModel.searchText.collectAsState()
     val isSearching by selectorViewModel.isSearching.collectAsState()
     val resourceList by selectorViewModel.resourceList.collectAsState()
@@ -120,7 +138,7 @@ fun ResourceSelectorContent(navController: NavController, resources: ResourceTre
             query = searchText,
             onQueryChange = selectorViewModel::onSearchTextChange,
             placeholder = {
-                          Text(stringResource(R.string.search_resource))
+                Text(stringResource(R.string.search_resource))
             },
             onSearch = selectorViewModel::onSearchTextChange,
             active = isSearching,

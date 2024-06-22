@@ -17,13 +17,21 @@ fun UserTimetable(navController: NavController, viewModel: SettingsViewModel) {
     val context = LocalContext.current
     // TODO: Maybe get resource children ?
     LaunchedEffect(true) {
-        viewModel.tryUpdateCalendar {
+        val success = viewModel.tryUpdateCalendar()
+        Toast.makeText(
+            context,
+            if (success) R.string.calendar_updated else R.string.unable_to_update_calendar,
+            Toast.LENGTH_LONG
+        ).show()
+    }
+    WaitForCalendar(navController, calendar, listOf()) {
+        val success = viewModel.tryUpdateCalendar()
+        if (!success) {
             Toast.makeText(
                 context,
-                if (it) R.string.calendar_updated else R.string.unable_to_update_calendar,
+                R.string.unable_to_get_calendar,
                 Toast.LENGTH_LONG
             ).show()
         }
     }
-    WaitForCalendar(navController, calendar, listOf(), "")
 }
