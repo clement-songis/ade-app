@@ -295,14 +295,14 @@ fun getLeaves(resources: List<Resource>): List<Resource> {
         if (it.children.isEmpty()) {
             leaves.add(it)
         } else {
-            leaves.addAll(getLeaves(resources))
+            leaves.addAll(getLeaves(it.children))
         }
     }
     return leaves
 }
 
 fun getAllChildren(resources: List<Resource>): List<Resource> {
-    return resources + resources.flatMap { getAllChildren(resources) }
+    return resources + resources.flatMap { getAllChildren(it.children) }
 }
 
 @Composable
