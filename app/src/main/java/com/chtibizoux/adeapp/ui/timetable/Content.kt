@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
@@ -43,6 +42,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -54,12 +54,12 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.round
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.chtibizoux.adeapp.R
@@ -75,10 +75,12 @@ import java.util.Locale
 
 // TODO: Make a week view
 
-const val HOUR_HEIGHT = 60
+const val HOUR_HEIGHT = 70
 const val MAIN_DIVIDER_HEIGHT = 2
 const val SECONDARY_DIVIDER_HEIGHT = 1
 const val VERTICAL_PADDING = 20
+
+const val HEADER_HEIGHT = 20
 
 const val TIME_WIDTH = 70
 
@@ -135,6 +137,7 @@ fun TimetableContent(
         val pagerState = rememberPagerState(
             initialPage = calendar.getPage(date),
             pageCount = { calendar.days.size })
+
         val coroutineScope = rememberCoroutineScope()
         val state = rememberPullToRefreshState()
         if (state.isRefreshing) {
@@ -174,7 +177,11 @@ fun TimetableContent(
                 Modifier.padding(padding).nestedScroll(state.nestedScrollConnection)
             ) {
                 HorizontalPager(pagerState) { page ->
-                    Day(navController, calendar.days[page], children)
+                    Day(navController, calendar.days[page], children) { offset ->
+                        coroutineScope.launch {
+                            pagerState.animateScrollToPage(page + offset)
+                        }
+                    }
                 }
                 PullToRefreshContainer(
                     modifier = Modifier.align(Alignment.TopCenter),
@@ -208,12 +215,15 @@ fun TimetableTitle(date: Date, goTo: (Date) -> Unit) {
 
 @Composable
 private fun Day(
-    navController: NavController, day: Day<Event>, children: List<Resource>
+    navController: NavController,
+    day: Day<Event>,
+    children: List<Resource>,
+    scrollTo: (offset: Int) -> Unit
 ) {
     if (children.isEmpty()) {
         SingleColumn(day.events, navController)
     } else {
-        MultipleColumn(children, day.events, navController)
+        MultipleColumn(children, day.events, navController, scrollTo)
     }
 }
 
@@ -233,38 +243,55 @@ fun SingleColumn(events: List<Event>, navController: NavController) {
 }
 
 @Composable
-fun MultipleColumn(children: List<Resource>, events: List<Event>, navController: NavController) {
-    val configuration = LocalConfiguration.current
+fun MultipleColumn(
+    children: List<Resource>,
+    events: List<Event>,
+    navController: NavController,
+    scrollTo: (offset: Int) -> Unit
+) {
+    val localDensity = LocalDensity.current
 
     val leaves = getLeaves(children)
     val allChildren = getAllChildren(children)
 
+    var width by remember { mutableIntStateOf(leaves.size) }
+    var height by remember { mutableIntStateOf(0) }
+
     var scale by remember { mutableFloatStateOf(1f) }
 
-    val hourWidth = ((configuration.screenWidthDp - TIME_WIDTH) / leaves.size.toFloat()) * scale
-//    val hourHeight = ((configuration.screenHeightDp - VERTICAL_PADDING * 2) / (END_HOUR - START_HOUR)) * scale
+    val hourWidth = (width / leaves.size.toFloat()) * scale
 
     var offset by remember { mutableStateOf(Offset.Zero) }
     val transformableState = rememberTransformableState { zoomChange, offsetChange, _ ->
         scale = (scale * zoomChange).coerceAtLeast(1f)
 
         val newOffset = offset + offsetChange / 2f
-
         offset = Offset(
             newOffset.x.coerceAtMost(0f)
-                .coerceAtLeast(-(configuration.screenWidthDp - TIME_WIDTH) * (scale - 1)),
+                .coerceAtLeast(-width * (scale - 1)),
             newOffset.y.coerceAtMost(0f)
+                .coerceAtLeast(
+                    (height.toFloat() - (HOUR_HEIGHT * (END_HOUR - START_HOUR) + VERTICAL_PADDING * 2))
+                        .coerceAtMost(0f)
+                )
         )
-        if (newOffset.x < 10) {
-//            Switch page
-        }
         if (newOffset.x > 10) {
-//            Switch page
+            scrollTo(-1)
+        }
+        if (newOffset.x < -width * (scale - 1) - 10) {
+            scrollTo(1)
         }
     }
 
     Column(
-        Modifier.transformable(transformableState)
+        Modifier.fillMaxSize()
+            .onGloballyPositioned { coordinates ->
+                width =
+                    with(localDensity) { coordinates.size.width.toDp().value.toInt() - TIME_WIDTH }
+                height =
+                    with(localDensity) { coordinates.size.height.toDp().value.toInt() - HEADER_HEIGHT }
+            }
+            .transformable(transformableState)
             .wrapContentSize(unbounded = true, align = Alignment.TopStart)
     ) {
         Box(Modifier.padding(start = TIME_WIDTH.dp).clipToBounds()) {
@@ -346,8 +373,8 @@ fun getAllChildren(resources: List<Resource>): List<Resource> {
 @Composable
 fun Header(leaves: List<Resource>, hourWidth: Float, offsetX: Float = 0f) {
     Row(
-        modifier = Modifier.offset(x = offsetX.dp),
-//        horizontalArrangement = Arrangement.SpaceAround
+        modifier = Modifier.offset(x = offsetX.dp).height(HEADER_HEIGHT.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
         leaves.forEach {
             Text(
