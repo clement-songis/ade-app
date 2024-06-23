@@ -273,10 +273,10 @@ fun MultipleColumn(
                     .coerceAtMost(0f)
             )
         )
-        if (newOffset.x > 10) {
+        if (newOffset.x > 50) {
             scrollTo(-1)
         }
-        if (newOffset.x < -width * (scale - 1) - 10) {
+        if (newOffset.x < -width * (scale - 1) - 50) {
             scrollTo(1)
         }
     }

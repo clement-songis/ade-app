@@ -25,7 +25,7 @@ class MyNotificationManager(private val context: Context) {
             context, 0, cancelIntent, PendingIntent.FLAG_IMMUTABLE
         )
         val builder = NotificationCompat.Builder(context, ALARMS_CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setSmallIcon(R.mipmap.ic_launcher)
             .setContentTitle(context.getString(R.string.alarm_success))
             .setContentText(context.getString(R.string.alarm_success_text, alarmNumber, forTime))
             .addAction(R.drawable.ic_cancel, context.getString(R.string.cancel), cancelPendingIntent)
@@ -48,7 +48,7 @@ class MyNotificationManager(private val context: Context) {
             context, 0, cancelIntent, PendingIntent.FLAG_IMMUTABLE
         )
         val builder = NotificationCompat.Builder(context, ALARMS_CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setSmallIcon(R.mipmap.ic_launcher)
             .setContentTitle(context.getString(R.string.alarm_success))
             .setContentText(context.getString(R.string.alarm_success_text, alarmNumber, forTime))
             .addAction(R.drawable.ic_cancel, context.getString(R.string.cancel), cancelPendingIntent)
@@ -72,7 +72,7 @@ class MyNotificationManager(private val context: Context) {
             context, 0, addIntent, PendingIntent.FLAG_IMMUTABLE
         )
         val builder = NotificationCompat.Builder(context, ALARMS_CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setSmallIcon(R.mipmap.ic_launcher)
             .setContentTitle(context.getString(R.string.alarm_error))
             .setContentText(context.getString(R.string.no_alarm_error, time))
             .addAction(
@@ -94,7 +94,7 @@ class MyNotificationManager(private val context: Context) {
         )
 
         val builder = NotificationCompat.Builder(context, ALARMS_CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setSmallIcon(R.mipmap.ic_launcher)
             .setContentTitle(context.getString(R.string.alarm_error))
             .setContentText(context.getString(R.string.no_calendar_error))
             .setContentIntent(showPendingIntent).setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -104,7 +104,7 @@ class MyNotificationManager(private val context: Context) {
 
     fun sendGetAlarmError() {
         val builder = NotificationCompat.Builder(context, ALARMS_CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setSmallIcon(R.mipmap.ic_launcher)
             .setContentTitle(context.getString(R.string.alarm_error))
             .setContentText(context.getString(R.string.get_alarm_error))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -122,7 +122,7 @@ class MyNotificationManager(private val context: Context) {
             context, 0, retryIntent, PendingIntent.FLAG_IMMUTABLE
         )
         val builder = NotificationCompat.Builder(context, ALARMS_CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setSmallIcon(R.mipmap.ic_launcher)
             .setContentTitle(context.getString(R.string.alarm_error)).setContentText(e.toString())
             .setPriority(NotificationCompat.PRIORITY_HIGH).addAction(
                 R.drawable.ic_sync, context.getString(R.string.retry), retryPendingIntent
