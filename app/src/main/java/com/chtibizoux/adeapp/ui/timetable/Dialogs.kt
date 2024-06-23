@@ -78,7 +78,7 @@ fun EventDialog(navController: NavController, event: Event, onClose: () -> Unit)
                     ) {
                         resources.value.forEach { resource ->
                             Text("${resource.name} (${resource.id})", modifier = Modifier.clickable {
-                                navController.navigate("${RootScreen.Timetable.name}/${resource.id}?category=${resource.category}")
+                                navController.navigate("${RootScreen.Timetable.name}/${resource.id}?date=${event.date}")
                             }, textAlign = TextAlign.Center)
                         }
                     }

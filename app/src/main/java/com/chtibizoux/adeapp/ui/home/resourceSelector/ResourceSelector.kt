@@ -179,13 +179,13 @@ fun ResourceCategories(navController: NavController, resources: ResourceTree) {
     ) {
         val category = resources.categories[tabIndex]
         category.resources.sortedBy { it.name }.forEach { resource ->
-            ResourceComponent(navController, category.category, resource)
+            ResourceComponent(navController, resource)
         }
     }
 }
 
 @Composable
-fun ResourceComponent(navController: NavController, category: String, resource: Resource) {
+fun ResourceComponent(navController: NavController, resource: Resource) {
     if (resource.children.isEmpty()) {
         SimpleResourceComponent(navController, resource)
     } else {
@@ -200,7 +200,7 @@ fun ResourceComponent(navController: NavController, category: String, resource: 
                 Box(
                     modifier = Modifier
                         .clickable {
-                            navController.navigate("${RootScreen.Timetable.name}/${resource.id}?category=${category}")
+                            navController.navigate("${RootScreen.Timetable.name}/${resource.id}")
                         }
                         .padding(10.dp),
                     contentAlignment = Alignment.CenterStart
@@ -222,7 +222,7 @@ fun ResourceComponent(navController: NavController, category: String, resource: 
             if (opened) {
                 Column(Modifier.padding(start = 20.dp)) {
                     resource.children.sortedBy { it.name }.forEach {
-                        ResourceComponent(navController, category, it)
+                        ResourceComponent(navController, it)
                     }
                 }
             }

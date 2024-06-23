@@ -13,9 +13,10 @@ import com.chtibizoux.adeapp.R
 import com.chtibizoux.adeapp.data.xml.Calendar
 import com.chtibizoux.adeapp.data.xml.Resource
 import com.chtibizoux.adeapp.ui.SettingsViewModel
+import java.util.Date
 
 @Composable
-fun Timetable(resourceId: Int, navController: NavController, viewModel: SettingsViewModel) {
+fun Timetable(resourceId: Int, navController: NavController, viewModel: SettingsViewModel, date: Date) {
     var resources: List<Resource> by remember { mutableStateOf(listOf()) }
     var calendar: Calendar? by remember { mutableStateOf(null) }
     val context = LocalContext.current
@@ -40,7 +41,7 @@ fun Timetable(resourceId: Int, navController: NavController, viewModel: Settings
             navController.navigateUp()
         }
     }
-    WaitForCalendar(navController, calendar, resources, true) {
+    WaitForCalendar(navController, calendar, resources, true, date) {
         calendar = viewModel.getCalendar(resourceId)
         if (calendar == null) {
             Toast.makeText(

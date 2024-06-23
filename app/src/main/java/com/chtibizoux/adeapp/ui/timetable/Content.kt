@@ -78,6 +78,7 @@ fun WaitForCalendar(
     calendar: Calendar?,
     children: List<Resource>,
     previousButton: Boolean = false,
+    date: Date = Date(),
     refreshCalendar: suspend () -> Unit
 ) {
     if (calendar == null) {
@@ -98,7 +99,7 @@ fun WaitForCalendar(
             }
         }
     } else {
-        TimetableContent(navController, calendar, children, previousButton, refreshCalendar)
+        TimetableContent(navController, calendar, children, previousButton, date, refreshCalendar)
     }
 }
 
@@ -109,6 +110,7 @@ fun TimetableContent(
     calendar: Calendar,
     children: List<Resource>,
     previousButton: Boolean = false,
+    date: Date,
     refreshCalendar: suspend () -> Unit
 ) {
     if (calendar.days.isEmpty()) {
@@ -122,7 +124,7 @@ fun TimetableContent(
         }
     } else {
         val pagerState =
-            rememberPagerState(initialPage = calendar.getPage(), pageCount = { calendar.days.size })
+            rememberPagerState(initialPage = calendar.getPage(date), pageCount = { calendar.days.size })
         val coroutineScope = rememberCoroutineScope()
         val state = rememberPullToRefreshState()
         if (state.isRefreshing) {

@@ -7,12 +7,12 @@ import kotlinx.serialization.Serializable
 import java.util.Date
 import java.util.Locale
 
-private val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.FRANCE)
+val calendarDateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.FRANCE)
 
 @Serializable
 data class Calendar(val days: List<Day<Event>>) {
     fun getPage(date: Date = Date()): Int {
-        val index = this.days.indexOfFirst { it.getDate() >= dateFormat.parse(dateFormat.format(date)) }
+        val index = this.days.indexOfFirst { it.getDate() >= calendarDateFormat.parse(calendarDateFormat.format(date)) }
         return if (index == -1) this.days.size - 1 else index
     }
 }
@@ -28,7 +28,7 @@ data class Day<T>(
     val events: List<T>,
 ) {
     fun getDate(): Date {
-        return dateFormat.parse(this.date)
+        return calendarDateFormat.parse(this.date)
     }
 }
 
