@@ -205,7 +205,7 @@ fun ResourceComponent(navController: NavController, category: String, resource: 
                         .padding(10.dp),
                     contentAlignment = Alignment.CenterStart
                 ) {
-                    Text(resource.name)
+                    Text("${resource.name} (${resource.id})")
                 }
 
                 Icon(
@@ -241,6 +241,6 @@ fun SimpleResourceComponent(navController: NavController, resource: Resource) {
             .padding(10.dp),
         contentAlignment = Alignment.CenterStart
     ) {
-        Text(resource.name)
+        Text("${resource.name} (${resource.id})")
     }
 }
