@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -75,7 +76,7 @@ import java.util.Locale
 
 // TODO: Make a week view
 
-const val HOUR_HEIGHT = 70
+const val HOUR_HEIGHT = 60
 const val MAIN_DIVIDER_HEIGHT = 2
 const val SECONDARY_DIVIDER_HEIGHT = 1
 const val VERTICAL_PADDING = 20
@@ -267,13 +268,11 @@ fun MultipleColumn(
 
         val newOffset = offset + offsetChange / 2f
         offset = Offset(
-            newOffset.x.coerceAtMost(0f)
-                .coerceAtLeast(-width * (scale - 1)),
-            newOffset.y.coerceAtMost(0f)
-                .coerceAtLeast(
-                    (height.toFloat() - (HOUR_HEIGHT * (END_HOUR - START_HOUR) + VERTICAL_PADDING * 2))
-                        .coerceAtMost(0f)
-                )
+            newOffset.x.coerceAtMost(0f).coerceAtLeast(-width * (scale - 1)),
+            newOffset.y.coerceAtMost(0f).coerceAtLeast(
+                (height.toFloat() - (HOUR_HEIGHT * (END_HOUR - START_HOUR) + VERTICAL_PADDING * 2))
+                    .coerceAtMost(0f)
+            )
         )
         if (newOffset.x > 10) {
             scrollTo(-1)
@@ -284,7 +283,8 @@ fun MultipleColumn(
     }
 
     Column(
-        Modifier.fillMaxSize()
+        Modifier
+            .fillMaxSize()
             .onGloballyPositioned { coordinates ->
                 width =
                     with(localDensity) { coordinates.size.width.toDp().value.toInt() - TIME_WIDTH }
@@ -303,13 +303,7 @@ fun MultipleColumn(
                 Modifier.clipToBounds()
             ) {
                 Box(Modifier.offset(offset.x.dp, offset.y.dp)) {
-                    Background(
-                        START_HOUR,
-                        END_HOUR,
-                        HOUR_HEIGHT,
-                        hourWidth,
-                        leaves.size
-                    )
+                    Background(START_HOUR, END_HOUR, HOUR_HEIGHT, hourWidth, leaves.size)
                     Box {
                         events.forEach { event ->
                             val resource =
@@ -469,20 +463,19 @@ fun EventElement(
 //    val height = endHour - startHour
     val height = event.duration / 2f
 
-    Surface(modifier = if (hourWidth == null) {
-        Modifier.fillMaxWidth().offset(
-            y = (VERTICAL_PADDING + (startHour - firstHour) * hourHeight).dp
-        ).height((height * hourHeight).dp)
-    } else {
-        Modifier.width((hourWidth * size).dp).offset(
-            x = (index * hourWidth).dp,
-            y = (VERTICAL_PADDING + (startHour - firstHour) * hourHeight).dp
-        ).height((height * hourHeight).dp)
-    },
+    val yOffset = (VERTICAL_PADDING + (startHour - firstHour) * hourHeight).dp
+    val mod = Modifier.height((height * hourHeight).dp)
+    Surface(
+        modifier = if (hourWidth == null) {
+            mod.fillMaxWidth().offset(y = yOffset)
+        } else {
+            mod.width((hourWidth * size).dp).offset(x = (index * hourWidth).dp, y = yOffset)
+        },
         color = event.getColor(),
         contentColor = Color.Black,
         shape = RoundedCornerShape(10.dp),
-        onClick = { showDialog = true }) {
+        onClick = { showDialog = true }
+    ) {
         Column(
             modifier = Modifier.padding(vertical = 3.dp, horizontal = 10.dp),
             verticalArrangement = Arrangement.Center,
