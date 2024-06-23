@@ -275,9 +275,12 @@ fun MultipleColumn(children: List<Resource>, events: List<Event>, navController:
                     allChildren.find { resource -> event.resources.find { resource.name == it.name && resource.id == it.id } != null }
 
                 if (resource != null) {
-                    val eventResourceLeaves = getLeaves(resource.children)
-                    val index = leaves.indexOf(eventResourceLeaves.first())
-                    val length = eventResourceLeaves.size
+                    val (index, length) = if (resource.children.isEmpty()) {
+                        Pair(leaves.indexOf(resource), 1)
+                    } else {
+                        val eventResourceLeaves = getLeaves(resource.children)
+                        Pair(leaves.indexOf(eventResourceLeaves.first()), eventResourceLeaves.size)
+                    }
                     println("${event.name} $index $length")
                     EventElement(navController, event)
                 } else {
