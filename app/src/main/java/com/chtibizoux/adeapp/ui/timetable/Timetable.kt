@@ -40,7 +40,7 @@ fun Timetable(resourceId: Int, navController: NavController, viewModel: Settings
             navController.navigateUp()
         }
     }
-    WaitForCalendar(navController, calendar, resources) {
+    WaitForCalendar(navController, calendar, resources, true) {
         calendar = viewModel.getCalendar(resourceId)
         if (calendar == null) {
             Toast.makeText(
