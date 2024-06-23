@@ -2,6 +2,8 @@ package com.chtibizoux.adeapp.ui.timetable
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.rememberTransformableState
+import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,7 +13,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
@@ -37,19 +42,24 @@ import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.round
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.chtibizoux.adeapp.R
@@ -63,14 +73,17 @@ import java.text.DateFormat
 import java.util.Date
 import java.util.Locale
 
-const val SPACE = 20
-const val MAIN_DIVIDER_HEIGHT = 20
+// TODO: Make a week view
+
+const val HOUR_HEIGHT = 60
+const val MAIN_DIVIDER_HEIGHT = 2
 const val SECONDARY_DIVIDER_HEIGHT = 1
-const val PADDING = 10
-const val TIME_PADDING = 70
+const val VERTICAL_PADDING = 20
+
+const val TIME_WIDTH = 70
+
 const val START_HOUR = 8
 const val END_HOUR = 19
-const val BOX_HEIGHT = (MAIN_DIVIDER_HEIGHT + SECONDARY_DIVIDER_HEIGHT + SPACE * 2)
 
 @Composable
 fun WaitForCalendar(
@@ -83,9 +96,7 @@ fun WaitForCalendar(
 ) {
     if (calendar == null) {
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background),
+            modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
             contentAlignment = Alignment.Center,
         ) {
             Column(
@@ -115,16 +126,15 @@ fun TimetableContent(
 ) {
     if (calendar.days.isEmpty()) {
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background),
+            modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
             contentAlignment = Alignment.Center,
         ) {
             Text(stringResource(R.string.no_calendar), color = Color.White)
         }
     } else {
-        val pagerState =
-            rememberPagerState(initialPage = calendar.getPage(date), pageCount = { calendar.days.size })
+        val pagerState = rememberPagerState(
+            initialPage = calendar.getPage(date),
+            pageCount = { calendar.days.size })
         val coroutineScope = rememberCoroutineScope()
         val state = rememberPullToRefreshState()
         if (state.isRefreshing) {
@@ -161,9 +171,7 @@ fun TimetableContent(
             },
         ) { padding ->
             Box(
-                Modifier
-                    .padding(padding)
-                    .nestedScroll(state.nestedScrollConnection)
+                Modifier.padding(padding).nestedScroll(state.nestedScrollConnection)
             ) {
                 HorizontalPager(pagerState) { page ->
                     Day(navController, calendar.days[page], children)
@@ -202,91 +210,116 @@ fun TimetableTitle(date: Date, goTo: (Date) -> Unit) {
 private fun Day(
     navController: NavController, day: Day<Event>, children: List<Resource>
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .verticalScroll(rememberScrollState())
-            .background(MaterialTheme.colorScheme.background),
-    ) {
-        Background(START_HOUR, END_HOUR)
-        if (children.isEmpty()) {
-            SingleColumn(day.events, navController)
-        } else {
-            MultipleColumn(children, day.events, navController)
-        }
+    if (children.isEmpty()) {
+        SingleColumn(day.events, navController)
+    } else {
+        MultipleColumn(children, day.events, navController)
     }
-}
-
-@Composable
-fun Background(startHour: Int, endHour: Int) {
-    Column(
-        modifier = Modifier.padding(vertical = PADDING.dp),
-        verticalArrangement = Arrangement.spacedBy(SPACE.dp)
-    ) {
-        (startHour * 2..endHour * 2).forEachIndexed { _, nb ->
-            if (nb % 2 == 0) {
-                Row(
-                    Modifier.height(MAIN_DIVIDER_HEIGHT.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "${(nb / 2).toString().padStart(2, '0')}:00",
-                        fontSize = 13.sp,
-                        modifier = Modifier.padding(start = 15.dp, end = 10.dp)
-                    )
-                    HorizontalDivider(thickness = 1.dp)
-                }
-            } else {
-                HorizontalDivider(
-                    Modifier.padding(start = (TIME_PADDING + 20).dp, end = 20.dp),
-                    thickness = SECONDARY_DIVIDER_HEIGHT.dp
-                )
-            }
-        }
-    }
-    VerticalDivider(
-        modifier = Modifier
-            .offset(x = TIME_PADDING.dp)
-//            .height((BOX_HEIGHT * (endHour - startHour) + MAIN_DIVIDER_HEIGHT + PADDING * 2).dp)
-//            .width(1.dp)
-    )
 }
 
 @Composable
 fun SingleColumn(events: List<Event>, navController: NavController) {
-    Box(Modifier.padding(start = TIME_PADDING.dp)) {
-        events.forEach { event ->
-            EventElement(navController, event)
+    Row(Modifier.verticalScroll(rememberScrollState())) {
+        Hours(START_HOUR, END_HOUR, HOUR_HEIGHT)
+        Box {
+            Background(START_HOUR, END_HOUR, HOUR_HEIGHT)
+            Box {
+                events.forEach { event ->
+                    EventElement(navController, event, START_HOUR, HOUR_HEIGHT)
+                }
+            }
         }
     }
 }
 
 @Composable
 fun MultipleColumn(children: List<Resource>, events: List<Event>, navController: NavController) {
+    val configuration = LocalConfiguration.current
+
     val leaves = getLeaves(children)
     val allChildren = getAllChildren(children)
-    Column(Modifier.padding(start = TIME_PADDING.dp)) {
-        Row {
-            leaves.forEach {
-                Text(it.name)
-            }
-        }
-        Box {
-            events.forEach { event ->
-                val resource =
-                    allChildren.find { resource -> event.resources.find { resource.name == it.name && resource.id == it.id } != null }
 
-                if (resource != null) {
-                    val (index, length) = if (resource.children.isNotEmpty()) {
-                        val eventResourceLeaves = getLeaves(resource.children)
-                        Pair(leaves.indexOf(eventResourceLeaves.first()), eventResourceLeaves.size)
-                    } else {
-                        Pair(leaves.indexOf(resource), 1)
+    var scale by remember { mutableFloatStateOf(1f) }
+
+    val hourWidth = ((configuration.screenWidthDp - TIME_WIDTH) / leaves.size.toFloat()) * scale
+//    val hourHeight = ((configuration.screenHeightDp - VERTICAL_PADDING * 2) / (END_HOUR - START_HOUR)) * scale
+
+    var offset by remember { mutableStateOf(Offset.Zero) }
+    val transformableState = rememberTransformableState { zoomChange, offsetChange, _ ->
+        scale = (scale * zoomChange).coerceAtLeast(1f)
+
+        val newOffset = offset + offsetChange / 2f
+
+        offset = Offset(
+            newOffset.x.coerceAtMost(0f)
+                .coerceAtLeast(-(configuration.screenWidthDp - TIME_WIDTH) * (scale - 1)),
+            newOffset.y.coerceAtMost(0f)
+        )
+        if (newOffset.x < 10) {
+//            Switch page
+        }
+        if (newOffset.x > 10) {
+//            Switch page
+        }
+    }
+
+    Column(
+        Modifier.transformable(transformableState)
+            .wrapContentSize(unbounded = true, align = Alignment.TopStart)
+    ) {
+        Box(Modifier.padding(start = TIME_WIDTH.dp).clipToBounds()) {
+            Header(leaves, hourWidth, offset.x)
+        }
+        Row(Modifier.clipToBounds()) {
+            Hours(START_HOUR, END_HOUR, HOUR_HEIGHT, offset.y)
+            Box(
+                Modifier.clipToBounds()
+            ) {
+                Box(Modifier.offset(offset.x.dp, offset.y.dp)) {
+                    Background(
+                        START_HOUR,
+                        END_HOUR,
+                        HOUR_HEIGHT,
+                        hourWidth,
+                        leaves.size
+                    )
+                    Box {
+                        events.forEach { event ->
+                            val resource =
+                                allChildren.find { resource -> event.resources.find { resource.name == it.name && resource.id == it.id } != null }
+
+                            if (resource != null) {
+                                val (index, length) = if (resource.children.isNotEmpty()) {
+                                    val eventResourceLeaves = getLeaves(resource.children)
+                                    Pair(
+                                        leaves.indexOf(eventResourceLeaves.first()),
+                                        eventResourceLeaves.size
+                                    )
+                                } else {
+                                    Pair(leaves.indexOf(resource), 1)
+                                }
+
+                                EventElement(
+                                    navController,
+                                    event,
+                                    START_HOUR,
+                                    HOUR_HEIGHT,
+                                    hourWidth,
+                                    length,
+                                    index
+                                )
+                            } else {
+                                EventElement(
+                                    navController,
+                                    event,
+                                    START_HOUR,
+                                    HOUR_HEIGHT,
+                                    hourWidth,
+                                    leaves.size
+                                )
+                            }
+                        }
                     }
-                    println("${event.name} $index $length")
-                    EventElement(navController, event)
-                } else {
-                    EventElement(navController, event)
                 }
             }
         }
@@ -311,7 +344,97 @@ fun getAllChildren(resources: List<Resource>): List<Resource> {
 }
 
 @Composable
-fun EventElement(navController: NavController, event: Event) {
+fun Header(leaves: List<Resource>, hourWidth: Float, offsetX: Float = 0f) {
+    Row(
+        modifier = Modifier.offset(x = offsetX.dp),
+//        horizontalArrangement = Arrangement.SpaceAround
+    ) {
+        leaves.forEach {
+            Text(
+                it.name,
+                modifier = Modifier.width((hourWidth).dp),
+                textAlign = TextAlign.Center,
+                maxLines = 1
+            )
+        }
+    }
+}
+
+@Composable
+fun Hours(startHour: Int, endHour: Int, hourHeight: Int, offsetY: Float = 0f) {
+    val ROW_HEIGHT = 20
+    Column(
+        modifier = Modifier.padding(vertical = (VERTICAL_PADDING - ROW_HEIGHT / 2f).dp)
+            .offset(y = offsetY.dp).width(TIME_WIDTH.dp),
+        verticalArrangement = Arrangement.spacedBy((hourHeight - ROW_HEIGHT).dp)
+    ) {
+        (startHour..endHour).forEachIndexed { _, nb ->
+            Row(
+                Modifier.height(ROW_HEIGHT.dp), verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "${nb.toString().padStart(2, '0')}:00",
+                    fontSize = 13.sp,
+                    modifier = Modifier.padding(start = 15.dp, end = 10.dp)
+                )
+                HorizontalDivider(thickness = MAIN_DIVIDER_HEIGHT.dp)
+            }
+        }
+    }
+    VerticalDivider(
+        Modifier.offset(y = offsetY.dp)
+            .height((hourHeight * (endHour - startHour) + VERTICAL_PADDING * 2).dp),
+        thickness = MAIN_DIVIDER_HEIGHT.dp
+    )
+}
+
+@Composable
+fun Background(
+    startHour: Int,
+    endHour: Int,
+    hourHeight: Int,
+    hourWidth: Float? = null,
+    columns: Int = 1
+) {
+    val mod = Modifier.padding(vertical = (VERTICAL_PADDING - MAIN_DIVIDER_HEIGHT / 2f).dp)
+    Column(
+        modifier = if (hourWidth == null) mod else mod.width((hourWidth * columns).dp),
+        verticalArrangement = Arrangement.spacedBy(((hourHeight - MAIN_DIVIDER_HEIGHT - SECONDARY_DIVIDER_HEIGHT) / 2f).dp)
+    ) {
+        (startHour * 2..endHour * 2).forEachIndexed { _, nb ->
+            if (nb % 2 == 0) {
+                HorizontalDivider(thickness = MAIN_DIVIDER_HEIGHT.dp)
+            } else {
+                HorizontalDivider(
+                    Modifier.padding(start = 20.dp, end = 20.dp),
+                    thickness = SECONDARY_DIVIDER_HEIGHT.dp
+                )
+            }
+        }
+    }
+    if (hourWidth != null) {
+        Row(
+            modifier = Modifier.height((hourHeight * (endHour - startHour) + VERTICAL_PADDING * 2).dp)
+                .padding(horizontal = (hourWidth - 0.5).dp),
+            horizontalArrangement = Arrangement.spacedBy((hourWidth - 1).dp)
+        ) {
+            (1..<columns).forEach { _ ->
+                VerticalDivider()
+            }
+        }
+    }
+}
+
+@Composable
+fun EventElement(
+    navController: NavController,
+    event: Event,
+    firstHour: Int,
+    hourHeight: Int,
+    hourWidth: Float? = null,
+    size: Int = 1,
+    index: Int = 0
+) {
     var showDialog by remember { mutableStateOf(false) }
 
     val startHour = event.startHour.getHourNumber()
@@ -319,10 +442,16 @@ fun EventElement(navController: NavController, event: Event) {
 //    val height = endHour - startHour
     val height = event.duration / 2f
 
-    Surface(modifier = Modifier
-        .fillMaxWidth()
-        .offset(y = (PADDING + MAIN_DIVIDER_HEIGHT / 2 + (startHour - START_HOUR) * BOX_HEIGHT + 1).dp)
-        .height((height * BOX_HEIGHT - 1).dp),
+    Surface(modifier = if (hourWidth == null) {
+        Modifier.fillMaxWidth().offset(
+            y = (VERTICAL_PADDING + (startHour - firstHour) * hourHeight).dp
+        ).height((height * hourHeight).dp)
+    } else {
+        Modifier.width((hourWidth * size).dp).offset(
+            x = (index * hourWidth).dp,
+            y = (VERTICAL_PADDING + (startHour - firstHour) * hourHeight).dp
+        ).height((height * hourHeight).dp)
+    },
         color = event.getColor(),
         contentColor = Color.Black,
         shape = RoundedCornerShape(10.dp),
@@ -334,14 +463,24 @@ fun EventElement(navController: NavController, event: Event) {
         ) {
             Text(
                 event.name,
+                modifier = Modifier.height((hourHeight / 2f).dp),
                 textAlign = TextAlign.Center,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1
             )
-            Text(event.resources.filter { it.category == "classroom" }.joinToString { it.name },
-                fontSize = 13.sp,
-                textAlign = TextAlign.Center
-            )
+            listOf("classroom", "trainee", "instructor").forEach { category ->
+                val resources = event.resources.filter { it.category == category }
+                if (resources.isNotEmpty()) {
+                    Text(
+                        resources.joinToString { it.name },
+                        modifier = Modifier.height((hourHeight / 2f).dp),
+                        fontSize = 13.sp,
+                        textAlign = TextAlign.Center,
+                        overflow = TextOverflow.Ellipsis,
+                        maxLines = 1
+                    )
+                }
+            }
         }
     }
 

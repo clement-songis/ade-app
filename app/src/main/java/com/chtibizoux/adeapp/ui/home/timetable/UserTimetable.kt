@@ -15,7 +15,6 @@ import com.chtibizoux.adeapp.ui.timetable.WaitForCalendar
 fun UserTimetable(navController: NavController, viewModel: SettingsViewModel) {
     val calendar by viewModel.userCalendar.collectAsState()
     val context = LocalContext.current
-    // TODO: Maybe get resource children ?
     LaunchedEffect(true) {
         val success = viewModel.tryUpdateCalendar()
         Toast.makeText(
