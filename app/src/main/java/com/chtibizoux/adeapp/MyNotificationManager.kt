@@ -19,6 +19,8 @@ import com.chtibizoux.adeapp.data.Time
 class MyNotificationManager(private val context: Context) {
     companion object {
         const val ALARM_NOTIFICATION_ID = 1
+        const val CREATE_ALARM_NOTIFICATION_ID = 2
+        const val ALARM_ERROR_NOTIFICATION_ID = 3
     }
 
     private val notificationManager =
@@ -116,7 +118,7 @@ class MyNotificationManager(private val context: Context) {
             deletePendingIntent
         )
 
-        notificationManager.notify(ALARM_NOTIFICATION_ID, builder.build())
+        notificationManager.notify(CREATE_ALARM_NOTIFICATION_ID, builder.build())
     }
 
     fun showNoAlarmError(time: Time) {
@@ -146,7 +148,7 @@ class MyNotificationManager(private val context: Context) {
         )
         builder.addAction(R.drawable.ic_add, context.getString(R.string.add), addPendingIntent)
 
-        notificationManager.notify(ALARM_NOTIFICATION_ID, builder.build())
+        notificationManager.notify(ALARM_ERROR_NOTIFICATION_ID, builder.build())
     }
 
     fun showNoHoursError() {
@@ -166,7 +168,7 @@ class MyNotificationManager(private val context: Context) {
         )
         builder.setContentIntent(showPendingIntent)
 
-        notificationManager.notify(ALARM_NOTIFICATION_ID, builder.build())
+        notificationManager.notify(ALARM_ERROR_NOTIFICATION_ID, builder.build())
     }
 
     fun showGetStartTimeError() {
@@ -176,7 +178,7 @@ class MyNotificationManager(private val context: Context) {
             .setContentText(context.getString(R.string.get_alarm_error))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
 
-        notificationManager.notify(ALARM_NOTIFICATION_ID, builder.build())
+        notificationManager.notify(ALARM_ERROR_NOTIFICATION_ID, builder.build())
     }
 
     fun showAlarmError(e: Exception) {
@@ -201,7 +203,7 @@ class MyNotificationManager(private val context: Context) {
         )
         builder.addAction(R.drawable.ic_sync, context.getString(R.string.retry), retryPendingIntent)
 
-        notificationManager.notify(ALARM_NOTIFICATION_ID, builder.build())
+        notificationManager.notify(ALARM_ERROR_NOTIFICATION_ID, builder.build())
     }
 
     fun cancelAlarmNotification() {

@@ -16,6 +16,10 @@ class WakeLockManager(context: Context) {
     }
 
     fun release() {
+        if (!wakeLock.isHeld) {
+            println("Wake lock already released")
+            return
+        }
         wakeLock.release()
     }
 }

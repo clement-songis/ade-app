@@ -76,7 +76,7 @@ class AlarmsReceiver : BroadcastReceiver() {
                 }
 
                 SNOOZE_ALARM_ACTION -> {
-
+                    println("SNOOZE")
                 }
 
                 STOP_ALARM_ACTION -> {
