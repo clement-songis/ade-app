@@ -231,7 +231,8 @@ class SettingsViewModel(private val repository: SettingsRepository) : ViewModel(
                     repository,
                     user.value!!,
                     alarms.value,
-                    usePreviousAlarm.value
+                    usePreviousAlarm.value,
+                    false
                 )
             } else {
                 AlarmsReceiver.disable(context)

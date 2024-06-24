@@ -7,6 +7,7 @@ import android.content.Intent
 import android.os.Build
 import android.widget.Toast
 import com.chtibizoux.adeapp.MyNotificationManager
+import com.chtibizoux.adeapp.alarms.AlarmActivity.Companion.FINISH_ALARM_ACTIVITY_ACTION
 import com.chtibizoux.adeapp.data.Alarm
 import com.chtibizoux.adeapp.data.BadHoursError
 import com.chtibizoux.adeapp.data.Result
@@ -48,6 +49,7 @@ class AlarmsManager(private val context: Context) {
 
             set(Calendar.SECOND, 0)
             set(Calendar.MILLISECOND, 0)
+
             if (timeInMillis < Calendar.getInstance().timeInMillis) {
                 add(Calendar.DATE, 1)
             }
@@ -67,7 +69,8 @@ class AlarmsManager(private val context: Context) {
         repository: SettingsRepository,
         user: User,
         alarms: List<Alarm>,
-        usePreviousAlarm: Boolean
+        usePreviousAlarm: Boolean,
+        notify: Boolean = true
     ) {
         try {
             val tomorrow = Calendar.getInstance()
@@ -84,13 +87,19 @@ class AlarmsManager(private val context: Context) {
                     for (time in alarm.hours) {
                         createAlarm(time)
                     }
-                    notificationManager.showCreateAlarmSuccess(alarm.hours.size, result.data)
+                    if (notify) {
+                        notificationManager.showCreateAlarmSuccess(alarm.hours.size, result.data)
+                    }
                 } else {
-                    notificationManager.showNoAlarmError(result.data)
+                    if (notify) {
+                        notificationManager.showNoAlarmError(result.data)
+                    }
                 }
             } else {
                 if (result is Result.Error && result.exception.cause is BadHoursError) {
-                    notificationManager.showNoHoursError()
+                    if (notify) {
+                        notificationManager.showNoHoursError()
+                    }
                 } else {
                     notificationManager.showGetStartTimeError()
                     // Retry
@@ -163,6 +172,9 @@ class AlarmsManager(private val context: Context) {
 
         notificationManager.cancelAlarmNotification()
 //        service.stopForeground(STOP_FOREGROUND_REMOVE)
+
+        val finishAlarmActivityIntent = Intent(FINISH_ALARM_ACTIVITY_ACTION)
+        context.sendBroadcast(finishAlarmActivityIntent)
 
         wakelockManager.release()
     }

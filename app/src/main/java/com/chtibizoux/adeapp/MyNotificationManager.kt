@@ -51,10 +51,10 @@ class MyNotificationManager(private val context: Context) {
         builder.addAction(R.drawable.ic_snooze, context.getString(R.string.snooze), snoozePendingIntent)
 
         // Add Dismiss Action
-        val dismissIntent: Intent = Intent(context, AlarmsReceiver::class.java).apply {
+        val dismissIntent = Intent(context, AlarmsReceiver::class.java).apply {
             action = STOP_ALARM_ACTION
         }
-        val dismissPendingIntent: PendingIntent = PendingIntent.getService(
+        val dismissPendingIntent = PendingIntent.getBroadcast(
             context, 0, dismissIntent, PendingIntent.FLAG_IMMUTABLE
         )
         builder.addAction(

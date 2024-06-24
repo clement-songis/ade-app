@@ -42,7 +42,7 @@ class AlarmActivity : ComponentActivity() {
     }
 
     private val broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
-        override fun onReceive(arg0: Context, intent: Intent) {
+        override fun onReceive(context: Context, intent: Intent) {
             if (intent.action == FINISH_ALARM_ACTIVITY_ACTION) {
                 finish()
             }
@@ -109,6 +109,11 @@ class AlarmActivity : ComponentActivity() {
         } else {
             registerReceiver(broadcastReceiver, IntentFilter(FINISH_ALARM_ACTIVITY_ACTION))
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        unregisterReceiver(broadcastReceiver)
     }
 }
 
