@@ -104,7 +104,7 @@ class DataSource {
 //            val calendar = parser.parse(ics)
 //            return@withContext Result.Success(calendar)
 //        } catch (e: Throwable) {
-//            println(e)
+//            System.err.println(e)
 //            return@withContext Result.Error(IOException("Error getting calendar", e))
 //        }
 //    }
@@ -114,7 +114,7 @@ class DataSource {
             val calendar = fetchEvents(user)
             return@withContext Result.Success(calendar)
         } catch (e: Throwable) {
-            println(e)
+            System.err.println(e)
             return@withContext Result.Error(IOException("Error getting calendar", e))
         }
     }
@@ -124,7 +124,7 @@ class DataSource {
             val resources = fetchResources(user)
             return@withContext Result.Success(resources)
         } catch (e: Throwable) {
-            println(e)
+            System.err.println(e)
             return@withContext Result.Error(IOException("Error getting resources", e))
         }
     }
@@ -134,7 +134,7 @@ class DataSource {
             val resource = fetchChildren(user, father)
             return@withContext Result.Success(resource)
         } catch (e: Throwable) {
-            println(e)
+            System.err.println(e)
             return@withContext Result.Error(IOException("Error getting children", e))
         }
     }
@@ -159,7 +159,7 @@ class DataSource {
             }
             return@withContext Result.Success(hours.first())
         } catch (e: Throwable) {
-            println(e)
+            System.err.println(e)
             return@withContext Result.Error(IOException("Error getting current starting time", e))
         }
     }
@@ -170,7 +170,7 @@ class DataSource {
             val hours = startingTimes(days)
             return@withContext Result.Success(hours.filter { it.getHourNumber() < 12 })
         } catch (e: Throwable) {
-            println(e)
+            System.err.println(e)
             return@withContext Result.Error(IOException("Error getting calendar", e))
         }
     }
