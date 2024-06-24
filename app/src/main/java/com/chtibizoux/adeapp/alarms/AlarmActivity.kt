@@ -1,6 +1,10 @@
 package com.chtibizoux.adeapp.alarms
 
+import android.annotation.SuppressLint
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.ActivityInfo
 import android.media.AudioManager
 import android.os.Build
@@ -26,11 +30,26 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.core.view.WindowCompat
+import com.chtibizoux.adeapp.BuildConfig
 import com.chtibizoux.adeapp.R
 import com.chtibizoux.adeapp.ui.theme.ADEAppTheme
 
+
 // TODO
 class AlarmActivity : ComponentActivity() {
+    companion object {
+        const val FINISH_ALARM_ACTIVITY_ACTION = BuildConfig.APPLICATION_ID + ".FINISH_ALARM_ACTIVITY"
+    }
+
+    private val broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(arg0: Context, intent: Intent) {
+            if (intent.action == FINISH_ALARM_ACTIVITY_ACTION) {
+                finish()
+            }
+        }
+    }
+
+    @SuppressLint("UnspecifiedRegisterReceiverFlag")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         volumeControlStream = AudioManager.STREAM_ALARM
@@ -83,6 +102,12 @@ class AlarmActivity : ComponentActivity() {
                     FullScreenAlarm()
                 }
             }
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(broadcastReceiver, IntentFilter(FINISH_ALARM_ACTIVITY_ACTION), RECEIVER_NOT_EXPORTED)
+        } else {
+            registerReceiver(broadcastReceiver, IntentFilter(FINISH_ALARM_ACTIVITY_ACTION))
         }
     }
 }
