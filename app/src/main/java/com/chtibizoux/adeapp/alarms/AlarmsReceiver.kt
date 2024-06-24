@@ -76,11 +76,10 @@ class AlarmsReceiver : BroadcastReceiver() {
                 }
 
                 SNOOZE_ALARM_ACTION -> {
-                    println("SNOOZE")
+                    alarmsManager.snoozeAlarm()
                 }
 
                 STOP_ALARM_ACTION -> {
-                    println("STOP")
                     alarmsManager.stopAlarm()
                 }
 

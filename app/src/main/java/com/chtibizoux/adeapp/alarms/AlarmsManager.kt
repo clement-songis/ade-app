@@ -155,11 +155,13 @@ class AlarmsManager(private val context: Context) {
     }
 
     fun startAlarm() {
+        stopAlarm()
+
         wakelockManager.acquire()
 
         notificationManager.showAlarmNotification()
 
-        alarmKlaxon.start()
+//        alarmKlaxon.start()
 
 //        context.sendBroadcast(Intent(ALARM_ALERT_ACTION))
     }
@@ -177,5 +179,28 @@ class AlarmsManager(private val context: Context) {
         context.sendBroadcast(finishAlarmActivityIntent)
 
         wakelockManager.release()
+    }
+
+    fun snoozeAlarm() {
+        stopAlarm()
+
+        val calendar: Calendar = Calendar.getInstance().apply {
+            add(Calendar.MINUTE, 10)
+        }
+
+        val numberOfMinutes = calendar.get(Calendar.MINUTE) + 60 * calendar.get(Calendar.HOUR_OF_DAY)
+
+        val alarmIntent = Intent(context, AlarmsReceiver::class.java).apply {
+            action = START_ALARM_ACTION
+        }
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            ALARM_REQUEST_CODE + numberOfMinutes,
+            alarmIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val alarmClockInfo = AlarmManager.AlarmClockInfo(calendar.timeInMillis, pendingIntent)
+        alarmManager.setAlarmClock(alarmClockInfo, pendingIntent)
     }
 }

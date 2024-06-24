@@ -18,13 +18,15 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -33,6 +35,9 @@ import androidx.core.view.WindowCompat
 import com.chtibizoux.adeapp.BuildConfig
 import com.chtibizoux.adeapp.R
 import com.chtibizoux.adeapp.ui.theme.ADEAppTheme
+import java.text.DateFormat
+import java.util.Calendar
+import java.util.Locale
 
 
 // TODO
@@ -120,39 +125,60 @@ class AlarmActivity : ComponentActivity() {
 @Composable
 fun FullScreenAlarm() {
     val context = LocalContext.current
+    val currentDateTime = remember { mutableStateOf(getCurrentDateTime()) }
+
+    LaunchedEffect(Unit) {
+        while (true) {
+            currentDateTime.value = getCurrentDateTime()
+            kotlinx.coroutines.delay(1000L) // Update every second
+        }
+    }
+
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("test")
-        Row {
-            Button(
-                onClick = {
-                    val stopAlarmIntent = Intent(
-                        context,
-                        AlarmsReceiver::class.java
-                    ).apply {
-                        action = STOP_ALARM_ACTION
-                    }
-                    context.sendBroadcast(stopAlarmIntent)
+        Column {
+            Text(text = currentDateTime.value.second, style = MaterialTheme.typography.bodyLarge)
+            Text(text = currentDateTime.value.first, style = MaterialTheme.typography.bodySmall)
+        }
+
+        Button(
+            onClick = {
+                val snoozeAlarmIntent = Intent(
+                    context,
+                    AlarmsReceiver::class.java
+                ).apply {
+                    action = SNOOZE_ALARM_ACTION
                 }
-            ) {
-                Text(stringResource(R.string.cancel))
+                context.sendBroadcast(snoozeAlarmIntent)
             }
-            Button(
-                onClick = {
-                    val snoozeAlarmIntent = Intent(
-                        context,
-                        AlarmsReceiver::class.java
-                    ).apply {
-                        action = SNOOZE_ALARM_ACTION
-                    }
-                    context.sendBroadcast(snoozeAlarmIntent)
+        ) {
+            Text(stringResource(R.string.snooze))
+        }
+
+        Button(
+            onClick = {
+                val stopAlarmIntent = Intent(
+                    context,
+                    AlarmsReceiver::class.java
+                ).apply {
+                    action = STOP_ALARM_ACTION
                 }
-            ) {
-                Text(stringResource(R.string.snooze))
+                context.sendBroadcast(stopAlarmIntent)
             }
+        ) {
+            Text(stringResource(R.string.cancel))
         }
     }
 
+}
+
+fun getCurrentDateTime(): Pair<String, String> {
+    val calendar = Calendar.getInstance()
+    val dateFormat = DateFormat.getDateInstance(DateFormat.LONG, Locale.getDefault())
+    val timeFormat = DateFormat.getTimeInstance(DateFormat.LONG, Locale.getDefault())
+    val currentDate = dateFormat.format(calendar.time)
+    val currentTime = timeFormat.format(calendar.time)
+    return Pair(currentDate, currentTime)
 }
