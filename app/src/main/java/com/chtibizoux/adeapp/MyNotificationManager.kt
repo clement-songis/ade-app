@@ -8,19 +8,17 @@ import android.provider.AlarmClock
 import androidx.core.app.NotificationCompat
 import com.chtibizoux.adeapp.alarms.AlarmActivity
 import com.chtibizoux.adeapp.alarms.AlarmsReceiver
-import com.chtibizoux.adeapp.alarms.DELETE_ALARM_ACTION
-import com.chtibizoux.adeapp.alarms.NEW_ALARM_ACTION
-import com.chtibizoux.adeapp.alarms.SNOOZE_ALARM_ACTION
-import com.chtibizoux.adeapp.alarms.STOP_ALARM_ACTION
-import com.chtibizoux.adeapp.alarms.TIME_EXTRA
-import com.chtibizoux.adeapp.alarms.VIEW_ALARMS_ACTION
 import com.chtibizoux.adeapp.data.Time
+import com.chtibizoux.adeapp.ui.home.alarms.NEW_ALARM_ACTION
+import com.chtibizoux.adeapp.ui.home.alarms.TIME_EXTRA
+import com.chtibizoux.adeapp.ui.home.alarms.VIEW_ALARMS_ACTION
 
 class MyNotificationManager(private val context: Context) {
     companion object {
         const val ALARM_NOTIFICATION_ID = 1
         const val CREATE_ALARM_NOTIFICATION_ID = 2
         const val ALARM_ERROR_NOTIFICATION_ID = 3
+        const val ALARM_SNOOZE_NOTIFICATION_ID = 4
     }
 
     private val notificationManager =
@@ -30,7 +28,7 @@ class MyNotificationManager(private val context: Context) {
         val builder = NotificationCompat.Builder(context, ALARMS_CHANNEL_ID)
             .setSmallIcon(R.mipmap.ic_launcher)
             .setContentTitle(context.getString(R.string.alarm))
-            .setContentText("A super alarm")
+            .setContentText("A super alarm")// TODO
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setDefaults(NotificationCompat.DEFAULT_LIGHTS)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
@@ -40,19 +38,22 @@ class MyNotificationManager(private val context: Context) {
             .setAutoCancel(false)
             .setLocalOnly(true)
 
-
         // Add Snooze action
         val snoozeIntent = Intent(context, AlarmsReceiver::class.java).apply {
-            action = SNOOZE_ALARM_ACTION
+            action = AlarmsReceiver.SNOOZE_ALARM_ACTION
         }
         val snoozePendingIntent = PendingIntent.getBroadcast(
             context, 0, snoozeIntent, PendingIntent.FLAG_IMMUTABLE
         )
-        builder.addAction(R.drawable.ic_snooze, context.getString(R.string.snooze), snoozePendingIntent)
+        builder.addAction(
+            R.drawable.ic_snooze,
+            context.getString(R.string.snooze),
+            snoozePendingIntent
+        )
 
         // Add Dismiss Action
         val dismissIntent = Intent(context, AlarmsReceiver::class.java).apply {
-            action = STOP_ALARM_ACTION
+            action = AlarmsReceiver.STOP_ALARM_ACTION
         }
         val dismissPendingIntent = PendingIntent.getBroadcast(
             context, 0, dismissIntent, PendingIntent.FLAG_IMMUTABLE
@@ -106,8 +107,8 @@ class MyNotificationManager(private val context: Context) {
 
         // Add delete action
         val deleteIntent = Intent(context, AlarmsReceiver::class.java).apply {
-            action = DELETE_ALARM_ACTION
-            putExtra("alarm", forTime.getMinutesNumber())
+            action = AlarmsReceiver.DELETE_ALARM_ACTION
+            putExtra(AlarmsReceiver.ALARM_EXTRA, forTime.getMinutesNumber())
         }
         val deletePendingIntent = PendingIntent.getBroadcast(
             context, 0, deleteIntent, PendingIntent.FLAG_IMMUTABLE
@@ -206,7 +207,38 @@ class MyNotificationManager(private val context: Context) {
         notificationManager.notify(ALARM_ERROR_NOTIFICATION_ID, builder.build())
     }
 
+    fun showSnooze(time: Time) {
+        val builder = NotificationCompat.Builder(context, ALARMS_CHANNEL_ID)
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setContentTitle(context.getString(R.string.snoozed, time))
+            .setContentText(context.getString(R.string.turn_off_on_tap))
+            .setPriority(NotificationCompat.PRIORITY_MAX)
+            .setOngoing(true)
+            .setAutoCancel(false)
+            .setLocalOnly(true)
+
+        // Add Dismiss Action
+        val dismissIntent = Intent(context, AlarmsReceiver::class.java).apply {
+            action = AlarmsReceiver.CANCEL_SNOOZE_ALARM_ACTION
+            putExtra(AlarmsReceiver.ALARM_EXTRA, time.getMinutesNumber())
+        }
+        val dismissPendingIntent = PendingIntent.getBroadcast(
+            context, 0, dismissIntent, PendingIntent.FLAG_IMMUTABLE
+        )
+        builder.addAction(
+            R.drawable.ic_alarm_off,
+            context.getString(R.string.cancel),
+            dismissPendingIntent
+        )
+
+        notificationManager.notify(ALARM_SNOOZE_NOTIFICATION_ID, builder.build())
+    }
+
     fun cancelAlarmNotification() {
         notificationManager.cancel(ALARM_NOTIFICATION_ID)
+    }
+
+    fun cancelSnoozeNotification() {
+        notificationManager.cancel(ALARM_SNOOZE_NOTIFICATION_ID)
     }
 }

@@ -68,5 +68,7 @@
     <string name="wrong_resourceId">The resource id is not a number</string>
     <string name="search_resource">Search a resource</string>
     <string name="snooze">Snooze</string>
+    <string name="snoozed">Repeating the alarm at %1$s</string>
     <string name="alarm">Alarm</string>
+    <string name="turn_off_on_tap">Tap to turn off</string>
 </resources>

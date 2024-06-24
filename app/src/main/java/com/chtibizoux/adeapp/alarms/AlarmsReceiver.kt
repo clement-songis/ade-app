@@ -12,19 +12,16 @@ import com.chtibizoux.adeapp.data.dataStore
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 
-const val CREATE_ALARM_ACTION = BuildConfig.APPLICATION_ID + ".CREATE_ALARM"
-const val DELETE_ALARM_ACTION = BuildConfig.APPLICATION_ID + ".DELETE_ALARM"
-const val START_ALARM_ACTION = BuildConfig.APPLICATION_ID + ".START_ALARM"
-const val SNOOZE_ALARM_ACTION = BuildConfig.APPLICATION_ID + ".SNOOZE_ALARM"
-const val STOP_ALARM_ACTION = BuildConfig.APPLICATION_ID + ".STOP_ALARM"
-
-const val VIEW_ALARMS_ACTION = BuildConfig.APPLICATION_ID + ".VIEW_ALARMS"
-const val NEW_ALARM_ACTION = BuildConfig.APPLICATION_ID + ".NEW_ALARM"
-
-const val TIME_EXTRA = "time"
-
 class AlarmsReceiver : BroadcastReceiver() {
     companion object {
+        const val CREATE_ALARM_ACTION = BuildConfig.APPLICATION_ID + ".CREATE_ALARM"
+        const val DELETE_ALARM_ACTION = BuildConfig.APPLICATION_ID + ".DELETE_ALARM"
+        const val START_ALARM_ACTION = BuildConfig.APPLICATION_ID + ".START_ALARM"
+        const val STOP_ALARM_ACTION = BuildConfig.APPLICATION_ID + ".STOP_ALARM"
+        const val SNOOZE_ALARM_ACTION = BuildConfig.APPLICATION_ID + ".SNOOZE_ALARM"
+        const val CANCEL_SNOOZE_ALARM_ACTION = BuildConfig.APPLICATION_ID + ".CANCEL_SNOOZE_ALARM"
+        const val ALARM_EXTRA = "alarm"
+
         fun enable(context: Context) {
             val receiver = ComponentName(context, AlarmsReceiver::class.java)
             context.packageManager.setComponentEnabledSetting(
@@ -46,11 +43,11 @@ class AlarmsReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         val alarmsManager = AlarmsManager(context)
-        val repository = SettingsRepository(context.dataStore, DataSource())
-        runBlocking {
-            val settings = repository.settings.first()
-            when (intent.action) {
-                CREATE_ALARM_ACTION -> runBlocking {
+        when (intent.action) {
+            CREATE_ALARM_ACTION -> {
+                val repository = SettingsRepository(context.dataStore, DataSource())
+                runBlocking {
+                    val settings = repository.settings.first()
                     if (settings.alarms.isNotEmpty() && settings.user != null) {
                         alarmsManager.createAlarmAndNotifyUser(
                             repository,
@@ -61,29 +58,44 @@ class AlarmsReceiver : BroadcastReceiver() {
                         alarmsManager.scheduleNextAlarmCreation()
                     }
                 }
+            }
 
-                DELETE_ALARM_ACTION -> {
+            DELETE_ALARM_ACTION -> {
+                val repository = SettingsRepository(context.dataStore, DataSource())
+                runBlocking {
+                    val settings = repository.settings.first()
                     val alarm = settings.alarms.find {
-                        it.forHour.getMinutesNumber() == intent.extras?.getInt("alarm")
+                        it.forHour.getMinutesNumber() == intent.extras?.getInt(ALARM_EXTRA)
                     }
                     if (alarm != null) {
                         alarmsManager.deleteAlarms(alarm)
                     }
                 }
+            }
 
-                START_ALARM_ACTION -> {
-                    alarmsManager.startAlarm()
+            START_ALARM_ACTION -> {
+                alarmsManager.startAlarm()
+            }
+
+            SNOOZE_ALARM_ACTION -> {
+                alarmsManager.snoozeAlarm()
+            }
+
+            CANCEL_SNOOZE_ALARM_ACTION -> {
+                val alarm = intent.extras?.getInt(ALARM_EXTRA)
+                if (alarm != null) {
+                    alarmsManager.cancelSnooze(alarm)
                 }
+            }
 
-                SNOOZE_ALARM_ACTION -> {
-                    alarmsManager.snoozeAlarm()
-                }
+            STOP_ALARM_ACTION -> {
+                alarmsManager.stopAlarm()
+            }
 
-                STOP_ALARM_ACTION -> {
-                    alarmsManager.stopAlarm()
-                }
-
-                "android.intent.action.BOOT_COMPLETED" -> {
+            "android.intent.action.BOOT_COMPLETED" -> {
+                val repository = SettingsRepository(context.dataStore, DataSource())
+                runBlocking {
+                    val settings = repository.settings.first()
                     if (settings.alarms.isNotEmpty() && settings.user != null) {
                         alarmsManager.scheduleNextAlarmCreation()
                         alarmsManager.createAlarmAndNotifyUser(
@@ -96,11 +108,12 @@ class AlarmsReceiver : BroadcastReceiver() {
                         disable(context)
                     }
                 }
+            }
 
-                else -> {
-                    throw Error("Bad action")
-                }
+            else -> {
+                throw Error("Bad action")
             }
         }
+
     }
 }

@@ -67,5 +67,7 @@
     <string name="wrong_resourceId">L\'identifiant du projet n\'est pas un numéro</string>
     <string name="search_resource">Rechercher une resource</string>
     <string name="snooze">Répéter</string>
+    <string name="snoozed">Répétission de l\'alarme à %1$s</string>
     <string name="alarm">Alarme</string>
+    <string name="turn_off_on_tap">Appuyez pour désactiver</string>
 </resources>

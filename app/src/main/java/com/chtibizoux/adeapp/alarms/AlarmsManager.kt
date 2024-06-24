@@ -7,7 +7,6 @@ import android.content.Intent
 import android.os.Build
 import android.widget.Toast
 import com.chtibizoux.adeapp.MyNotificationManager
-import com.chtibizoux.adeapp.alarms.AlarmActivity.Companion.FINISH_ALARM_ACTIVITY_ACTION
 import com.chtibizoux.adeapp.data.Alarm
 import com.chtibizoux.adeapp.data.BadHoursError
 import com.chtibizoux.adeapp.data.Result
@@ -33,10 +32,22 @@ class AlarmsManager(private val context: Context) {
         context,
         ALARM_CREATOR_REQUEST_CODE,
         Intent(context, AlarmsReceiver::class.java).apply {
-            action = CREATE_ALARM_ACTION
+            action = AlarmsReceiver.CREATE_ALARM_ACTION
         },
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
     )
+
+    private fun getAlarmIntent(time: Int): PendingIntent {
+        val alarmIntent = Intent(context, AlarmsReceiver::class.java).apply {
+            action = AlarmsReceiver.START_ALARM_ACTION
+        }
+        return PendingIntent.getBroadcast(
+            context,
+            ALARM_REQUEST_CODE + time,
+            alarmIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+    }
 
     fun scheduleNextAlarmCreation() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !alarmManager.canScheduleExactAlarms()) {
@@ -117,7 +128,7 @@ class AlarmsManager(private val context: Context) {
 
     private fun createAlarm(time: Time) {
         val alarmIntent = Intent(context, AlarmsReceiver::class.java).apply {
-            action = START_ALARM_ACTION
+            action = AlarmsReceiver.START_ALARM_ACTION
         }
         val pendingIntent = PendingIntent.getBroadcast(
             context,
@@ -140,17 +151,7 @@ class AlarmsManager(private val context: Context) {
 
     fun deleteAlarms(alarm: Alarm) {
         for (time in alarm.hours) {
-            val alarmIntent = Intent(context, AlarmsReceiver::class.java).apply {
-                action = START_ALARM_ACTION
-            }
-            val pendingIntent = PendingIntent.getBroadcast(
-                context,
-                ALARM_REQUEST_CODE + time.getMinutesNumber(),
-                alarmIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-
-            alarmManager.cancel(pendingIntent)
+            alarmManager.cancel(getAlarmIntent(time.getMinutesNumber()))
         }
     }
 
@@ -161,7 +162,7 @@ class AlarmsManager(private val context: Context) {
 
         notificationManager.showAlarmNotification()
 
-//        alarmKlaxon.start()
+        alarmKlaxon.start()
 
 //        context.sendBroadcast(Intent(ALARM_ALERT_ACTION))
     }
@@ -175,7 +176,7 @@ class AlarmsManager(private val context: Context) {
         notificationManager.cancelAlarmNotification()
 //        service.stopForeground(STOP_FOREGROUND_REMOVE)
 
-        val finishAlarmActivityIntent = Intent(FINISH_ALARM_ACTIVITY_ACTION)
+        val finishAlarmActivityIntent = Intent(AlarmActivity.FINISH_ALARM_ACTIVITY_ACTION)
         context.sendBroadcast(finishAlarmActivityIntent)
 
         wakelockManager.release()
@@ -188,19 +189,19 @@ class AlarmsManager(private val context: Context) {
             add(Calendar.MINUTE, 10)
         }
 
-        val numberOfMinutes = calendar.get(Calendar.MINUTE) + 60 * calendar.get(Calendar.HOUR_OF_DAY)
+        val numberOfMinutes =
+            calendar.get(Calendar.MINUTE) + 60 * calendar.get(Calendar.HOUR_OF_DAY)
 
-        val alarmIntent = Intent(context, AlarmsReceiver::class.java).apply {
-            action = START_ALARM_ACTION
-        }
-        val pendingIntent = PendingIntent.getBroadcast(
-            context,
-            ALARM_REQUEST_CODE + numberOfMinutes,
-            alarmIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
+        notificationManager.showSnooze(Time(numberOfMinutes))
+
+        val pendingIntent = getAlarmIntent(numberOfMinutes)
 
         val alarmClockInfo = AlarmManager.AlarmClockInfo(calendar.timeInMillis, pendingIntent)
         alarmManager.setAlarmClock(alarmClockInfo, pendingIntent)
+    }
+
+    fun cancelSnooze(time: Int) {
+        alarmManager.cancel(getAlarmIntent(time))
+        notificationManager.cancelSnoozeNotification()
     }
 }

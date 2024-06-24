@@ -135,7 +135,7 @@ fun FullScreenAlarm() {
     }
 
     Column(
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Column {
@@ -149,7 +149,7 @@ fun FullScreenAlarm() {
                     context,
                     AlarmsReceiver::class.java
                 ).apply {
-                    action = SNOOZE_ALARM_ACTION
+                    action = AlarmsReceiver.SNOOZE_ALARM_ACTION
                 }
                 context.sendBroadcast(snoozeAlarmIntent)
             }
@@ -163,7 +163,7 @@ fun FullScreenAlarm() {
                     context,
                     AlarmsReceiver::class.java
                 ).apply {
-                    action = STOP_ALARM_ACTION
+                    action = AlarmsReceiver.STOP_ALARM_ACTION
                 }
                 context.sendBroadcast(stopAlarmIntent)
             }
@@ -177,7 +177,7 @@ fun FullScreenAlarm() {
 fun getCurrentDateTime(): Pair<String, String> {
     val calendar = Calendar.getInstance()
     val dateFormat = DateFormat.getDateInstance(DateFormat.LONG, Locale.getDefault())
-    val timeFormat = DateFormat.getTimeInstance(DateFormat.LONG, Locale.getDefault())
+    val timeFormat = DateFormat.getTimeInstance(DateFormat.SHORT, Locale.getDefault())
     val currentDate = dateFormat.format(calendar.time)
     val currentTime = timeFormat.format(calendar.time)
     return Pair(currentDate, currentTime)

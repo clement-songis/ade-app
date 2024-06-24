@@ -49,6 +49,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.chtibizoux.adeapp.BuildConfig
 import com.chtibizoux.adeapp.R
 import com.chtibizoux.adeapp.data.Alarm
 import com.chtibizoux.adeapp.data.DefaultAlarmSettings
@@ -56,6 +57,11 @@ import com.chtibizoux.adeapp.data.Time
 import com.chtibizoux.adeapp.ui.SettingsViewModel
 import com.chtibizoux.adeapp.ui.home.SettingsButton
 import java.util.Calendar
+
+const val VIEW_ALARMS_ACTION = BuildConfig.APPLICATION_ID + ".VIEW_ALARMS"
+const val NEW_ALARM_ACTION = BuildConfig.APPLICATION_ID + ".NEW_ALARM"
+
+const val TIME_EXTRA = "time"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -94,6 +100,7 @@ fun Alarms(navController: NavController, viewModel: SettingsViewModel) {
                     }
                 }
             }
+            // TODO
 //            val intent = LocalContext.current.findActivity()?.intent
 //            if (intent?.action == NEW_ALARM_ACTION) {
 //                val extra = intent.getStringExtra(TIME_EXTRA)
