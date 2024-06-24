@@ -67,4 +67,6 @@
     <string name="resourceId_selection_not_supported">ADE resource selection is currently not implemented</string>
     <string name="wrong_resourceId">The resource id is not a number</string>
     <string name="search_resource">Search a resource</string>
+    <string name="snooze">Snooze</string>
+    <string name="alarm">Alarm</string>
 </resources>

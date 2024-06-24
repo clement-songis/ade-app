@@ -66,4 +66,6 @@
     <string name="resourceId_selection_not_supported">La sélection des ressources ADE n\'est actuellement pas implémentée</string>
     <string name="wrong_resourceId">L\'identifiant du projet n\'est pas un numéro</string>
     <string name="search_resource">Rechercher une resource</string>
+    <string name="snooze">Répéter</string>
+    <string name="alarm">Alarme</string>
 </resources>

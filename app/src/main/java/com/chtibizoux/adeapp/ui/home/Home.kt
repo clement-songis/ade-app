@@ -29,9 +29,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navDeepLink
-import com.chtibizoux.adeapp.NEW_ALARM_ACTION
+import com.chtibizoux.adeapp.alarms.NEW_ALARM_ACTION
 import com.chtibizoux.adeapp.R
-import com.chtibizoux.adeapp.VIEW_ALARMS_ACTION
+import com.chtibizoux.adeapp.alarms.VIEW_ALARMS_ACTION
 import com.chtibizoux.adeapp.ui.RootScreen
 import com.chtibizoux.adeapp.ui.SettingsViewModel
 import com.chtibizoux.adeapp.ui.home.alarms.Alarms
