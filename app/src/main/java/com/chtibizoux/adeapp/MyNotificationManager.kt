@@ -5,7 +5,6 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
-import android.provider.AlarmClock
 import androidx.core.app.NotificationCompat
 import com.chtibizoux.adeapp.alarms.AlarmActivity
 import com.chtibizoux.adeapp.alarms.AlarmService
