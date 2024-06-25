@@ -19,6 +19,9 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -31,6 +34,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 import com.chtibizoux.adeapp.BuildConfig
 import com.chtibizoux.adeapp.R
@@ -43,7 +48,8 @@ import java.util.Locale
 // TODO
 class AlarmActivity : ComponentActivity() {
     companion object {
-        const val FINISH_ALARM_ACTIVITY_ACTION = BuildConfig.APPLICATION_ID + ".FINISH_ALARM_ACTIVITY"
+        const val FINISH_ALARM_ACTIVITY_ACTION =
+            BuildConfig.APPLICATION_ID + ".FINISH_ALARM_ACTIVITY"
     }
 
     private val broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
@@ -100,17 +106,16 @@ class AlarmActivity : ComponentActivity() {
 
         setContent {
             ADEAppTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    FullScreenAlarm()
-                }
+                FullScreenAlarm()
             }
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            registerReceiver(broadcastReceiver, IntentFilter(FINISH_ALARM_ACTIVITY_ACTION), RECEIVER_NOT_EXPORTED)
+            registerReceiver(
+                broadcastReceiver,
+                IntentFilter(FINISH_ALARM_ACTIVITY_ACTION),
+                RECEIVER_NOT_EXPORTED
+            )
         } else {
             registerReceiver(broadcastReceiver, IntentFilter(FINISH_ALARM_ACTIVITY_ACTION))
         }
@@ -125,6 +130,62 @@ class AlarmActivity : ComponentActivity() {
 @Composable
 fun FullScreenAlarm() {
     val context = LocalContext.current
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(vertical = 80.dp),
+            verticalArrangement = Arrangement.SpaceBetween,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            TimeComponent()
+
+            Button(
+                onClick = {
+                    val snoozeAlarmIntent = Intent(
+                        context,
+                        AlarmsReceiver::class.java
+                    ).apply {
+                        action = AlarmsReceiver.SNOOZE_ALARM_ACTION
+                    }
+                    context.sendBroadcast(snoozeAlarmIntent)
+                },
+                shape = RoundedCornerShape(20.dp),
+            ) {
+                Text(
+                    stringResource(R.string.snooze),
+                    fontSize = 20.sp,
+                    modifier = Modifier.padding(horizontal = 30.dp, vertical = 20.dp)
+                )
+            }
+
+            Button(
+                onClick = {
+                    val stopAlarmIntent = Intent(
+                        context,
+                        AlarmsReceiver::class.java
+                    ).apply {
+                        action = AlarmsReceiver.STOP_ALARM_ACTION
+                    }
+                    context.sendBroadcast(stopAlarmIntent)
+                },
+                shape = RoundedCornerShape(24.dp),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 30.dp)
+            ) {
+                Text(
+                    stringResource(R.string.cancel),
+                    fontSize = 20.sp,
+                    modifier = Modifier.padding(vertical = 20.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun TimeComponent() {
     val currentDateTime = remember { mutableStateOf(getCurrentDateTime()) }
 
     LaunchedEffect(Unit) {
@@ -134,44 +195,10 @@ fun FullScreenAlarm() {
         }
     }
 
-    Column(
-        verticalArrangement = Arrangement.SpaceBetween,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Column {
-            Text(text = currentDateTime.value.second, style = MaterialTheme.typography.bodyLarge)
-            Text(text = currentDateTime.value.first, style = MaterialTheme.typography.bodySmall)
-        }
-
-        Button(
-            onClick = {
-                val snoozeAlarmIntent = Intent(
-                    context,
-                    AlarmsReceiver::class.java
-                ).apply {
-                    action = AlarmsReceiver.SNOOZE_ALARM_ACTION
-                }
-                context.sendBroadcast(snoozeAlarmIntent)
-            }
-        ) {
-            Text(stringResource(R.string.snooze))
-        }
-
-        Button(
-            onClick = {
-                val stopAlarmIntent = Intent(
-                    context,
-                    AlarmsReceiver::class.java
-                ).apply {
-                    action = AlarmsReceiver.STOP_ALARM_ACTION
-                }
-                context.sendBroadcast(stopAlarmIntent)
-            }
-        ) {
-            Text(stringResource(R.string.cancel))
-        }
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(text = currentDateTime.value.second, fontSize = 60.sp)
+        Text(text = currentDateTime.value.first, fontSize = 20.sp)
     }
-
 }
 
 fun getCurrentDateTime(): Pair<String, String> {

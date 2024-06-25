@@ -12,6 +12,9 @@ import com.chtibizoux.adeapp.data.Time
 import com.chtibizoux.adeapp.ui.home.alarms.NEW_ALARM_ACTION
 import com.chtibizoux.adeapp.ui.home.alarms.TIME_EXTRA
 import com.chtibizoux.adeapp.ui.home.alarms.VIEW_ALARMS_ACTION
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
 class MyNotificationManager(private val context: Context) {
     companion object {
@@ -25,10 +28,14 @@ class MyNotificationManager(private val context: Context) {
         context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
     fun showAlarmNotification() {
+        val calendar = Calendar.getInstance()
+        val timeFormat = SimpleDateFormat("hh:mm", Locale.getDefault())
+        val time = timeFormat.format(calendar.time)
+
         val builder = NotificationCompat.Builder(context, ALARMS_CHANNEL_ID)
             .setSmallIcon(R.mipmap.ic_launcher)
             .setContentTitle(context.getString(R.string.alarm))
-            .setContentText("A super alarm")// TODO
+            .setContentText(time)
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setDefaults(NotificationCompat.DEFAULT_LIGHTS)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
@@ -210,8 +217,8 @@ class MyNotificationManager(private val context: Context) {
     fun showSnooze(time: Time) {
         val builder = NotificationCompat.Builder(context, ALARMS_CHANNEL_ID)
             .setSmallIcon(R.mipmap.ic_launcher)
-            .setContentTitle(context.getString(R.string.snoozed, time))
-            .setContentText(context.getString(R.string.turn_off_on_tap))
+            .setContentTitle(context.getString(R.string.snoozed))
+            .setContentText(time.toString())
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setOngoing(true)
             .setAutoCancel(false)

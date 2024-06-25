@@ -7,6 +7,7 @@ import android.content.Intent
 import android.os.Build
 import android.widget.Toast
 import com.chtibizoux.adeapp.MyNotificationManager
+import com.chtibizoux.adeapp.R
 import com.chtibizoux.adeapp.data.Alarm
 import com.chtibizoux.adeapp.data.BadHoursError
 import com.chtibizoux.adeapp.data.Result
@@ -51,7 +52,11 @@ class AlarmsManager(private val context: Context) {
 
     fun scheduleNextAlarmCreation() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !alarmManager.canScheduleExactAlarms()) {
-            Toast.makeText(context, "Unable to set exact alarm", Toast.LENGTH_LONG).show()
+            Toast.makeText(
+                context,
+                context.getString(R.string.unable_to_set_exact_alarm),
+                Toast.LENGTH_LONG
+            ).show()
             return
         }
         val calendar: Calendar = Calendar.getInstance().apply {
@@ -137,6 +142,7 @@ class AlarmsManager(private val context: Context) {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         val calendar: Calendar = Calendar.getInstance().apply {
+//            Add a day if UPDATE_HOUR is before midnight
             add(Calendar.DATE, 1)
             set(Calendar.HOUR_OF_DAY, time.hour)
             set(Calendar.MINUTE, time.minute)

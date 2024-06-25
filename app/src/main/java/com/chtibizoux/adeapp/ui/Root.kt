@@ -17,7 +17,6 @@ enum class RootScreen { Home, Timetable, Settings }
 
 @Composable
 fun Root(viewModel: SettingsViewModel) {
-    // TODO: change icon
     val navController = rememberNavController()
     NavHost(
         navController, startDestination = RootScreen.Home.name
