@@ -31,7 +31,7 @@ class AlarmKlaxon(context: Context) {
     // Default system ringtone
     private val ringtone: Ringtone = RingtoneManager.getRingtone(
         context,
-        RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+        RingtoneManager.getActualDefaultRingtoneUri(context, RingtoneManager.TYPE_ALARM)
     )
 
     private val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager

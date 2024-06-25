@@ -8,7 +8,7 @@ import androidx.datastore.core.DataStore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.chtibizoux.adeapp.alarms.AlarmsManager
+import com.chtibizoux.adeapp.alarms.CreateAlarmsManager
 import com.chtibizoux.adeapp.alarms.AlarmsReceiver
 import com.chtibizoux.adeapp.data.Alarm
 import com.chtibizoux.adeapp.data.DataSource
@@ -223,11 +223,11 @@ class SettingsViewModel(private val repository: SettingsRepository) : ViewModel(
 
     fun initAlarms(context: Context) {
         viewModelScope.launch {
-            val alarmsManager = AlarmsManager(context)
+            val createAlarmsManager = CreateAlarmsManager(context)
             if (alarms.value.isNotEmpty()) {
                 AlarmsReceiver.enable(context)
-                alarmsManager.scheduleNextAlarmCreation()
-                alarmsManager.createAlarmAndNotifyUser(
+                createAlarmsManager.scheduleNextAlarmCreation()
+                createAlarmsManager.createAlarmAndNotifyUser(
                     repository,
                     user.value!!,
                     alarms.value,
@@ -236,7 +236,7 @@ class SettingsViewModel(private val repository: SettingsRepository) : ViewModel(
                 )
             } else {
                 AlarmsReceiver.disable(context)
-                alarmsManager.removeAlarmCreatorSchedule()
+                createAlarmsManager.removeAlarmCreatorSchedule()
             }
         }
     }

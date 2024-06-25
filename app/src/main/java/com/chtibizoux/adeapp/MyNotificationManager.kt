@@ -2,11 +2,13 @@ package com.chtibizoux.adeapp
 
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.provider.AlarmClock
 import androidx.core.app.NotificationCompat
 import com.chtibizoux.adeapp.alarms.AlarmActivity
+import com.chtibizoux.adeapp.alarms.AlarmService
 import com.chtibizoux.adeapp.alarms.AlarmsReceiver
 import com.chtibizoux.adeapp.data.Time
 import com.chtibizoux.adeapp.ui.home.alarms.NEW_ALARM_ACTION
@@ -46,9 +48,7 @@ class MyNotificationManager(private val context: Context) {
             .setLocalOnly(true)
 
         // Add Snooze action
-        val snoozeIntent = Intent(context, AlarmsReceiver::class.java).apply {
-            action = AlarmsReceiver.SNOOZE_ALARM_ACTION
-        }
+        val snoozeIntent = Intent(AlarmService.SNOOZE_ALARM_ACTION)
         val snoozePendingIntent = PendingIntent.getBroadcast(
             context, 0, snoozeIntent, PendingIntent.FLAG_IMMUTABLE
         )
@@ -59,9 +59,7 @@ class MyNotificationManager(private val context: Context) {
         )
 
         // Add Dismiss Action
-        val dismissIntent = Intent(context, AlarmsReceiver::class.java).apply {
-            action = AlarmsReceiver.STOP_ALARM_ACTION
-        }
+        val dismissIntent = Intent(AlarmService.STOP_ALARM_ACTION)
         val dismissPendingIntent = PendingIntent.getBroadcast(
             context, 0, dismissIntent, PendingIntent.FLAG_IMMUTABLE
         )
@@ -92,8 +90,11 @@ class MyNotificationManager(private val context: Context) {
         )
         builder.setFullScreenIntent(fullScreenPendingIntent, true)
 
-//        service.startForeground(1, builder.build())
-        notificationManager.notify(ALARM_NOTIFICATION_ID, builder.build())
+        if (context is Service) {
+            context.startForeground(ALARM_NOTIFICATION_ID, builder.build())
+        } else {
+            notificationManager.notify(ALARM_NOTIFICATION_ID, builder.build())
+        }
     }
 
     fun showCreateAlarmSuccess(alarmNumber: Number, forTime: Time) {
@@ -225,8 +226,7 @@ class MyNotificationManager(private val context: Context) {
             .setLocalOnly(true)
 
         // Add Dismiss Action
-        val dismissIntent = Intent(context, AlarmsReceiver::class.java).apply {
-            action = AlarmsReceiver.CANCEL_SNOOZE_ALARM_ACTION
+        val dismissIntent = Intent(AlarmService.CANCEL_SNOOZE_ALARM_ACTION).apply {
             putExtra(AlarmsReceiver.ALARM_EXTRA, time.getMinutesNumber())
         }
         val dismissPendingIntent = PendingIntent.getBroadcast(
@@ -239,10 +239,6 @@ class MyNotificationManager(private val context: Context) {
         )
 
         notificationManager.notify(ALARM_SNOOZE_NOTIFICATION_ID, builder.build())
-    }
-
-    fun cancelAlarmNotification() {
-        notificationManager.cancel(ALARM_NOTIFICATION_ID)
     }
 
     fun cancelSnoozeNotification() {

@@ -16,10 +16,6 @@ class AlarmsReceiver : BroadcastReceiver() {
     companion object {
         const val CREATE_ALARM_ACTION = BuildConfig.APPLICATION_ID + ".CREATE_ALARM"
         const val DELETE_ALARM_ACTION = BuildConfig.APPLICATION_ID + ".DELETE_ALARM"
-        const val START_ALARM_ACTION = BuildConfig.APPLICATION_ID + ".START_ALARM"
-        const val STOP_ALARM_ACTION = BuildConfig.APPLICATION_ID + ".STOP_ALARM"
-        const val SNOOZE_ALARM_ACTION = BuildConfig.APPLICATION_ID + ".SNOOZE_ALARM"
-        const val CANCEL_SNOOZE_ALARM_ACTION = BuildConfig.APPLICATION_ID + ".CANCEL_SNOOZE_ALARM"
         const val ALARM_EXTRA = "alarm"
 
         fun enable(context: Context) {
@@ -42,20 +38,20 @@ class AlarmsReceiver : BroadcastReceiver() {
     }
 
     override fun onReceive(context: Context, intent: Intent) {
-        val alarmsManager = AlarmsManager(context)
+        val createAlarmsManager = CreateAlarmsManager(context)
         when (intent.action) {
             CREATE_ALARM_ACTION -> {
                 val repository = SettingsRepository(context.dataStore, DataSource())
                 runBlocking {
                     val settings = repository.settings.first()
                     if (settings.alarms.isNotEmpty() && settings.user != null) {
-                        alarmsManager.createAlarmAndNotifyUser(
+                        createAlarmsManager.createAlarmAndNotifyUser(
                             repository,
                             settings.user,
                             settings.alarms,
                             settings.usePreviousAlarm
                         )
-                        alarmsManager.scheduleNextAlarmCreation()
+                        createAlarmsManager.scheduleNextAlarmCreation()
                     }
                 }
             }
@@ -68,28 +64,9 @@ class AlarmsReceiver : BroadcastReceiver() {
                         it.forHour.getMinutesNumber() == intent.extras?.getInt(ALARM_EXTRA)
                     }
                     if (alarm != null) {
-                        alarmsManager.deleteAlarms(alarm)
+                        createAlarmsManager.deleteAlarms(alarm)
                     }
                 }
-            }
-
-            START_ALARM_ACTION -> {
-                alarmsManager.startAlarm()
-            }
-
-            SNOOZE_ALARM_ACTION -> {
-                alarmsManager.snoozeAlarm()
-            }
-
-            CANCEL_SNOOZE_ALARM_ACTION -> {
-                val alarm = intent.extras?.getInt(ALARM_EXTRA)
-                if (alarm != null) {
-                    alarmsManager.cancelSnooze(alarm)
-                }
-            }
-
-            STOP_ALARM_ACTION -> {
-                alarmsManager.stopAlarm()
             }
 
             "android.intent.action.BOOT_COMPLETED" -> {
@@ -97,8 +74,8 @@ class AlarmsReceiver : BroadcastReceiver() {
                 runBlocking {
                     val settings = repository.settings.first()
                     if (settings.alarms.isNotEmpty() && settings.user != null) {
-                        alarmsManager.scheduleNextAlarmCreation()
-                        alarmsManager.createAlarmAndNotifyUser(
+                        createAlarmsManager.scheduleNextAlarmCreation()
+                        createAlarmsManager.createAlarmAndNotifyUser(
                             repository,
                             settings.user,
                             settings.alarms,
@@ -111,7 +88,7 @@ class AlarmsReceiver : BroadcastReceiver() {
             }
 
             else -> {
-                throw Error("Bad action")
+                throw Error("Bad action ${intent.action}")
             }
         }
 

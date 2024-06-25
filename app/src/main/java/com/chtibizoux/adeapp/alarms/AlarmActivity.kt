@@ -52,10 +52,12 @@ class AlarmActivity : ComponentActivity() {
             BuildConfig.APPLICATION_ID + ".FINISH_ALARM_ACTIVITY"
     }
 
-    private val broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+    private val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             if (intent.action == FINISH_ALARM_ACTIVITY_ACTION) {
                 finish()
+            } else {
+                throw Error("Bad action ${intent.action}")
             }
         }
     }
@@ -144,13 +146,7 @@ fun FullScreenAlarm() {
 
             Button(
                 onClick = {
-                    val snoozeAlarmIntent = Intent(
-                        context,
-                        AlarmsReceiver::class.java
-                    ).apply {
-                        action = AlarmsReceiver.SNOOZE_ALARM_ACTION
-                    }
-                    context.sendBroadcast(snoozeAlarmIntent)
+                    context.sendBroadcast(Intent(AlarmService.SNOOZE_ALARM_ACTION))
                 },
                 shape = RoundedCornerShape(20.dp),
             ) {
@@ -163,13 +159,7 @@ fun FullScreenAlarm() {
 
             Button(
                 onClick = {
-                    val stopAlarmIntent = Intent(
-                        context,
-                        AlarmsReceiver::class.java
-                    ).apply {
-                        action = AlarmsReceiver.STOP_ALARM_ACTION
-                    }
-                    context.sendBroadcast(stopAlarmIntent)
+                    context.sendBroadcast(Intent(AlarmService.STOP_ALARM_ACTION))
                 },
                 shape = RoundedCornerShape(24.dp),
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 30.dp)
