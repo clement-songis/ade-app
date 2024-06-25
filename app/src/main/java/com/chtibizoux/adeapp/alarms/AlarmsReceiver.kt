@@ -16,7 +16,7 @@ class AlarmsReceiver : BroadcastReceiver() {
     companion object {
         const val CREATE_ALARM_ACTION = BuildConfig.APPLICATION_ID + ".CREATE_ALARM"
         const val DELETE_ALARM_ACTION = BuildConfig.APPLICATION_ID + ".DELETE_ALARM"
-        const val ALARM_EXTRA = "alarm"
+        const val ALARM_EXTRA = "alarm_for_time"
 
         fun enable(context: Context) {
             val receiver = ComponentName(context, AlarmsReceiver::class.java)
@@ -61,7 +61,7 @@ class AlarmsReceiver : BroadcastReceiver() {
                 runBlocking {
                     val settings = repository.settings.first()
                     val alarm = settings.alarms.find {
-                        it.forHour.getMinutesNumber() == intent.extras?.getInt(ALARM_EXTRA)
+                        it.forHour.toString() == intent.extras?.getString(ALARM_EXTRA)
                     }
                     if (alarm != null) {
                         createAlarmsManager.deleteAlarms(alarm)

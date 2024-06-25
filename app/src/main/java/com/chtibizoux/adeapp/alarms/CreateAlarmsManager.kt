@@ -18,9 +18,8 @@ import java.util.Calendar
 
 class CreateAlarmsManager(private val context: Context) {
     companion object {
-        const val ALARM_CREATOR_REQUEST_CODE = 10
-        const val ALARM_REQUEST_CODE = 20
-        const val UPDATE_HOUR = 14
+        private const val ALARM_CREATOR_REQUEST_CODE = 10
+        private const val UPDATE_HOUR = 14
     }
 
     private val notificationManager = MyNotificationManager(context)
@@ -78,6 +77,7 @@ class CreateAlarmsManager(private val context: Context) {
 //        val calendar = Calendar.getInstance()
 //        calendar.add(Calendar.MINUTE, 1)
 //        createAlarm(Time(calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE)))
+//        createAlarm(Time(12, 0))
 
         try {
             val tomorrow = Calendar.getInstance()
@@ -95,7 +95,7 @@ class CreateAlarmsManager(private val context: Context) {
                         createAlarm(time)
                     }
                     if (notify) {
-                        notificationManager.showCreateAlarmSuccess(alarm.hours.size, result.data)
+                        notificationManager.showCreateAlarmSuccess(alarm.hours.size, alarm.forHour)
                     }
                 } else {
                     if (notify) {
@@ -139,6 +139,7 @@ class CreateAlarmsManager(private val context: Context) {
     }
 
     fun deleteAlarms(alarm: Alarm) {
+        notificationManager.cancelCreateNotification()
         for (time in alarm.hours) {
             alarmManager.cancel(AlarmsManager.getAlarmIntent(time.getMinutesNumber(), context))
         }

@@ -24,6 +24,8 @@ class MyNotificationManager(private val context: Context) {
         const val CREATE_ALARM_NOTIFICATION_ID = 2
         const val ALARM_ERROR_NOTIFICATION_ID = 3
         const val ALARM_SNOOZE_NOTIFICATION_ID = 4
+
+        const val NO_EXTRA_REQUEST_CODE = 0
     }
 
     private val notificationManager =
@@ -50,7 +52,7 @@ class MyNotificationManager(private val context: Context) {
         // Add Snooze action
         val snoozeIntent = Intent(AlarmService.SNOOZE_ALARM_ACTION)
         val snoozePendingIntent = PendingIntent.getBroadcast(
-            context, 0, snoozeIntent, PendingIntent.FLAG_IMMUTABLE
+            context, NO_EXTRA_REQUEST_CODE, snoozeIntent, PendingIntent.FLAG_IMMUTABLE
         )
         builder.addAction(
             R.drawable.ic_snooze,
@@ -61,7 +63,7 @@ class MyNotificationManager(private val context: Context) {
         // Add Dismiss Action
         val dismissIntent = Intent(AlarmService.STOP_ALARM_ACTION)
         val dismissPendingIntent = PendingIntent.getBroadcast(
-            context, 0, dismissIntent, PendingIntent.FLAG_IMMUTABLE
+            context, NO_EXTRA_REQUEST_CODE, dismissIntent, PendingIntent.FLAG_IMMUTABLE
         )
         builder.addAction(
             R.drawable.ic_alarm_off,
@@ -74,7 +76,7 @@ class MyNotificationManager(private val context: Context) {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
         }
         val showPendingIntent = PendingIntent.getActivity(
-            context, 0, showIntent, PendingIntent.FLAG_IMMUTABLE
+            context, NO_EXTRA_REQUEST_CODE, showIntent, PendingIntent.FLAG_IMMUTABLE
         )
         builder.setContentIntent(showPendingIntent)
 
@@ -84,9 +86,8 @@ class MyNotificationManager(private val context: Context) {
             action = "fullscreen_activity"
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_USER_ACTION
         }
-
         val fullScreenPendingIntent = PendingIntent.getActivity(
-            context, 0, fullScreenIntent, PendingIntent.FLAG_IMMUTABLE
+            context, NO_EXTRA_REQUEST_CODE, fullScreenIntent, PendingIntent.FLAG_IMMUTABLE
         )
         builder.setFullScreenIntent(fullScreenPendingIntent, true)
 
@@ -105,21 +106,21 @@ class MyNotificationManager(private val context: Context) {
             .setPriority(NotificationCompat.PRIORITY_HIGH)
 
         // Show alarms on notification click
-        val showIntent = Intent(AlarmClock.ACTION_SHOW_ALARMS).apply {
+        val showIntent = Intent(VIEW_ALARMS_ACTION).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK
         }
         val showPendingIntent = PendingIntent.getActivity(
-            context, 0, showIntent, PendingIntent.FLAG_IMMUTABLE
+            context, NO_EXTRA_REQUEST_CODE, showIntent, PendingIntent.FLAG_IMMUTABLE
         )
         builder.setContentIntent(showPendingIntent)
 
         // Add delete action
         val deleteIntent = Intent(context, AlarmsReceiver::class.java).apply {
             action = AlarmsReceiver.DELETE_ALARM_ACTION
-            putExtra(AlarmsReceiver.ALARM_EXTRA, forTime.getMinutesNumber())
+            putExtra(AlarmsReceiver.ALARM_EXTRA, forTime.toString())
         }
         val deletePendingIntent = PendingIntent.getBroadcast(
-            context, 0, deleteIntent, PendingIntent.FLAG_IMMUTABLE
+            context, forTime.getMinutesNumber(), deleteIntent, PendingIntent.FLAG_IMMUTABLE
         )
         builder.addAction(
             R.drawable.ic_cancel,
@@ -143,7 +144,7 @@ class MyNotificationManager(private val context: Context) {
             action = VIEW_ALARMS_ACTION
         }
         val showPendingIntent = PendingIntent.getActivity(
-            context, 0, showIntent, PendingIntent.FLAG_IMMUTABLE
+            context, NO_EXTRA_REQUEST_CODE, showIntent, PendingIntent.FLAG_IMMUTABLE
         )
         builder.setContentIntent(showPendingIntent)
 
@@ -153,7 +154,7 @@ class MyNotificationManager(private val context: Context) {
             putExtra(TIME_EXTRA, time.toString())
         }
         val addPendingIntent = PendingIntent.getActivity(
-            context, 0, addIntent, PendingIntent.FLAG_IMMUTABLE
+            context, time.getMinutesNumber(), addIntent, PendingIntent.FLAG_IMMUTABLE
         )
         builder.addAction(R.drawable.ic_add, context.getString(R.string.add), addPendingIntent)
 
@@ -173,7 +174,7 @@ class MyNotificationManager(private val context: Context) {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK
         }
         val showPendingIntent = PendingIntent.getActivity(
-            context, 0, showIntent, PendingIntent.FLAG_IMMUTABLE
+            context, NO_EXTRA_REQUEST_CODE, showIntent, PendingIntent.FLAG_IMMUTABLE
         )
         builder.setContentIntent(showPendingIntent)
 
@@ -202,13 +203,13 @@ class MyNotificationManager(private val context: Context) {
             action = VIEW_ALARMS_ACTION
         }
         val showPendingIntent = PendingIntent.getActivity(
-            context, 0, showIntent, PendingIntent.FLAG_IMMUTABLE
+            context, NO_EXTRA_REQUEST_CODE, showIntent, PendingIntent.FLAG_IMMUTABLE
         )
         builder.setContentIntent(showPendingIntent)
 
         val retryIntent = Intent(context, AlarmsReceiver::class.java)
         val retryPendingIntent = PendingIntent.getBroadcast(
-            context, 0, retryIntent, PendingIntent.FLAG_IMMUTABLE
+            context, NO_EXTRA_REQUEST_CODE, retryIntent, PendingIntent.FLAG_IMMUTABLE
         )
         builder.addAction(R.drawable.ic_sync, context.getString(R.string.retry), retryPendingIntent)
 
@@ -227,10 +228,10 @@ class MyNotificationManager(private val context: Context) {
 
         // Add Dismiss Action
         val dismissIntent = Intent(AlarmService.CANCEL_SNOOZE_ALARM_ACTION).apply {
-            putExtra(AlarmsReceiver.ALARM_EXTRA, time.getMinutesNumber())
+            putExtra(AlarmService.SNOOZE_TIME_EXTRA, time.toString())
         }
         val dismissPendingIntent = PendingIntent.getBroadcast(
-            context, 0, dismissIntent, PendingIntent.FLAG_IMMUTABLE
+            context, time.getMinutesNumber(), dismissIntent, PendingIntent.FLAG_IMMUTABLE
         )
         builder.addAction(
             R.drawable.ic_alarm_off,
@@ -243,5 +244,9 @@ class MyNotificationManager(private val context: Context) {
 
     fun cancelSnoozeNotification() {
         notificationManager.cancel(ALARM_SNOOZE_NOTIFICATION_ID)
+    }
+
+    fun cancelCreateNotification() {
+        notificationManager.cancel(CREATE_ALARM_NOTIFICATION_ID)
     }
 }

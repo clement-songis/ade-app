@@ -9,6 +9,7 @@ import android.content.IntentFilter
 import android.os.Build
 import android.os.IBinder
 import com.chtibizoux.adeapp.BuildConfig
+import com.chtibizoux.adeapp.data.Time
 
 class AlarmService : Service() {
     companion object {
@@ -16,6 +17,7 @@ class AlarmService : Service() {
         const val STOP_ALARM_ACTION = BuildConfig.APPLICATION_ID + ".STOP_ALARM"
         const val SNOOZE_ALARM_ACTION = BuildConfig.APPLICATION_ID + ".SNOOZE_ALARM"
         const val CANCEL_SNOOZE_ALARM_ACTION = BuildConfig.APPLICATION_ID + ".CANCEL_SNOOZE_ALARM"
+        const val SNOOZE_TIME_EXTRA = "snooze_time"
     }
 
     private lateinit var alarmsManager: AlarmsManager
@@ -28,9 +30,9 @@ class AlarmService : Service() {
                 }
 
                 CANCEL_SNOOZE_ALARM_ACTION -> {
-                    val alarm = intent.extras?.getInt(AlarmsReceiver.ALARM_EXTRA)
-                    if (alarm != null) {
-                        alarmsManager.cancelSnooze(alarm)
+                    val time = Time.fromString(intent.extras?.getString(SNOOZE_TIME_EXTRA) ?: "")
+                    if (time != null) {
+                        alarmsManager.cancelSnooze(time)
                     }
                 }
 

@@ -15,6 +15,8 @@ import java.util.Calendar
 
 class AlarmsManager(private val service: Service) {
     companion object {
+        private const val ALARM_REQUEST_CODE = 20
+
         fun getAlarmIntent(time: Int, context: Context): PendingIntent {
             val alarmIntent = Intent(context, AlarmService::class.java).apply {
                 action = AlarmService.START_ALARM_ACTION
@@ -22,14 +24,14 @@ class AlarmsManager(private val service: Service) {
             return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 PendingIntent.getForegroundService(
                     context,
-                    CreateAlarmsManager.ALARM_REQUEST_CODE + time,
+                    ALARM_REQUEST_CODE + time,
                     alarmIntent,
                     PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                 )
             } else {
                 PendingIntent.getService(
                     context,
-                    CreateAlarmsManager.ALARM_REQUEST_CODE + time,
+                    ALARM_REQUEST_CODE + time,
                     alarmIntent,
                     PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                 )
@@ -96,8 +98,8 @@ class AlarmsManager(private val service: Service) {
         alarmManager.setAlarmClock(alarmClockInfo, pendingIntent)
     }
 
-    fun cancelSnooze(time: Int) {
-        alarmManager.cancel(getAlarmIntent(time, service))
+    fun cancelSnooze(time: Time) {
+        alarmManager.cancel(getAlarmIntent(time.getMinutesNumber(), service))
         notificationManager.cancelSnoozeNotification()
     }
 }
