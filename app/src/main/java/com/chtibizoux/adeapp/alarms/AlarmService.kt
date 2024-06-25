@@ -67,13 +67,13 @@ class AlarmService : Service() {
         }
     }
 
-    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val state = super.onStartCommand(intent, flags, startId)
 
-        if (intent.action == START_ALARM_ACTION) {
+        if (intent?.action == START_ALARM_ACTION) {
             alarmsManager.startAlarm()
         } else {
-            throw Error("Bad action ${intent.action}")
+            throw Error("Bad action ${intent?.action}")
         }
 
         return state

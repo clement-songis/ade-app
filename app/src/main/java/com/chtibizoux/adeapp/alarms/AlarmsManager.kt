@@ -19,12 +19,21 @@ class AlarmsManager(private val service: Service) {
             val alarmIntent = Intent(context, AlarmService::class.java).apply {
                 action = AlarmService.START_ALARM_ACTION
             }
-            return PendingIntent.getService(
-                context,
-                CreateAlarmsManager.ALARM_REQUEST_CODE + time,
-                alarmIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
+            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                PendingIntent.getForegroundService(
+                    context,
+                    CreateAlarmsManager.ALARM_REQUEST_CODE + time,
+                    alarmIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+            } else {
+                PendingIntent.getService(
+                    context,
+                    CreateAlarmsManager.ALARM_REQUEST_CODE + time,
+                    alarmIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+            }
         }
     }
 
