@@ -88,6 +88,11 @@ class AlarmsManager(private val context: Context) {
         usePreviousAlarm: Boolean,
         notify: Boolean = true
     ) {
+        // Test
+//        val calendar = Calendar.getInstance()
+//        calendar.add(Calendar.MINUTE, 1)
+//        createAlarm(Time(calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE)))
+
         try {
             val tomorrow = Calendar.getInstance()
             tomorrow.add(Calendar.DATE, 1)

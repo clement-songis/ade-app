@@ -179,11 +179,13 @@ fun TimetableContent(
                 Modifier.padding(padding).nestedScroll(state.nestedScrollConnection)
             ) {
                 HorizontalPager(pagerState) { page ->
-                    Day(navController, calendar.days[page], children) { offset ->
+                    Day(navController, calendar.days[page], children, { offset ->
                         coroutineScope.launch {
                             pagerState.animateScrollToPage(page + offset)
                         }
-                    }
+                    }, {
+                        state.startRefresh()
+                    })
                 }
                 PullToRefreshContainer(
                     modifier = Modifier.align(Alignment.TopCenter),
@@ -220,12 +222,13 @@ private fun Day(
     navController: NavController,
     day: Day<Event>,
     children: List<Resource>,
-    scrollTo: (offset: Int) -> Unit
+    scrollTo: (offset: Int) -> Unit,
+    refresh: () -> Unit
 ) {
     if (children.isEmpty()) {
         SingleColumn(day.events, navController)
     } else {
-        MultipleColumn(children, day.events, navController, scrollTo)
+        MultipleColumn(children, day.events, navController, scrollTo, refresh)
     }
 }
 
@@ -249,7 +252,8 @@ fun MultipleColumn(
     children: List<Resource>,
     events: List<Event>,
     navController: NavController,
-    scrollTo: (offset: Int) -> Unit
+    scrollTo: (offset: Int) -> Unit,
+    refresh: () -> Unit
 ) {
     val localDensity = LocalDensity.current
 
@@ -275,6 +279,9 @@ fun MultipleColumn(
                     .coerceAtMost(0f)
             )
         )
+        if (newOffset.y > MINIMUM_SWIPE_OFFSET) {
+            refresh()
+        }
         if (newOffset.x > MINIMUM_SWIPE_OFFSET) {
             scrollTo(-1)
         }
