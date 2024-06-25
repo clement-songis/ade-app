@@ -100,7 +100,9 @@ fun WaitForCalendar(
 ) {
     if (calendar == null) {
         Box(
-            modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background),
             contentAlignment = Alignment.Center,
         ) {
             Column(
@@ -130,7 +132,9 @@ fun TimetableContent(
 ) {
     if (calendar.days.isEmpty()) {
         Box(
-            modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background),
             contentAlignment = Alignment.Center,
         ) {
             Text(stringResource(R.string.no_calendar), color = Color.White)
@@ -176,7 +180,9 @@ fun TimetableContent(
             },
         ) { padding ->
             Box(
-                Modifier.padding(padding).nestedScroll(state.nestedScrollConnection)
+                Modifier
+                    .padding(padding)
+                    .nestedScroll(state.nestedScrollConnection)
             ) {
                 HorizontalPager(pagerState) { page ->
                     Day(navController, calendar.days[page], children, { offset ->
@@ -279,14 +285,12 @@ fun MultipleColumn(
                     .coerceAtMost(0f)
             )
         )
-        if (newOffset.y > MINIMUM_SWIPE_OFFSET) {
-            refresh()
-        }
         if (newOffset.x > MINIMUM_SWIPE_OFFSET) {
             scrollTo(-1)
-        }
-        if (newOffset.x < -width * (scale - 1) - MINIMUM_SWIPE_OFFSET) {
+        } else if (newOffset.x < -width * (scale - 1) - MINIMUM_SWIPE_OFFSET) {
             scrollTo(1)
+        } else if (newOffset.y > MINIMUM_SWIPE_OFFSET) {
+            refresh()
         }
     }
 
@@ -302,7 +306,11 @@ fun MultipleColumn(
             .transformable(transformableState)
             .wrapContentSize(unbounded = true, align = Alignment.TopStart)
     ) {
-        Box(Modifier.padding(start = TIME_WIDTH.dp).clipToBounds()) {
+        Box(
+            Modifier
+                .padding(start = TIME_WIDTH.dp)
+                .clipToBounds()
+        ) {
             Header(leaves, hourWidth, offset.x)
         }
         Row(Modifier.clipToBounds()) {
@@ -375,7 +383,9 @@ fun getAllChildren(resources: List<Resource>): List<Resource> {
 @Composable
 fun Header(leaves: List<Resource>, hourWidth: Float, offsetX: Float = 0f) {
     Row(
-        modifier = Modifier.offset(x = offsetX.dp).height(HEADER_HEIGHT.dp),
+        modifier = Modifier
+            .offset(x = offsetX.dp)
+            .height(HEADER_HEIGHT.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         leaves.forEach {
@@ -393,8 +403,10 @@ fun Header(leaves: List<Resource>, hourWidth: Float, offsetX: Float = 0f) {
 fun Hours(startHour: Int, endHour: Int, hourHeight: Int, offsetY: Float = 0f) {
     val ROW_HEIGHT = 20
     Column(
-        modifier = Modifier.padding(vertical = (VERTICAL_PADDING - ROW_HEIGHT / 2f).dp)
-            .offset(y = offsetY.dp).width(TIME_WIDTH.dp),
+        modifier = Modifier
+            .padding(vertical = (VERTICAL_PADDING - ROW_HEIGHT / 2f).dp)
+            .offset(y = offsetY.dp)
+            .width(TIME_WIDTH.dp),
         verticalArrangement = Arrangement.spacedBy((hourHeight - ROW_HEIGHT).dp)
     ) {
         (startHour..endHour).forEachIndexed { _, nb ->
@@ -411,7 +423,8 @@ fun Hours(startHour: Int, endHour: Int, hourHeight: Int, offsetY: Float = 0f) {
         }
     }
     VerticalDivider(
-        Modifier.offset(y = offsetY.dp)
+        Modifier
+            .offset(y = offsetY.dp)
             .height((hourHeight * (endHour - startHour) + VERTICAL_PADDING * 2).dp),
         thickness = MAIN_DIVIDER_HEIGHT.dp
     )
@@ -443,7 +456,8 @@ fun Background(
     }
     if (hourWidth != null) {
         Row(
-            modifier = Modifier.height((hourHeight * (endHour - startHour) + VERTICAL_PADDING * 2).dp)
+            modifier = Modifier
+                .height((hourHeight * (endHour - startHour) + VERTICAL_PADDING * 2).dp)
                 .padding(horizontal = (hourWidth - 0.5).dp),
             horizontalArrangement = Arrangement.spacedBy((hourWidth - 1).dp)
         ) {
@@ -475,9 +489,13 @@ fun EventElement(
     val mod = Modifier.height((height * hourHeight).dp)
     Surface(
         modifier = if (hourWidth == null) {
-            mod.fillMaxWidth().offset(y = yOffset)
+            mod
+                .fillMaxWidth()
+                .offset(y = yOffset)
         } else {
-            mod.width((hourWidth * size).dp).offset(x = (index * hourWidth).dp, y = yOffset)
+            mod
+                .width((hourWidth * size).dp)
+                .offset(x = (index * hourWidth).dp, y = yOffset)
         },
         color = event.getColor(),
         contentColor = Color.Black,
