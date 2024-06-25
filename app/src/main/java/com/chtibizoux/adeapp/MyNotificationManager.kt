@@ -33,7 +33,7 @@ class MyNotificationManager(private val context: Context) {
 
     fun showAlarmNotification() {
         val calendar = Calendar.getInstance()
-        val timeFormat = SimpleDateFormat("hh:mm", Locale.getDefault())
+        val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
         val time = timeFormat.format(calendar.time)
 
         val builder = NotificationCompat.Builder(context, ALARMS_CHANNEL_ID)
