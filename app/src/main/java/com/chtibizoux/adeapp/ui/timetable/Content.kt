@@ -87,6 +87,8 @@ const val TIME_WIDTH = 70
 const val START_HOUR = 8
 const val END_HOUR = 19
 
+const val MINIMUM_SWIPE_OFFSET = 40
+
 @Composable
 fun WaitForCalendar(
     navController: NavController,
@@ -273,10 +275,10 @@ fun MultipleColumn(
                     .coerceAtMost(0f)
             )
         )
-        if (newOffset.x > 50) {
+        if (newOffset.x > MINIMUM_SWIPE_OFFSET) {
             scrollTo(-1)
         }
-        if (newOffset.x < -width * (scale - 1) - 50) {
+        if (newOffset.x < -width * (scale - 1) - MINIMUM_SWIPE_OFFSET) {
             scrollTo(1)
         }
     }
