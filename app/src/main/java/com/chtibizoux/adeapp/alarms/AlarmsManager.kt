@@ -45,6 +45,7 @@ class AlarmsManager(private val service: Service) {
 
     fun startAlarm() {
         stopAlarm()
+        notificationManager.cancelSnoozeNotification()
 
         wakelockManager.acquire()
 
