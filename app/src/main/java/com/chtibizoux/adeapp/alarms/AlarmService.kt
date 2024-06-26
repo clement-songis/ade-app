@@ -81,8 +81,8 @@ class AlarmService : Service() {
         return state
     }
 
-    override fun onBind(intent: Intent): IBinder {
-        TODO("Return the communication channel to the service.")
+    override fun onBind(intent: Intent): IBinder? {
+        return null
     }
 
     override fun onDestroy() {

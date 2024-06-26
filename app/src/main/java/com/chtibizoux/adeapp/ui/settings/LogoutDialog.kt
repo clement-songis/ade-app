@@ -1,11 +1,8 @@
-package com.chtibizoux.adeapp.ui.timetable
+package com.chtibizoux.adeapp.ui.settings
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,14 +12,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,17 +25,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import androidx.navigation.NavController
 import com.chtibizoux.adeapp.R
-import com.chtibizoux.adeapp.data.xml.Event
-import com.chtibizoux.adeapp.ui.RootScreen
 
-
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun EventDialog(navController: NavController, event: Event, onClose: () -> Unit) {
+fun LogoutDialog(onClose: (Boolean?) -> Unit) {
     Dialog(
-        onDismissRequest = onClose,
+        onDismissRequest = { onClose(null) },
         properties = DialogProperties(usePlatformDefaultWidth = false),
     ) {
         Surface(
@@ -64,50 +52,21 @@ fun EventDialog(navController: NavController, event: Event, onClose: () -> Unit)
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                Text(event.name, fontSize = 20.sp, textAlign = TextAlign.Center)
                 Text(
-                    "${event.date} • ${event.startHour} − ${event.endHour}",
+                    stringResource(R.string.clear_data),
+                    fontSize = 20.sp,
                     textAlign = TextAlign.Center
                 )
-                event.resources.groupBy { it.category }.forEach { resources ->
-                    FlowRow(
-                        horizontalArrangement = Arrangement.spacedBy(
-                            10.dp,
-                            Alignment.CenterHorizontally
-                        )
-                    ) {
-                        resources.value.forEach { resource ->
-                            Text("${resource.name} (${resource.id})", modifier = Modifier.clickable {
-                                navController.navigate("${RootScreen.Timetable.name}/${resource.id}?date=${event.date}")
-                            }, textAlign = TextAlign.Center)
-                        }
-                    }
-                }
                 Row(
                     modifier = Modifier
                         .height(40.dp)
                         .fillMaxWidth()
                 ) {
+                    TextButton(onClick = { onClose(false) }) { Text(stringResource(R.string.no)) }
                     Spacer(modifier = Modifier.weight(1f))
-                    TextButton(onClick = onClose) { Text(stringResource(R.string.close)) }
+                    TextButton(onClick = { onClose(true) }) { Text(stringResource(R.string.yes)) }
                 }
             }
         }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun MyDatePickerDialog(initialDate: Long, onDateSelected: (Long?) -> Unit) {
-    val datePickerState = rememberDatePickerState(initialDate)
-
-    DatePickerDialog(onDismissRequest = { onDateSelected(null) }, confirmButton = {
-        TextButton(onClick = {
-            onDateSelected(datePickerState.selectedDateMillis)
-        }) {
-            Text(stringResource(R.string.ok))
-        }
-    }) {
-        DatePicker(datePickerState)
     }
 }

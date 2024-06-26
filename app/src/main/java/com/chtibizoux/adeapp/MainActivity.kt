@@ -12,33 +12,10 @@ import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.chtibizoux.adeapp.data.dataStore
-import com.chtibizoux.adeapp.ui.AppState
-import com.chtibizoux.adeapp.ui.Root
-import com.chtibizoux.adeapp.ui.SettingsViewModel
-import com.chtibizoux.adeapp.ui.SettingsViewModelFactory
-import com.chtibizoux.adeapp.ui.login.Login
-import com.chtibizoux.adeapp.ui.startup.Startup
-import com.chtibizoux.adeapp.ui.theme.ADEAppTheme
+import com.chtibizoux.adeapp.ui.Application
 
 const val ALARMS_CHANNEL_ID = "alarm_id"
 
@@ -82,50 +59,6 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             Application()
-        }
-    }
-}
-
-@Composable
-fun Application(
-    viewModel: SettingsViewModel = viewModel(
-        factory = SettingsViewModelFactory(LocalContext.current.dataStore)
-    )
-) {
-    ADEAppTheme {
-        when (viewModel.appState) {
-            AppState.CONNECTED -> Root(viewModel)
-            AppState.FIRST_CONNECTION -> Startup(viewModel)
-            AppState.LOADING -> Loading()
-            AppState.GET_STARTING_TIMES_FAILED -> Retry(viewModel)
-            AppState.DISCONNECTED -> Login(viewModel)
-        }
-    }
-}
-
-@Composable
-private fun Retry(viewModel: SettingsViewModel) {
-    Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-        Box(contentAlignment = Alignment.Center) {
-            Column {
-                Text(stringResource(R.string.get_starting_times_error))
-                Button(onClick = { viewModel.retry() }) {
-                    Text(stringResource(R.string.retry))
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun Loading() {
-    Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-        Box(contentAlignment = Alignment.Center) {
-            CircularProgressIndicator(
-                modifier = Modifier.size(80.dp),
-                strokeCap = StrokeCap.Round,
-                strokeWidth = 8.dp
-            )
         }
     }
 }

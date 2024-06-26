@@ -27,7 +27,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.chtibizoux.adeapp.R
 import com.chtibizoux.adeapp.ui.SettingsViewModel
 import com.chtibizoux.adeapp.ui.nextFocus
-import com.chtibizoux.adeapp.ui.nextFocusKeyboardAction
+import com.chtibizoux.adeapp.ui.submitKeyboardAction
 
 @Composable
 fun Login(settingsViewModel: SettingsViewModel, loginViewModel: LoginViewModel = viewModel()) {
@@ -64,8 +64,8 @@ fun Login(settingsViewModel: SettingsViewModel, loginViewModel: LoginViewModel =
                     .fillMaxWidth()
                     .nextFocus(),
                 label = { Text(stringResource(R.string.link)) },
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                keyboardActions = nextFocusKeyboardAction(),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Go),
+                keyboardActions = submitKeyboardAction(::login),
                 isError = loginViewModel.linkError != null,
                 supportingText = {
                     if (loginViewModel.linkError != null) {
@@ -79,7 +79,7 @@ fun Login(settingsViewModel: SettingsViewModel, loginViewModel: LoginViewModel =
                 singleLine = true
             )
 
-            Button(onClick = { login() }, enabled = loginViewModel.linkError == null) {
+            Button(onClick = ::login, enabled = loginViewModel.linkError == null) {
                 Text(stringResource(R.string.login))
             }
         }
