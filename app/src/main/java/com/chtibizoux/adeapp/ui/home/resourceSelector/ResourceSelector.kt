@@ -12,7 +12,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
@@ -30,7 +29,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.chtibizoux.adeapp.R
 import com.chtibizoux.adeapp.ui.SettingsViewModel
-import com.chtibizoux.adeapp.ui.home.SettingsButton
+import com.chtibizoux.adeapp.ui.SettingsButton
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -55,18 +54,12 @@ fun ResourceSelector(
             state.endRefresh()
         }
     }
-    Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(colors = TopAppBarDefaults.topAppBarColors(
-//                containerColor = MaterialTheme.colorScheme.primaryContainer,
-//                titleContentColor = MaterialTheme.colorScheme.primary,
-            ), title = {
-                Text(stringResource(R.string.other_timetables))
-            }, actions = {
-                SettingsButton(navController)
-            })
-        },
-    ) { padding ->
+    Scaffold(topBar = {
+        CenterAlignedTopAppBar(
+            title = { Text(stringResource(R.string.other_timetables)) },
+            actions = { SettingsButton(navController) }
+        )
+    }) { padding ->
         Surface(
             modifier = Modifier
                 .padding(padding),

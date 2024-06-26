@@ -106,10 +106,3 @@ fun Home(rootNavController: NavController, viewModel: SettingsViewModel) {
         }
     }
 }
-
-@Composable
-fun SettingsButton(navController: NavController) {
-    IconButton(onClick = { navController.navigate(RootScreen.Settings.name) }) {
-        Icon(Icons.Filled.Settings, stringResource(R.string.settings))
-    }
-}

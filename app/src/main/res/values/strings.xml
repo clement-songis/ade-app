@@ -71,4 +71,9 @@
     <string name="snoozed">Alarm snoozed</string>
     <string name="alarm">Alarm</string>
     <string name="unable_to_set_exact_alarm">Unable to set exact alarm</string>
+    <string name="change_timetable_view">Change timetable view</string>
+    <string name="big_interval">From %1$s to %2$s</string>
+    <string name="medium_interval">From %1$s to %2$s, %3$s</string>
+    <string name="short_interval">From %3$s %1$s to %2$s, %4$s</string>
+    <string name="date_month_pattern">MMMM d</string>
 </resources>

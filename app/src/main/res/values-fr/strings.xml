@@ -70,4 +70,9 @@
     <string name="snoozed">Alarme répétée</string>
     <string name="alarm">Alarme</string>
     <string name="unable_to_set_exact_alarm">Impossible de définir l\'alarme exacte</string>
+    <string name="change_timetable_view">Modifier la vue de l\'emploi du temps</string>
+    <string name="big_interval">Du %1$s au %2$s</string>
+    <string name="medium_interval">Du %1$s au %2$s %3$s</string>
+    <string name="short_interval">Du %1$s au %2$s %3$s %4$s</string>
+    <string name="date_month_pattern">d MMMM</string>
 </resources>

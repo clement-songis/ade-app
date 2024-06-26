@@ -13,17 +13,20 @@ import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+
+const val TIME_WIDTH = 70
 
 private const val ROW_HEIGHT = 20
 
 @Composable
-fun Hours(startHour: Int, endHour: Int, hourHeight: Int, offsetY: Float = 0f) {
+fun Hours(startHour: Int, endHour: Int, hourHeight: Int, offset: IntOffset = IntOffset.Zero) {
     Column(
         modifier = Modifier
             .padding(vertical = (VERTICAL_PADDING - ROW_HEIGHT / 2f).dp)
-            .offset(y = offsetY.dp)
+            .offset { offset }
             .width(TIME_WIDTH.dp),
         verticalArrangement = Arrangement.spacedBy((hourHeight - ROW_HEIGHT).dp)
     ) {
@@ -42,7 +45,7 @@ fun Hours(startHour: Int, endHour: Int, hourHeight: Int, offsetY: Float = 0f) {
     }
     VerticalDivider(
         Modifier
-            .offset(y = offsetY.dp)
+            .offset { offset }
             .height((hourHeight * (endHour - startHour) + VERTICAL_PADDING * 2).dp),
         thickness = MAIN_DIVIDER_HEIGHT.dp
     )

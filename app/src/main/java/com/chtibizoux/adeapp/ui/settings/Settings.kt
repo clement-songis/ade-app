@@ -47,6 +47,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import com.chtibizoux.adeapp.R
+import com.chtibizoux.adeapp.ui.BackButton
 import com.chtibizoux.adeapp.ui.SettingsViewModel
 import com.chtibizoux.adeapp.ui.atLeast
 import com.chtibizoux.adeapp.ui.clearFocusKeyboardAction
@@ -56,20 +57,12 @@ import com.chtibizoux.adeapp.ui.nextFocusKeyboardAction
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Settings(navController: NavController, viewModel: SettingsViewModel) {
-    Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(colors = TopAppBarDefaults.topAppBarColors(
-//                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-//                    titleContentColor = MaterialTheme.colorScheme.primary,
-            ), title = {
-                Text(stringResource(R.string.settings))
-            }, navigationIcon = {
-                IconButton(onClick = { navController.navigateUp() }) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.back))
-                }
-            })
-        },
-    ) { padding ->
+    Scaffold(topBar = {
+        CenterAlignedTopAppBar(
+            title = { Text(stringResource(R.string.settings)) },
+            navigationIcon = { BackButton(navController) }
+        )
+    }) { padding ->
         Surface(
             modifier = Modifier
                 .fillMaxSize()

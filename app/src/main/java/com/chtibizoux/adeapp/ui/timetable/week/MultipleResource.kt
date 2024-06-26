@@ -1,0 +1,97 @@
+package com.chtibizoux.adeapp.ui.timetable.week
+
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import com.chtibizoux.adeapp.data.xml.Day
+import com.chtibizoux.adeapp.data.xml.Event
+import com.chtibizoux.adeapp.data.xml.Resource
+import com.chtibizoux.adeapp.ui.timetable.Background
+import com.chtibizoux.adeapp.ui.timetable.EventElement
+import com.chtibizoux.adeapp.ui.timetable.HOUR_HEIGHT
+import com.chtibizoux.adeapp.ui.timetable.Hours
+import com.chtibizoux.adeapp.ui.timetable.MultipleResourcesHeader
+import com.chtibizoux.adeapp.ui.timetable.TIME_WIDTH
+import com.chtibizoux.adeapp.ui.timetable.ZoomableComponent
+import com.chtibizoux.adeapp.ui.timetable.day.getAllChildren
+import com.chtibizoux.adeapp.ui.timetable.day.getLeaves
+
+@Composable
+fun MultipleResource(
+    week: List<Day<Event>>,
+    navController: NavController,
+    children: List<Resource>,
+    startHour: Int,
+    endHour: Int,
+    xScrollEnabled: MutableState<Boolean>,
+    yScrollEnabled: MutableState<Boolean>
+) {
+    val leaves = getLeaves(children)
+    val allChildren = getAllChildren(children)
+
+    fun getHourWidth(width: Float) = width / (leaves.size * week.size)
+
+    //    fun getHourHeight(height: Float) = (height - VERTICAL_PADDING * 2) / (END_HOUR - START_HOUR)
+    fun getHourHeight(height: Float) = HOUR_HEIGHT
+
+    ZoomableComponent(
+        xScrollEnabled,
+        yScrollEnabled,
+        TIME_WIDTH.dp,
+        header = { offset, width ->
+            WeekMultipleResourcesHeader(leaves, week, getHourWidth(width), offset)
+        },
+        leftSide = { offset, height ->
+            Hours(startHour, endHour, getHourHeight(height), offset)
+        }
+    ) { width, height ->
+        val hourWidth = getHourWidth(width)
+        val hourHeight = getHourHeight(height)
+
+        Background(startHour, endHour, hourHeight, hourWidth, leaves.size)
+        Row {
+            week.forEach { day ->
+                Box {
+                    day.events.forEach { event ->
+                        val resource =
+                            allChildren.find { resource -> event.resources.find { resource.name == it.name && resource.id == it.id } != null }
+
+                        if (resource != null) {
+                            val (index, length) = if (resource.children.isNotEmpty()) {
+                                val eventResourceLeaves = getLeaves(resource.children)
+                                Pair(
+                                    leaves.indexOf(eventResourceLeaves.first()),
+                                    eventResourceLeaves.size
+                                )
+                            } else {
+                                Pair(leaves.indexOf(resource), 1)
+                            }
+
+                            EventElement(
+                                navController,
+                                event,
+                                startHour,
+                                hourHeight,
+                                hourWidth,
+                                length,
+                                index
+                            )
+                        } else {
+                            EventElement(
+                                navController,
+                                event,
+                                startHour,
+                                hourHeight,
+                                hourWidth,
+                                leaves.size
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

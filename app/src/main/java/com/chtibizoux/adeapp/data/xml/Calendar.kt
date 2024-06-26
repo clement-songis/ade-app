@@ -12,7 +12,10 @@ val calendarDateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.FRANCE)
 @Serializable
 data class Calendar(val days: List<Day<Event>>) {
     fun getPage(date: Date = Date()): Int {
-        val index = this.days.indexOfFirst { it.getDate() >= calendarDateFormat.parse(calendarDateFormat.format(date)) }
+        // TODO: Maybe last event to switch day if it's evening or add 18h to getDate
+        val index = this.days.indexOfFirst {
+            it.getDate() >= calendarDateFormat.parse(calendarDateFormat.format(date))
+        }
         return if (index == -1) this.days.size - 1 else index
     }
 }

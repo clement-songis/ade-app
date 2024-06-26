@@ -81,12 +81,10 @@ class MyNotificationManager(private val context: Context) {
 
         // Setup fullscreen intent
         val fullScreenIntent = Intent(context, AlarmActivity::class.java).apply {
-            // set action, so we can be different then content pending intent
-            action = "fullscreen_activity"
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_USER_ACTION
         }
         val fullScreenPendingIntent = PendingIntent.getActivity(
-            context, NO_EXTRA_REQUEST_CODE, fullScreenIntent, PendingIntent.FLAG_IMMUTABLE
+            context, NO_EXTRA_REQUEST_CODE + 1, fullScreenIntent, PendingIntent.FLAG_IMMUTABLE
         )
         builder.setFullScreenIntent(fullScreenPendingIntent, true)
 

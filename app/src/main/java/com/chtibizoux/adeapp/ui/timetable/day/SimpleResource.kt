@@ -14,7 +14,7 @@ import com.chtibizoux.adeapp.ui.timetable.HOUR_HEIGHT
 import com.chtibizoux.adeapp.ui.timetable.Hours
 
 @Composable
-fun SingleColumn(events: List<Event>, navController: NavController, startHour: Int, endHour: Int) {
+fun SimpleResource(events: List<Event>, navController: NavController, startHour: Int, endHour: Int) {
     Row(Modifier.verticalScroll(rememberScrollState())) {
         Hours(startHour, endHour, HOUR_HEIGHT)
         Box {
