@@ -20,9 +20,11 @@ class SettingsRepository(
     }
 
     suspend fun login(user: User): Boolean {
-        // TODO: Check connection
-        dataStore.updateData { settings -> settings.copy(user = user) }
-        return true
+        val isValidUser = dataSource.checkConnection(user)
+        if (isValidUser) {
+            dataStore.updateData { settings -> settings.copy(user = user) }
+        }
+        return isValidUser
     }
 
     suspend fun closeStartup() {

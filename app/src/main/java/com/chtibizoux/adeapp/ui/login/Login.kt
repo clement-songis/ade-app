@@ -64,7 +64,7 @@ fun Login(settingsViewModel: SettingsViewModel, loginViewModel: LoginViewModel =
                     .fillMaxWidth()
                     .nextFocus(),
                 label = { Text(stringResource(R.string.link)) },
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Go),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                 keyboardActions = submitKeyboardAction(::login),
                 isError = loginViewModel.linkError != null,
                 supportingText = {

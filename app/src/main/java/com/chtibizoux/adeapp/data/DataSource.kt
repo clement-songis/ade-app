@@ -1,8 +1,10 @@
 package com.chtibizoux.adeapp.data
 
 import android.icu.text.SimpleDateFormat
+import android.util.Xml
 import com.chtibizoux.adeapp.data.xml.Calendar
 import com.chtibizoux.adeapp.data.xml.CalendarParser
+import com.chtibizoux.adeapp.data.xml.Category
 import com.chtibizoux.adeapp.data.xml.Day
 import com.chtibizoux.adeapp.data.xml.Resource
 import com.chtibizoux.adeapp.data.xml.ResourceTree
@@ -12,6 +14,7 @@ import com.chtibizoux.adeapp.data.xml.SimpleCalendarParser
 import com.chtibizoux.adeapp.data.xml.SimpleEvent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.xmlpull.v1.XmlPullParser
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
@@ -107,32 +110,33 @@ class DataSource {
     suspend fun getCalendar(user: User): Result<Calendar> = withContext(Dispatchers.IO) {
         try {
             val calendar = fetchEvents(user)
-            return@withContext Result.Success(calendar)
+            Result.Success(calendar)
         } catch (e: Throwable) {
             System.err.println(e)
-            return@withContext Result.Error(IOException("Error getting calendar", e))
+            Result.Error(IOException("Error getting calendar", e))
         }
     }
 
     suspend fun getResources(user: User): Result<ResourceTree> = withContext(Dispatchers.IO) {
         try {
             val resources = fetchResources(user)
-            return@withContext Result.Success(resources)
+            Result.Success(resources)
         } catch (e: Throwable) {
             System.err.println(e)
-            return@withContext Result.Error(IOException("Error getting resources", e))
+            Result.Error(IOException("Error getting resources", e))
         }
     }
 
-    suspend fun getChildren(user: User, father: Int): Result<List<Resource>> = withContext(Dispatchers.IO) {
-        try {
-            val resource = fetchChildren(user, father)
-            return@withContext Result.Success(resource)
-        } catch (e: Throwable) {
-            System.err.println(e)
-            return@withContext Result.Error(IOException("Error getting children", e))
+    suspend fun getChildren(user: User, father: Int): Result<List<Resource>> =
+        withContext(Dispatchers.IO) {
+            try {
+                val resource = fetchChildren(user, father)
+                Result.Success(resource)
+            } catch (e: Throwable) {
+                System.err.println(e)
+                Result.Error(IOException("Error getting children", e))
+            }
         }
-    }
 
     private fun startingTimes(days: List<Day<SimpleEvent>>): List<Time> {
         val hours = mutableListOf<Time>()
@@ -145,28 +149,68 @@ class DataSource {
         return hours.toSet().sortedBy { it.getMinutesNumber() }
     }
 
-    suspend fun getStartingTime(user: User, date: Date): Result<Time> = withContext(Dispatchers.IO) {
-        try {
-            val (days) = fetchSimpleEvents(user, date)
-            val hours = startingTimes(days)
-            if (hours.size != 1) {
-                throw BadHoursError("Bad hours number ${hours.size}")
+    suspend fun getStartingTime(user: User, date: Date): Result<Time> =
+        withContext(Dispatchers.IO) {
+            try {
+                val (days) = fetchSimpleEvents(user, date)
+                val hours = startingTimes(days)
+                if (hours.size != 1) {
+                    throw BadHoursError("Bad hours number ${hours.size}")
+                }
+                Result.Success(hours.first())
+            } catch (e: Throwable) {
+                System.err.println(e)
+                Result.Error(
+                    IOException(
+                        "Error getting current starting time",
+                        e
+                    )
+                )
             }
-            return@withContext Result.Success(hours.first())
-        } catch (e: Throwable) {
-            System.err.println(e)
-            return@withContext Result.Error(IOException("Error getting current starting time", e))
         }
-    }
 
     suspend fun getStartingTimes(user: User): Result<List<Time>> = withContext(Dispatchers.IO) {
         try {
             val (days) = fetchSimpleEvents(user)
             val hours = startingTimes(days)
-            return@withContext Result.Success(hours.filter { it.getHourNumber() < 12 })
+            Result.Success(hours.filter { it.getHourNumber() < 12 })
         } catch (e: Throwable) {
             System.err.println(e)
-            return@withContext Result.Error(IOException("Error getting calendar", e))
+            Result.Error(IOException("Error getting calendar", e))
+        }
+    }
+
+    suspend fun checkConnection(user: User): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val url =
+                URL("${user.baseURL}/jsp/webapi?function=getResources&id=${user.resourceId}&projectId=${user.projectId}&data=${user.data}")
+            val connection = url.openConnection() as HttpURLConnection
+            connection.run {
+                readTimeout = 10000
+                connectTimeout = 15000
+
+                inputStream.use {
+                    val parser: XmlPullParser = Xml.newPullParser()
+                    parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false)
+                    parser.setInput(inputStream, null)
+                    parser.nextTag()
+                    parser.require(XmlPullParser.START_TAG, null, "resources")
+                    parser.nextTag()
+                    parser.require(XmlPullParser.START_TAG, null, "resource")
+                    val id = parser.getAttributeValue(null, "id")
+                    if (id.toInt() != user.resourceId) {
+                        throw Error("Wrong resource id")
+                    }
+                    parser.nextTag()
+                    parser.require(XmlPullParser.END_TAG, null, "resource")
+                    parser.nextTag()
+                    parser.require(XmlPullParser.END_TAG, null, "resources")
+                    true
+                }
+            }
+        } catch (e: Throwable) {
+            System.err.println(e)
+            false
         }
     }
 }

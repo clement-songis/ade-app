@@ -63,85 +63,31 @@ fun Settings(navController: NavController, viewModel: SettingsViewModel) {
                 var repeat by remember { mutableStateOf(defaultAlarm.repeat.toString()) }
                 var interval by remember { mutableStateOf(defaultAlarm.interval.toString()) }
 
-                OutlinedTextField(
-                    value = repeat,
-                    onValueChange = {
-                        repeat = it
-                        viewModel.updateRepeat(it.atLeast(1))
-                    },
-                    modifier = Modifier
-                        .nextFocus()
-                        .fillMaxWidth(),
-                    label = { Text(stringResource(R.string.repeat_interval)) },
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Number,
-                        imeAction = ImeAction.Next
+                AlarmsSettings(
+                    repeat = FieldValueManager(
+                        repeat,
+                        update = {
+                            repeat = it
+                            viewModel.updateRepeat(it.atLeast(1))
+                        },
+                        repeat != defaultAlarm.repeat.toString()
                     ),
-                    keyboardActions = nextFocusKeyboardAction(),
-                    isError = repeat != defaultAlarm.repeat.toString(),
-                    supportingText = {
-                        if (defaultAlarm.repeat.toString() != repeat) {
-                            Text(
-                                modifier = Modifier.fillMaxWidth(),
-                                text = stringResource(R.string.number_error),
-                                color = MaterialTheme.colorScheme.error
-                            )
-                        }
-                    },
-                    singleLine = true
-                )
-                if (repeat.atLeast(1) > 1) {
-                    OutlinedTextField(
-                        value = interval,
-                        onValueChange = {
+                    interval = FieldValueManager(
+                        interval,
+                        update = {
                             interval = it
                             viewModel.updateInterval(it.atLeast(0))
                         },
-                        modifier = Modifier
-                            .nextFocus()
-                            .fillMaxWidth(),
-                        label = { Text(stringResource(R.string.default_interval)) },
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Number,
-                            imeAction = ImeAction.Next
-                        ),
-                        keyboardActions = nextFocusKeyboardAction(),
-                        isError = interval != defaultAlarm.interval.toString(),
-                        supportingText = {
-                            if (defaultAlarm.interval.toString() != interval) {
-                                Text(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    text = stringResource(R.string.number_error),
-                                    color = MaterialTheme.colorScheme.error
-                                )
-                            }
+                        interval != defaultAlarm.interval.toString()
+                    ),
+                    timeUntilEvent = FieldValueManager(
+                        timeUntilEvent,
+                        update = {
+                            timeUntilEvent = it
+                            viewModel.updateTimeUntilEvent(it.atLeast(0))
                         },
-                        singleLine = true
+                        timeUntilEvent != defaultAlarm.timeUntilEvent.toString()
                     )
-                }
-                OutlinedTextField(
-                    value = timeUntilEvent,
-                    onValueChange = {
-                        timeUntilEvent = it
-                        viewModel.updateTimeUntilEvent(it.atLeast(0))
-                    },
-                    modifier = Modifier
-                        .nextFocus()
-                        .fillMaxWidth(),
-                    label = { Text(stringResource(R.string.default_alarm_interval)) },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    keyboardActions = clearFocusKeyboardAction(),
-                    isError = timeUntilEvent != defaultAlarm.timeUntilEvent.toString(),
-                    supportingText = {
-                        if (defaultAlarm.timeUntilEvent.toString() != timeUntilEvent) {
-                            Text(
-                                modifier = Modifier.fillMaxWidth(),
-                                text = stringResource(R.string.number_error),
-                                color = MaterialTheme.colorScheme.error
-                            )
-                        }
-                    },
-                    singleLine = true
                 )
 
                 Row(

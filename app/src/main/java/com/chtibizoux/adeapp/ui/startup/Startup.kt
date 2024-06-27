@@ -29,6 +29,8 @@ import com.chtibizoux.adeapp.ui.SettingsViewModel
 import com.chtibizoux.adeapp.ui.atLeast
 import com.chtibizoux.adeapp.ui.nextFocus
 import com.chtibizoux.adeapp.ui.nextFocusKeyboardAction
+import com.chtibizoux.adeapp.ui.settings.AlarmsSettings
+import com.chtibizoux.adeapp.ui.settings.FieldValueManager
 import com.chtibizoux.adeapp.ui.submitKeyboardAction
 import com.chtibizoux.adeapp.ui.submitOnEnter
 
@@ -46,96 +48,41 @@ fun Startup(
         settingsViewModel.setDefaultAlarmSettings(startupViewModel.alarmSettings)
         settingsViewModel.setAlarms(startupViewModel.alarms)
     }
+
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Column(
-            modifier = Modifier.verticalScroll(rememberScrollState()),
+            modifier = Modifier
+                .verticalScroll(rememberScrollState())
+                .padding(20.dp),
             verticalArrangement = Arrangement.SpaceBetween,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(stringResource(R.string.alarm_choice), Modifier.padding(20.dp), fontSize = 25.sp)
+            Text(stringResource(R.string.alarm_choice), fontSize = 25.sp)
             Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
-                // TODO: Better ui, fields, focus, animations, errors
-                OutlinedTextField(
-                    value = startupViewModel.repeat,
-                    onValueChange = {
-                        startupViewModel.updateRepeat(it)
-                    },
-                    modifier = Modifier
-                        .nextFocus(),
-                    label = { Text(stringResource(R.string.repeat_interval)) },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
-                    keyboardActions = nextFocusKeyboardAction(),
-                    isError = startupViewModel.validRepeat,
-                    supportingText = {
-                        if (startupViewModel.validRepeat) {
-                            Text(
-                                modifier = Modifier.fillMaxWidth(),
-                                text = stringResource(R.string.number_error),
-                                color = MaterialTheme.colorScheme.error
-                            )
-                        }
-                    },
-                    singleLine = true
-                )
-                if (startupViewModel.repeat.atLeast(1) > 1) {
-                    OutlinedTextField(
-                        value = startupViewModel.interval,
-                        onValueChange = {
-                            startupViewModel.updateInterval(it)
-                        },
-                        modifier = Modifier
-                            .nextFocus(),
-                        label = { Text(stringResource(R.string.default_interval)) },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
-                        keyboardActions = nextFocusKeyboardAction(),
-                        isError = startupViewModel.validInterval,
-                        supportingText = {
-                            if (startupViewModel.validInterval) {
-                                Text(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    text = stringResource(R.string.number_error),
-                                    color = MaterialTheme.colorScheme.error
-                                )
-                            }
-                        },
-                        singleLine = true
-                    )
-                }
-                OutlinedTextField(
-                    value = startupViewModel.timeUntilEvent,
-                    onValueChange = {
-                        startupViewModel.updateTimeUntilEvent(it)
-                    },
-                    modifier = Modifier.submitOnEnter(::submit),
-                    label = { Text(stringResource(R.string.default_alarm_interval)) },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    keyboardActions = submitKeyboardAction(::submit),
-                    isError = startupViewModel.validTimeUntilEvent,
-                    supportingText = {
-                        if (startupViewModel.validTimeUntilEvent) {
-                            Text(
-                                modifier = Modifier.fillMaxWidth(),
-                                text = stringResource(R.string.number_error),
-                                color = MaterialTheme.colorScheme.error
-                            )
-                        }
-                    },
-                    singleLine = true
+                AlarmsSettings(
+                    repeat = FieldValueManager(
+                        startupViewModel.repeat,
+                        startupViewModel::updateRepeat,
+                        !startupViewModel.validRepeat
+                    ),
+                    interval = FieldValueManager(
+                        startupViewModel.interval,
+                        startupViewModel::updateInterval,
+                        !startupViewModel.validInterval
+                    ),
+                    timeUntilEvent = FieldValueManager(
+                        startupViewModel.timeUntilEvent,
+                        startupViewModel::updateTimeUntilEvent,
+                        !startupViewModel.validTimeUntilEvent
+                    ),
+                    ::submit
                 )
             }
-            Column {
-                startupViewModel.alarms.forEach { alarm ->
-                    Text(
-                        text = "${alarm.forHour} ➜ ${alarm.hours.joinToString { it.toString() }}",
-                        modifier = Modifier.padding(10.dp)
-                    )
-                }
-            }
+            AlarmsComponent(startupViewModel.alarms)
             Row(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(20.dp),
-                horizontalArrangement = Arrangement.End
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.End)
             ) {
                 TextButton(onClick = {
                     settingsViewModel.noAlarm()

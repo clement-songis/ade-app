@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.chtibizoux.adeapp.data.xml.Event
+import kotlin.random.Random
 
 @Composable
 fun EventElement(
@@ -53,7 +54,7 @@ fun EventElement(
                 .width((hourWidth * size).dp)
                 .offset(x = (index * hourWidth).dp, y = yOffset)
         },
-        color = event.getColor(),
+        color = event.getColor() ?: Color(Random.nextInt(0xffffff)),
         contentColor = Color.Black,
         shape = RoundedCornerShape(10.dp),
         onClick = { showDialog = true }

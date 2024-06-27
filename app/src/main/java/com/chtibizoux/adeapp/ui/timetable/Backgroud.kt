@@ -43,9 +43,8 @@ fun Background(
         Row(
             modifier = Modifier
                 .height((hourHeight * (endHour - startHour) + VERTICAL_PADDING * 2).dp)
-                .width((hourWidth * columns).dp)
-                .padding(horizontal = (hourWidth - SECONDARY_DIVIDER_HEIGHT / 2f).dp),
-            horizontalArrangement = Arrangement.SpaceBetween
+                .width((hourWidth * columns).dp),
+            horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             (1..<columns).forEach { i ->
                 if (subColumns != null && i % subColumns == 0) {

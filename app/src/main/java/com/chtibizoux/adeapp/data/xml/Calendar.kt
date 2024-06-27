@@ -48,12 +48,14 @@ data class Event(
     val duration: Int,
     val startHour: Time,
     val endHour: Time,
-    val color: String,// TODO: Parse color
+    val color: String,
     val resources: List<SimpleResource>,
 ) {
-    fun getColor(): Color {
-        val (r, g, b) = color.split(",")
-        return Color(r.toInt(), g.toInt(), b.toInt())
+    fun getColor(): Color? {
+        val values = color.split(",")
+        if (values.size != 3) return null
+        val (r, g, b) = values.map { it.toIntOrNull() ?: return@getColor null }
+        return Color(r, g, b)
     }
 }
 

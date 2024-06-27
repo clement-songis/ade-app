@@ -52,22 +52,7 @@ fun ZoomableComponent(
     val verticalScrollState = rememberScrollState()
     val horizontalScrollState = rememberScrollState()
 
-    Column(
-        Modifier
-            .fillMaxSize()
-            .pointerInput(Unit) {
-                awaitEachGesture {
-                    awaitFirstDown()
-                    do {
-                        val event = awaitPointerEvent()
-                        val zoomChange = event.calculateZoom()
-
-                        scaleX = (scaleX * zoomChange).coerceAtLeast(1f)
-                        // TODO: separate zoom
-                    } while (event.changes.any { it.pressed })
-                }
-            }
-    ) {
+    Column(Modifier.fillMaxSize()) {
         Box(
             Modifier
                 .padding(start = sideWidth)
@@ -86,6 +71,18 @@ fun ZoomableComponent(
             Box(
                 Modifier
                     .fillMaxSize()
+                    .pointerInput(Unit) {
+                        awaitEachGesture {
+//                            awaitFirstDown()
+                            do {
+                                val event = awaitPointerEvent()
+                                val zoomChange = event.calculateZoom()
+
+                                scaleX = (scaleX * zoomChange).coerceAtLeast(1f)
+                                // TODO: separate zoom
+                            } while (event.changes.any { it.pressed })
+                        }
+                    }
                     .onGloballyPositioned { coordinates ->
                         width = coordinates.size.width
                         height = coordinates.size.height

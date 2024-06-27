@@ -30,14 +30,18 @@ class LoginViewModel : ViewModel() {
                 linkError = R.string.not_an_ade_url
                 return null
             }
-            val dataMatchResult = Regex("data=([^&]+)").find(url.query)
+            val query = url.query ?: ""
+
+            // Get data login token
+            val dataMatchResult = Regex("data=([^&]+)").find(query)
             if (dataMatchResult == null) {
                 linkError = R.string.no_data_not_supported
                 return null
             }
             val (data) = dataMatchResult.destructured
 
-            val projectIdMatchResult = Regex("projectId=([^&]+)").find(url.query)
+            // Get project ID
+            val projectIdMatchResult = Regex("projectId=([^&]+)").find(query)
             if (projectIdMatchResult == null) {
                 linkError = R.string.projectId_selection_not_supported
                 return null
@@ -49,7 +53,8 @@ class LoginViewModel : ViewModel() {
                 return null
             }
 
-            val resourcesMatchResult = Regex("resources=([^&]+)").find(url.query)
+            // Get resource ID
+            val resourcesMatchResult = Regex("resources=([^&]+)").find(query)
             if (resourcesMatchResult == null) {
                 linkError = R.string.resourceId_selection_not_supported
                 return null
@@ -65,6 +70,7 @@ class LoginViewModel : ViewModel() {
                 return null
             }
 
+            linkError = null
             val baseURL = url.scheme + "://" + url.authority
             return User(baseURL, projectId, resourceId, data)
         } catch (e: URISyntaxException) {
