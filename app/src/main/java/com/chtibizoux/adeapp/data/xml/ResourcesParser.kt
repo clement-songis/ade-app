@@ -57,8 +57,9 @@ class ResourcesParser {
 
     @Throws(XmlPullParserException::class, IOException::class)
     private fun readResource(parser: XmlPullParser): Resource {
-//        parser.require(XmlPullParser.START_TAG, ns, "branch")
-//        parser.require(XmlPullParser.START_TAG, ns, "leaf")
+        if (parser.name != "branch" && parser.name != "leaf") {
+            throw XmlPullParserException("resource tag name must be branch or leaf")
+        }
         val id = parser.getAttributeValue(ns, "id").toInt()
         val name = parser.getAttributeValue(ns, "name")
         val resources = mutableListOf<Resource>()

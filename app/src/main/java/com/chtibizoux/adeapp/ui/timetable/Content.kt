@@ -29,7 +29,6 @@ import com.chtibizoux.adeapp.ui.timetable.week.WeekComponent
 import com.chtibizoux.adeapp.ui.timetable.week.Weeks
 import java.util.Date
 
-const val HOUR_HEIGHT = 60f
 const val MAIN_DIVIDER_HEIGHT = 2
 const val SECONDARY_DIVIDER_HEIGHT = 1
 const val VERTICAL_PADDING = 20
@@ -140,38 +139,4 @@ fun TimetableContent(
             )
         }
     }
-
-//    val weeks = Weeks(calendar.days)
-//    TimetableScaffold(
-//        isWeekView,
-//        initialDate,
-//        if (isWeekView) weeks.size else calendar.days.size,
-//        { if (isWeekView) weeks.getPage(it) else calendar.getPage(it) },
-//        { (if (isWeekView) weeks[it].first() else calendar.days[it]).getDate() },
-//        {
-//            initialDate = (if (isWeekView) weeks[it].first() else calendar.days[it]).getDate()
-//            isWeekView = true
-//        },
-//        navController,
-//        previousButton,
-//        refreshCalendar
-//    ) { page, xScrollEnabled, yScrollEnabled ->
-//        if (isWeekView) {
-//            WeekComponent(
-//                navController,
-//                weeks[page],
-//                children,
-//                xScrollEnabled,
-//                yScrollEnabled
-//            )
-//        } else {
-//            DayComponent(
-//                navController,
-//                calendar.days[page],
-//                children,
-//                xScrollEnabled,
-//                yScrollEnabled
-//            )
-//        }
-//    }
 }

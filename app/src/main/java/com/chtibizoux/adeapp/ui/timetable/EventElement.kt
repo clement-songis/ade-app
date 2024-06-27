@@ -38,8 +38,8 @@ fun EventElement(
     var showDialog by remember { mutableStateOf(false) }
 
     val startHour = event.startHour.getHourNumber()
-//    val endHour = event.endHour.getHourNumber()
-//    val height = endHour - startHour
+    // val endHour = event.endHour.getHourNumber()
+    // val height = endHour - startHour
     val height = event.duration / 2f
 
     val yOffset = (VERTICAL_PADDING + (startHour - firstHour) * hourHeight).dp
@@ -68,7 +68,7 @@ fun EventElement(
                 event.name,
                 modifier = Modifier.height((hourHeight / 2f).dp),
                 textAlign = TextAlign.Center,
-//                overflow = TextOverflow.Ellipsis,// Don't use because of wierd text position glitches
+                // overflow = TextOverflow.Ellipsis, Don't use it because of wierd text position glitches
                 maxLines = 1
             )
             listOf("classroom", "trainee", "instructor").forEach { category ->
@@ -79,7 +79,7 @@ fun EventElement(
                         modifier = Modifier.height((hourHeight / 2f).dp),
                         fontSize = 13.sp,
                         textAlign = TextAlign.Center,
-//                        overflow = TextOverflow.Ellipsis,
+                        // overflow = TextOverflow.Ellipsis,
                         maxLines = 1
                     )
                 }

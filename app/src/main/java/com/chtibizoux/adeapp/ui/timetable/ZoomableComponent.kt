@@ -81,7 +81,7 @@ fun ZoomableComponent(
                     .fillMaxSize()
                     .pointerInput(Unit) {
                         awaitEachGesture {
-//                            awaitFirstDown()
+                            // Don't use awaitFirstDown() because it doesn't detect press on button children
                             do {
                                 val event = awaitPointerEvent()
                                 val zoomChange = event.calculateZoom()

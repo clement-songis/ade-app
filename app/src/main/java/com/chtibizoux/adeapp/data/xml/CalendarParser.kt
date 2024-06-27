@@ -29,7 +29,6 @@ class CalendarParser {
             if (parser.eventType != XmlPullParser.START_TAG) {
                 continue
             }
-            // Starts by looking for the entry tag.
             if (parser.name == "event") {
                 val event = readEvent(parser)
                 val index = days.indexOfFirst { it.date == event.date }
@@ -54,7 +53,6 @@ class CalendarParser {
         val startHour = Time.fromString(parser.getAttributeValue(ns, "startHour"))!!
         val endHour = Time.fromString(parser.getAttributeValue(ns, "endHour"))!!
         val color = parser.getAttributeValue(ns, "color")
-//        absoluteSlot slot day week
         var resources = listOf<SimpleResource>()
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.eventType != XmlPullParser.START_TAG) {

@@ -54,15 +54,11 @@ class AlarmsManager(private val service: Service) {
         notificationManager.showAlarmNotification()
 
         alarmKlaxon.start()
-
-//        context.sendBroadcast(Intent(ALARM_ALERT_ACTION))
     }
 
 
     fun stopAlarm() {
         alarmKlaxon.stop()
-
-//        context.sendBroadcast(Intent(ALARM_DONE_ACTION))
 
         service.stopForeground(STOP_FOREGROUND_REMOVE)
 

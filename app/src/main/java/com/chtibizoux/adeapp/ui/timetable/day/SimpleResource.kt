@@ -17,7 +17,6 @@ fun SimpleResource(events: List<Event>, navController: NavController, startHour:
     fun getHourWidth(width: Float) = width.coerceAtLeast(1f)
 
     fun getHourHeight(height: Float) = (height - VERTICAL_PADDING * 2) / (endHour - startHour)
-//    fun getHourHeight(height: Float) = HOUR_HEIGHT
 
     ZoomableComponent(
         TIME_WIDTH.dp,
