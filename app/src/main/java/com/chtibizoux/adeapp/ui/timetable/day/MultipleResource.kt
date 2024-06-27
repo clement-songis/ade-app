@@ -7,6 +7,8 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.chtibizoux.adeapp.data.xml.Event
 import com.chtibizoux.adeapp.data.xml.Resource
+import com.chtibizoux.adeapp.data.xml.getAllChildren
+import com.chtibizoux.adeapp.data.xml.getLeaves
 import com.chtibizoux.adeapp.ui.timetable.Background
 import com.chtibizoux.adeapp.ui.timetable.EventElement
 import com.chtibizoux.adeapp.ui.timetable.HOUR_HEIGHT
@@ -28,7 +30,7 @@ fun MultipleResource(
     val leaves = getLeaves(children)
     val allChildren = getAllChildren(children)
 
-    fun getHourWidth(width: Float) = width / leaves.size
+    fun getHourWidth(width: Float) = (width / leaves.size).coerceAtLeast(1f)
 
     //    fun getHourHeight(height: Float) = (height - VERTICAL_PADDING * 2) / (END_HOUR - START_HOUR)
     fun getHourHeight(height: Float) = HOUR_HEIGHT
@@ -86,20 +88,4 @@ fun MultipleResource(
             }
         }
     }
-}
-
-fun getLeaves(resources: List<Resource>): List<Resource> {
-    val leaves: MutableList<Resource> = mutableListOf()
-    resources.forEach {
-        if (it.children.isEmpty()) {
-            leaves.add(it)
-        } else {
-            leaves.addAll(getLeaves(it.children))
-        }
-    }
-    return leaves
-}
-
-fun getAllChildren(resources: List<Resource>): List<Resource> {
-    return resources + resources.flatMap { getAllChildren(it.children) }
 }

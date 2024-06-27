@@ -2,15 +2,10 @@
 <resources>
     <string name="title_timetable">Emploi du temps</string>
     <string name="title_alarms">Alarmes</string>
-    <string name="title_notifications">Notifications</string>
     <string name="welcome_message">Bienvenue sur &appname; !</string>
     <string name="app_description">Une super application pour gérer ton emploi du temps facilement.</string>
-    <string name="username">Utilisateur</string>
-    <string name="password">Mot de passe</string>
     <string name="login_text">Pour commencer, veuillez fournir le lien pour accéder à votre ADE</string>
     <string name="login">Se connecter</string>
-    <string name="invalid_username">Nom d\'utilisateur invalide</string>
-    <string name="invalid_password">Mot de passe invalide</string>
     <string name="login_failed">La connexion a échoué</string>
     <string name="alarm_add">Ajouter une alarme</string>
     <string name="add">Ajouter</string>
@@ -25,7 +20,6 @@
     <string name="get_starting_times_error">Erreur lors de l\'obtention des heures de début des cours à partir de l\'API ADE</string>
     <string name="no_alarm_error">Aucune alarme réglée pour cette heure %1$s</string>
     <string name="alarm_success_text">%1$s alarme(s) réglée(s) pour %2$s</string>
-    <string name="no_user">Aucun utilisateur connecté</string>
     <string name="retry">réessayer</string>
     <string name="unable_to_update_calendar">Impossible de mettre à jour le calendrier depuis l\'API ADE</string>
     <string name="more">Plus</string>

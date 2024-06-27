@@ -16,14 +16,17 @@ import androidx.compose.ui.unit.dp
 fun Background(
     startHour: Int,
     endHour: Int,
-    hourHeight: Int,
+    hourHeight: Float,
     hourWidth: Float? = null,
-    columns: Int = 1
+    columns: Int = 1,
+    subColumns: Int? = null
 ) {
-    val mod = Modifier.padding(vertical = (VERTICAL_PADDING - MAIN_DIVIDER_HEIGHT / 2f).dp)
+    val mod = Modifier
+        .padding(vertical = (VERTICAL_PADDING - MAIN_DIVIDER_HEIGHT / 2f).dp)
+        .height((hourHeight * (endHour - startHour) + MAIN_DIVIDER_HEIGHT).dp)
     Column(
         modifier = if (hourWidth == null) mod else mod.width((hourWidth * columns).dp),
-        verticalArrangement = Arrangement.spacedBy(((hourHeight - MAIN_DIVIDER_HEIGHT - SECONDARY_DIVIDER_HEIGHT) / 2f).dp)
+        verticalArrangement = Arrangement.SpaceBetween
     ) {
         (startHour * 2..endHour * 2).forEachIndexed { _, nb ->
             if (nb % 2 == 0) {
@@ -40,11 +43,16 @@ fun Background(
         Row(
             modifier = Modifier
                 .height((hourHeight * (endHour - startHour) + VERTICAL_PADDING * 2).dp)
-                .padding(horizontal = (hourWidth - 0.5).dp),
-            horizontalArrangement = Arrangement.spacedBy((hourWidth - 1).dp)
+                .width((hourWidth * columns).dp)
+                .padding(horizontal = (hourWidth - SECONDARY_DIVIDER_HEIGHT / 2f).dp),
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            (1..<columns).forEach { _ ->
-                VerticalDivider()
+            (1..<columns).forEach { i ->
+                if (subColumns != null && i % subColumns == 0) {
+                    VerticalDivider(thickness = MAIN_DIVIDER_HEIGHT.dp)
+                } else {
+                    VerticalDivider()
+                }
             }
         }
     }

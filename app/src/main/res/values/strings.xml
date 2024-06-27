@@ -3,15 +3,10 @@
     <string name="app_name" translatable="false">&appname;</string>
     <string name="title_timetable">Timetable</string>
     <string name="title_alarms">Alarms</string>
-    <string name="title_notifications">Notifications</string>
     <string name="welcome_message">Welcome to &appname; !</string>
     <string name="app_description">A great app for easily managing a schedule.</string>
-    <string name="username">Username</string>
-    <string name="password">Password</string>
     <string name="login_text">To get started, please provide the link to access your ADE.</string>
     <string name="login">Login</string>
-    <string name="invalid_username">Not a valid username</string>
-    <string name="invalid_password">Password must be >5 characters</string>
     <string name="login_failed">Login failed</string>
     <string name="alarm_add">Add an alarm</string>
     <string name="add">Add</string>
@@ -26,7 +21,6 @@
     <string name="get_starting_times_error">Error getting class start times from ADE API</string>
     <string name="no_alarm_error">No alarm set for this time %1$s</string>
     <string name="alarm_success_text">%1$s alarm(s) set for %2$s</string>
-    <string name="no_user">No users logged in</string>
     <string name="retry">try again</string>
     <string name="unable_to_update_calendar">Unable to update calendar from ADE API</string>
     <string name="more">More</string>

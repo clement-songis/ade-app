@@ -19,11 +19,6 @@ import java.util.Date
 import java.util.Locale
 
 class DataSource {
-//    $ADE_BASE/jsp/webapi?function=${getResources}&projectId=$PROJECT_ID&detail=${3}&data=$data
-
-//    $ADE_BASE/jsp/webapi?function=imageET&displayConfId=2&detail=2&weeks=20&days=0,1,2,3,4,5,6&width=1920&height=1080&resources=67&projectId=3&data=$data
-//    $ADE_BASE/jsp/webapi?function=imageET&displayConfId=2&weeks=20&days=0&width=540&height=960&resources=67&projectId=3&data=$data
-
 //    private fun fetchIcs(resourceId: Int): String {
 //        val url = URL("$INTRANET_BASE/ICS_ADE/$resourceId.ics")
 ////        $ADE_BASE/jsp/custom/modules/plannings/anonymous_cal.jsp?resources=$resourceId&projectId=$PROJECT_ID&calType=ical&firstDate=2024-01-22&lastDate=2024-01-26
@@ -49,7 +44,7 @@ class DataSource {
     private val dateFormat = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
     private fun fetchSimpleEvents(
         user: User,
-        date: Date? = null/*, week: Int? = null, day: Int? = null*/
+        date: Date? = null
     ): SimpleCalendar {
         val dateQuery = if (date == null) "" else "&date=${dateFormat.format(date)}"
         val url =
@@ -99,7 +94,7 @@ class DataSource {
 
 //    suspend fun getCalendar(resourceId: Int): Result<MyCalendar> = withContext(Dispatchers.IO) {
 //        try {
-//            val ics = getIcs(resourceId)
+//            val ics = fetchIcs(resourceId)
 //            val parser = Parser()
 //            val calendar = parser.parse(ics)
 //            return@withContext Result.Success(calendar)

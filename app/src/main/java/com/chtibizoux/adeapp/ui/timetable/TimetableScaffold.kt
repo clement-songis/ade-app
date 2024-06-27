@@ -6,7 +6,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.CalendarViewDay
+import androidx.compose.material.icons.filled.CalendarViewWeek
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -59,8 +60,8 @@ fun TimetableScaffold(
         }
     }
 
-    val xScrollEnabled = remember { mutableStateOf(false) }
-    val yScrollEnabled = remember { mutableStateOf(false) }
+    val xScrollEnabled = remember { mutableStateOf(true) }
+    val yScrollEnabled = remember { mutableStateOf(true) }
 
     Scaffold(topBar = {
         CenterAlignedTopAppBar(
@@ -79,7 +80,7 @@ fun TimetableScaffold(
             actions = {
                 IconButton(onClick = { isWeekView = !isWeekView }) {
                     Icon(
-                        if (isWeekView) Icons.Filled.Settings else Icons.Filled.Settings,
+                        if (isWeekView) Icons.Filled.CalendarViewDay else Icons.Filled.CalendarViewWeek,
                         stringResource(R.string.change_timetable_view)
                     )
                 }

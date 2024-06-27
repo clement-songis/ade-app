@@ -26,6 +26,7 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -41,6 +42,8 @@ fun ZoomableComponent(
     leftSide: @Composable (offset: IntOffset, height: Float) -> Unit = { _, _ -> },
     content: @Composable (width: Float, height: Float) -> Unit,
 ) {
+    val localDensity = LocalDensity.current
+
     var width by remember { mutableIntStateOf(0) }
     var height by remember { mutableIntStateOf(0) }
     var contentWidth by remember { mutableIntStateOf(0) }
@@ -50,6 +53,9 @@ fun ZoomableComponent(
     var scaleY by remember { mutableFloatStateOf(1f) }
 
     var offset by remember { mutableStateOf(Offset.Zero) }
+
+    val scaledWidth = with(localDensity) { (width * scaleX).toDp().value }
+    val scaledHeight = with(localDensity) { (height * scaleY).toDp().value }
 
     Column(
         Modifier
@@ -66,21 +72,19 @@ fun ZoomableComponent(
                         // TODO: separate zoom
 
                         val widthOverflow = (width - contentWidth)
-                            .coerceAtMost(0)
-                            .toFloat()
-                        val heightOverflow = (width - contentWidth)
-                            .coerceAtMost(0)
-                            .toFloat()
+                            .coerceAtMost(0).toFloat()
+                        val heightOverflow = (height - contentHeight)
+                            .coerceAtMost(0).toFloat()
 
-                        val newOffset = offset + offsetChange / 2f
+                        val newOffset = offset + offsetChange
                         offset = Offset(
                             newOffset.x.coerceIn(widthOverflow, 0f),
                             newOffset.y.coerceIn(heightOverflow, 0f)
                         )
 
                         val overflowOffset = newOffset - offset
-                        xScrollEnabled.value = overflowOffset.x != 0f
-                        yScrollEnabled.value = overflowOffset.y != 0f
+                        xScrollEnabled.value = overflowOffset.x != 0f || offsetChange.x == 0f
+                        yScrollEnabled.value = overflowOffset.y != 0f || offsetChange.y == 0f
                     } while (event.changes.any { it.pressed })
                 }
             }
@@ -90,7 +94,7 @@ fun ZoomableComponent(
                 .padding(start = sideWidth)
                 .overflowable()
         ) {
-            header(IntOffset(offset.x.roundToInt(), 0), scaleX * width)
+            header(IntOffset(offset.x.roundToInt(), 0), scaledWidth)
         }
         Row {
             Box(
@@ -98,15 +102,16 @@ fun ZoomableComponent(
                     .width(sideWidth)
                     .overflowable()
             ) {
-                leftSide(IntOffset(0, offset.y.roundToInt()), scaleY * height)
+                leftSide(IntOffset(0, offset.y.roundToInt()), scaledHeight)
             }
             Box(
                 Modifier
-                    .overflowable()
+                    .fillMaxSize()
                     .onGloballyPositioned { coordinates ->
                         width = coordinates.size.width
                         height = coordinates.size.height
                     }
+                    .overflowable()
             ) {
                 Box(
                     Modifier
@@ -116,7 +121,7 @@ fun ZoomableComponent(
                             contentHeight = coordinates.size.height
                         }
                 ) {
-                    content(scaleX * width, scaleY * height)
+                    content(scaledWidth, scaledHeight)
                 }
             }
         }

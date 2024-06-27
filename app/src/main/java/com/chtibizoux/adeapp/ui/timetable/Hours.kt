@@ -22,31 +22,33 @@ const val TIME_WIDTH = 70
 private const val ROW_HEIGHT = 20
 
 @Composable
-fun Hours(startHour: Int, endHour: Int, hourHeight: Int, offset: IntOffset = IntOffset.Zero) {
-    Column(
-        modifier = Modifier
-            .padding(vertical = (VERTICAL_PADDING - ROW_HEIGHT / 2f).dp)
-            .offset { offset }
-            .width(TIME_WIDTH.dp),
-        verticalArrangement = Arrangement.spacedBy((hourHeight - ROW_HEIGHT).dp)
-    ) {
-        (startHour..endHour).forEachIndexed { _, nb ->
-            Row(
-                Modifier.height(ROW_HEIGHT.dp), verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "${nb.toString().padStart(2, '0')}:00",
-                    fontSize = 13.sp,
-                    modifier = Modifier.padding(start = 15.dp, end = 10.dp)
-                )
-                HorizontalDivider(thickness = MAIN_DIVIDER_HEIGHT.dp)
+fun Hours(startHour: Int, endHour: Int, hourHeight: Float, offset: IntOffset = IntOffset.Zero) {
+    Row(Modifier.width(TIME_WIDTH.dp)) {
+        Column(
+            modifier = Modifier
+                .padding(vertical = (VERTICAL_PADDING - ROW_HEIGHT / 2f).dp)
+                .offset { offset }
+                .weight(1f),
+            verticalArrangement = Arrangement.spacedBy((hourHeight - ROW_HEIGHT).dp)
+        ) {
+            (startHour..endHour).forEachIndexed { _, nb ->
+                Row(
+                    Modifier.height(ROW_HEIGHT.dp), verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "${nb.toString().padStart(2, '0')}:00",
+                        fontSize = 13.sp,
+                        modifier = Modifier.padding(start = 15.dp, end = 10.dp)
+                    )
+                    HorizontalDivider(thickness = MAIN_DIVIDER_HEIGHT.dp)
+                }
             }
         }
+        VerticalDivider(
+            Modifier
+                .offset { offset }
+                .height((hourHeight * (endHour - startHour) + VERTICAL_PADDING * 2).dp),
+            thickness = MAIN_DIVIDER_HEIGHT.dp
+        )
     }
-    VerticalDivider(
-        Modifier
-            .offset { offset }
-            .height((hourHeight * (endHour - startHour) + VERTICAL_PADDING * 2).dp),
-        thickness = MAIN_DIVIDER_HEIGHT.dp
-    )
 }

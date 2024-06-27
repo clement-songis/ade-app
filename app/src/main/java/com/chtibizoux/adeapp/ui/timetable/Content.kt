@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -28,7 +29,7 @@ import java.util.Date
 
 // TODO: Make a week view
 
-const val HOUR_HEIGHT = 60
+const val HOUR_HEIGHT = 60f
 const val MAIN_DIVIDER_HEIGHT = 2
 const val SECONDARY_DIVIDER_HEIGHT = 1
 const val VERTICAL_PADDING = 20
@@ -47,7 +48,7 @@ fun WaitForCalendar(
 ) {
     if (calendar == null) {
         Column(
-            modifier = Modifier.background(MaterialTheme.colorScheme.background),
+            modifier = Modifier.background(MaterialTheme.colorScheme.background).fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterVertically)
         ) {
@@ -58,7 +59,7 @@ fun WaitForCalendar(
         }
     } else if (calendar.days.isEmpty()) {
         Box(
-            modifier = Modifier.background(MaterialTheme.colorScheme.background),
+            modifier = Modifier.background(MaterialTheme.colorScheme.background).fillMaxSize(),
             contentAlignment = Alignment.Center,
         ) {
             Text(stringResource(R.string.no_calendar), color = Color.White)
@@ -67,12 +68,16 @@ fun WaitForCalendar(
         TimetableContent(
             navController,
             calendar,
-            children,
+            sortResources(children),
             previousButton,
             date,
             refreshCalendar
         )
     }
+}
+
+fun sortResources(resources: List<Resource>): List<Resource> {
+    return resources.map { it.copy(children = sortResources(it.children)) }.sortedBy { it.name }
 }
 
 @Composable

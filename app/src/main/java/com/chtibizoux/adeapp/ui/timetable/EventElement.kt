@@ -19,7 +19,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -30,7 +29,7 @@ fun EventElement(
     navController: NavController,
     event: Event,
     firstHour: Int,
-    hourHeight: Int,
+    hourHeight: Float,
     hourWidth: Float? = null,
     size: Int = 1,
     index: Int = 0
@@ -68,7 +67,7 @@ fun EventElement(
                 event.name,
                 modifier = Modifier.height((hourHeight / 2f).dp),
                 textAlign = TextAlign.Center,
-                overflow = TextOverflow.Ellipsis,
+//                overflow = TextOverflow.Ellipsis,// Don't use because of wierd text position glitches
                 maxLines = 1
             )
             listOf("classroom", "trainee", "instructor").forEach { category ->
@@ -79,7 +78,7 @@ fun EventElement(
                         modifier = Modifier.height((hourHeight / 2f).dp),
                         fontSize = 13.sp,
                         textAlign = TextAlign.Center,
-                        overflow = TextOverflow.Ellipsis,
+//                        overflow = TextOverflow.Ellipsis,
                         maxLines = 1
                     )
                 }

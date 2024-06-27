@@ -45,3 +45,19 @@ data class Resource(
     val name: String,
     val children: List<Resource>
 )
+
+fun getLeaves(resources: List<Resource>): List<Resource> {
+    val leaves: MutableList<Resource> = mutableListOf()
+    resources.forEach {
+        if (it.children.isEmpty()) {
+            leaves.add(it)
+        } else {
+            leaves.addAll(getLeaves(it.children))
+        }
+    }
+    return leaves
+}
+
+fun getAllChildren(resources: List<Resource>): List<Resource> {
+    return resources + resources.flatMap { getAllChildren(it.children) }
+}

@@ -9,15 +9,14 @@ import androidx.navigation.NavController
 import com.chtibizoux.adeapp.data.xml.Day
 import com.chtibizoux.adeapp.data.xml.Event
 import com.chtibizoux.adeapp.data.xml.Resource
+import com.chtibizoux.adeapp.data.xml.getAllChildren
+import com.chtibizoux.adeapp.data.xml.getLeaves
 import com.chtibizoux.adeapp.ui.timetable.Background
 import com.chtibizoux.adeapp.ui.timetable.EventElement
 import com.chtibizoux.adeapp.ui.timetable.HOUR_HEIGHT
 import com.chtibizoux.adeapp.ui.timetable.Hours
-import com.chtibizoux.adeapp.ui.timetable.MultipleResourcesHeader
 import com.chtibizoux.adeapp.ui.timetable.TIME_WIDTH
 import com.chtibizoux.adeapp.ui.timetable.ZoomableComponent
-import com.chtibizoux.adeapp.ui.timetable.day.getAllChildren
-import com.chtibizoux.adeapp.ui.timetable.day.getLeaves
 
 @Composable
 fun MultipleResource(
@@ -32,7 +31,7 @@ fun MultipleResource(
     val leaves = getLeaves(children)
     val allChildren = getAllChildren(children)
 
-    fun getHourWidth(width: Float) = width / (leaves.size * week.size)
+    fun getHourWidth(width: Float) = (width / (leaves.size * week.size)).coerceAtLeast(1f)
 
     //    fun getHourHeight(height: Float) = (height - VERTICAL_PADDING * 2) / (END_HOUR - START_HOUR)
     fun getHourHeight(height: Float) = HOUR_HEIGHT
@@ -51,7 +50,7 @@ fun MultipleResource(
         val hourWidth = getHourWidth(width)
         val hourHeight = getHourHeight(height)
 
-        Background(startHour, endHour, hourHeight, hourWidth, leaves.size)
+        Background(startHour, endHour, hourHeight, hourWidth, leaves.size * week.size, leaves.size)
         Row {
             week.forEach { day ->
                 Box {
