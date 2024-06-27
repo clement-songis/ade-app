@@ -12,9 +12,14 @@ class Weeks(days: List<Day<Event>>) : List<List<Day<Event>>> by days.groupBy({
     calendar.get(Calendar.WEEK_OF_YEAR)
 }).values.toList() {
     fun getPage(date: Date = Date()): Int {
-        // TODO: view Calendar.getPage
         val index = this.indexOfFirst {
-            it[0].getDate() >= calendarDateFormat.parse(calendarDateFormat.format(date))
+            val lastHour = it.last().events.last().endHour
+            val calendar = Calendar.getInstance().apply {
+                time = it.last().getDate()
+                set(Calendar.HOUR_OF_DAY, lastHour.hour)
+                set(Calendar.MINUTE, lastHour.minute)
+            }
+            calendar.time >= date
         }
         return if (index == -1) this.size - 1 else index
     }

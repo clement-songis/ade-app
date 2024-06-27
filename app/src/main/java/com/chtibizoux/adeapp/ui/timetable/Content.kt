@@ -27,8 +27,6 @@ import com.chtibizoux.adeapp.ui.timetable.week.WeekComponent
 import com.chtibizoux.adeapp.ui.timetable.week.Weeks
 import java.util.Date
 
-// TODO: Make a week view
-
 const val HOUR_HEIGHT = 60f
 const val MAIN_DIVIDER_HEIGHT = 2
 const val SECONDARY_DIVIDER_HEIGHT = 1
