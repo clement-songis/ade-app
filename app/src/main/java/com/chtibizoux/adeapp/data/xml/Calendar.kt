@@ -44,7 +44,7 @@ data class Day<T>(
 @Serializable
 data class Event(
     val name: String,
-    val date: String,// TODO: Parse date
+    val date: String,
     val duration: Int,
     val startHour: Time,
     val endHour: Time,
@@ -60,7 +60,7 @@ data class Event(
 @Serializable
 data class SimpleEvent(
     val name: String,
-    val date: String,// TODO: Parse date
+    val date: String,
     val startHour: Time,
     val endHour: Time,
 )
