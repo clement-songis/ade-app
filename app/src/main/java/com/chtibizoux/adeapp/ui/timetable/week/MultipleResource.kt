@@ -2,8 +2,10 @@ package com.chtibizoux.adeapp.ui.timetable.week
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.chtibizoux.adeapp.data.xml.Day
@@ -53,7 +55,7 @@ fun MultipleResource(
         Background(startHour, endHour, hourHeight, hourWidth, leaves.size * week.size, leaves.size)
         Row {
             week.forEach { day ->
-                Box {
+                Box(Modifier.width((hourWidth * leaves.size).dp)) {
                     day.events.forEach { event ->
                         val resource =
                             allChildren.find { resource -> event.resources.find { resource.name == it.name && resource.id == it.id } != null }
