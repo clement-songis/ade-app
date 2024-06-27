@@ -1,6 +1,7 @@
 package com.chtibizoux.adeapp.ui.home.resourceSelector
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -29,7 +30,7 @@ fun SelectorContent(
     val isSearching by selectorViewModel.isSearching.collectAsState()
     val resourceList by selectorViewModel.resourceList.collectAsState()
 
-    Column {
+    Column(modifier = Modifier.fillMaxSize()) {
         SearchBar(
             query = searchText,
             onQueryChange = selectorViewModel::onSearchTextChange,
