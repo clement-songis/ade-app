@@ -23,9 +23,7 @@ fun MultipleResource(
     navController: NavController,
     children: List<Resource>,
     startHour: Int,
-    endHour: Int,
-    xScrollEnabled: MutableState<Boolean>,
-    yScrollEnabled: MutableState<Boolean>
+    endHour: Int
 ) {
     val leaves = getLeaves(children)
     val allChildren = getAllChildren(children)
@@ -36,8 +34,6 @@ fun MultipleResource(
     fun getHourHeight(height: Float) = HOUR_HEIGHT
 
     ZoomableComponent(
-        xScrollEnabled,
-        yScrollEnabled,
         TIME_WIDTH.dp,
         header = { offset, width ->
             MultipleResourcesHeader(leaves, getHourWidth(width), offset)

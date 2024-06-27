@@ -111,13 +111,11 @@ fun TimetableContent(
             navController,
             previousButton,
             refreshCalendar
-        ) { page, xScrollEnabled, yScrollEnabled ->
+        ) { page ->
             WeekComponent(
                 navController,
                 weeks[page],
-                children,
-                xScrollEnabled,
-                yScrollEnabled
+                children
             )
         }
     } else {
@@ -134,13 +132,11 @@ fun TimetableContent(
             navController,
             previousButton,
             refreshCalendar
-        ) { page, xScrollEnabled, yScrollEnabled ->
+        ) { page ->
             DayComponent(
                 navController,
                 calendar.days[page],
-                children,
-                xScrollEnabled,
-                yScrollEnabled
+                children
             )
         }
     }

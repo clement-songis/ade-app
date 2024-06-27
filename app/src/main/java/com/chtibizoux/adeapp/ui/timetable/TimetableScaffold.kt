@@ -2,9 +2,12 @@ package com.chtibizoux.adeapp.ui.timetable
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarViewDay
 import androidx.compose.material.icons.filled.CalendarViewWeek
@@ -44,9 +47,10 @@ fun TimetableScaffold(
     navController: NavController,
     previousButton: Boolean,
     refreshCalendar: suspend () -> Unit,
-    content: @Composable (page: Int, xScrollEnabled: MutableState<Boolean>, yScrollEnabled: MutableState<Boolean>) -> Unit,
+    content: @Composable (page: Int) -> Unit,
 ) {
-    val pagerState = rememberPagerState(initialPage = getPage(initialDate), pageCount = { pageCount })
+    val pagerState =
+        rememberPagerState(initialPage = getPage(initialDate), pageCount = { pageCount })
 
     val coroutineScope = rememberCoroutineScope()
 
@@ -57,9 +61,6 @@ fun TimetableScaffold(
             state.endRefresh()
         }
     }
-
-    val xScrollEnabled = remember { mutableStateOf(true) }
-    val yScrollEnabled = remember { mutableStateOf(true) }
 
     Scaffold(topBar = {
         CenterAlignedTopAppBar(
@@ -86,10 +87,9 @@ fun TimetableScaffold(
             }
         )
     }) { padding ->
-        val modifier = Modifier.padding(padding)
-        Box(if (yScrollEnabled.value) modifier.nestedScroll(state.nestedScrollConnection) else modifier) {
-            HorizontalPager(pagerState, userScrollEnabled = xScrollEnabled.value) { page ->
-                content(page, xScrollEnabled, yScrollEnabled)
+        Box(Modifier.padding(padding).nestedScroll(state.nestedScrollConnection)) {
+            HorizontalPager(pagerState) { page ->
+                content(page)
             }
             PullToRefreshContainer(
                 modifier = Modifier.align(Alignment.TopCenter),

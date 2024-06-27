@@ -13,13 +13,11 @@ import com.chtibizoux.adeapp.ui.timetable.START_HOUR
 fun DayComponent(
     navController: NavController,
     day: Day<Event>,
-    children: List<Resource>,
-    xScrollEnabled: MutableState<Boolean>,
-    yScrollEnabled: MutableState<Boolean>,
+    children: List<Resource>
 ) {
     if (children.isEmpty()) {
         SimpleResource(day.events, navController, START_HOUR, END_HOUR)
     } else {
-        MultipleResource(day.events, navController, children, START_HOUR, END_HOUR, xScrollEnabled, yScrollEnabled)
+        MultipleResource(day.events, navController, children, START_HOUR, END_HOUR)
     }
 }

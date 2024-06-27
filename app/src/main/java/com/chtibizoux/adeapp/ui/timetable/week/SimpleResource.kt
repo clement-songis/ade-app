@@ -22,9 +22,7 @@ fun SimpleResource(
     week: List<Day<Event>>,
     navController: NavController,
     startHour: Int,
-    endHour: Int,
-    xScrollEnabled: MutableState<Boolean>,
-    yScrollEnabled: MutableState<Boolean>
+    endHour: Int
 ) {
     fun getHourWidth(width: Float) = (width / week.size).coerceAtLeast(1f)
 
@@ -32,8 +30,6 @@ fun SimpleResource(
     fun getHourHeight(height: Float) = HOUR_HEIGHT
 
     ZoomableComponent(
-        xScrollEnabled,
-        yScrollEnabled,
         TIME_WIDTH.dp,
         header = { offset, width ->
             WeekHeader(week, getHourWidth(width), offset)

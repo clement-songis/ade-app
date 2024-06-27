@@ -2,41 +2,35 @@ package com.chtibizoux.adeapp.ui.timetable
 
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
-import androidx.compose.foundation.gestures.calculatePan
 import androidx.compose.foundation.gestures.calculateZoom
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.round
-import kotlin.math.roundToInt
 
 @Composable
 fun ZoomableComponent(
-    xScrollEnabled: MutableState<Boolean>,
-    yScrollEnabled: MutableState<Boolean>,
     sideWidth: Dp = 0.dp,
     header: @Composable (offset: IntOffset, width: Float) -> Unit = { _, _ -> },
     leftSide: @Composable (offset: IntOffset, height: Float) -> Unit = { _, _ -> },
@@ -52,10 +46,11 @@ fun ZoomableComponent(
     var scaleX by remember { mutableFloatStateOf(1f) }
     var scaleY by remember { mutableFloatStateOf(1f) }
 
-    var offset by remember { mutableStateOf(Offset.Zero) }
-
     val scaledWidth = with(localDensity) { (width * scaleX).toDp().value }
     val scaledHeight = with(localDensity) { (height * scaleY).toDp().value }
+
+    val verticalScrollState = rememberScrollState()
+    val horizontalScrollState = rememberScrollState()
 
     Column(
         Modifier
@@ -66,25 +61,9 @@ fun ZoomableComponent(
                     do {
                         val event = awaitPointerEvent()
                         val zoomChange = event.calculateZoom()
-                        val offsetChange = event.calculatePan()
 
                         scaleX = (scaleX * zoomChange).coerceAtLeast(1f)
                         // TODO: separate zoom
-
-                        val widthOverflow = (width - contentWidth)
-                            .coerceAtMost(0).toFloat()
-                        val heightOverflow = (height - contentHeight)
-                            .coerceAtMost(0).toFloat()
-
-                        val newOffset = offset + offsetChange
-                        offset = Offset(
-                            newOffset.x.coerceIn(widthOverflow, 0f),
-                            newOffset.y.coerceIn(heightOverflow, 0f)
-                        )
-
-                        val overflowOffset = newOffset - offset
-                        xScrollEnabled.value = overflowOffset.x != 0f || offsetChange.x == 0f
-                        yScrollEnabled.value = overflowOffset.y != 0f || offsetChange.y == 0f
                     } while (event.changes.any { it.pressed })
                 }
             }
@@ -94,7 +73,7 @@ fun ZoomableComponent(
                 .padding(start = sideWidth)
                 .overflowable()
         ) {
-            header(IntOffset(offset.x.roundToInt(), 0), scaledWidth)
+            header(IntOffset(-horizontalScrollState.value, 0), scaledWidth)
         }
         Row {
             Box(
@@ -102,7 +81,7 @@ fun ZoomableComponent(
                     .width(sideWidth)
                     .overflowable()
             ) {
-                leftSide(IntOffset(0, offset.y.roundToInt()), scaledHeight)
+                leftSide(IntOffset(0, -verticalScrollState.value), scaledHeight)
             }
             Box(
                 Modifier
@@ -111,11 +90,11 @@ fun ZoomableComponent(
                         width = coordinates.size.width
                         height = coordinates.size.height
                     }
-                    .overflowable()
             ) {
                 Box(
                     Modifier
-                        .offset { offset.round() }
+                        .horizontalScroll(horizontalScrollState)
+                        .verticalScroll(verticalScrollState)
                         .onGloballyPositioned { coordinates ->
                             contentWidth = coordinates.size.width
                             contentHeight = coordinates.size.height

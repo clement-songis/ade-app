@@ -14,12 +14,10 @@ fun WeekComponent(
     navController: NavController,
     week: List<Day<Event>>,
     children: List<Resource>,
-    xScrollEnabled: MutableState<Boolean>,
-    yScrollEnabled: MutableState<Boolean>,
 ) {
     if (children.isEmpty()) {
-        SimpleResource(week, navController, START_HOUR, END_HOUR, xScrollEnabled, yScrollEnabled)
+        SimpleResource(week, navController, START_HOUR, END_HOUR)
     } else {
-        MultipleResource(week, navController, children, START_HOUR, END_HOUR, xScrollEnabled, yScrollEnabled)
+        MultipleResource(week, navController, children, START_HOUR, END_HOUR)
     }
 }
