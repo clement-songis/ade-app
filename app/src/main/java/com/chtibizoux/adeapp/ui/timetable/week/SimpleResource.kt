@@ -15,7 +15,6 @@ import com.chtibizoux.adeapp.ui.timetable.EventElement
 import com.chtibizoux.adeapp.ui.timetable.HOUR_HEIGHT
 import com.chtibizoux.adeapp.ui.timetable.Hours
 import com.chtibizoux.adeapp.ui.timetable.TIME_WIDTH
-import com.chtibizoux.adeapp.ui.timetable.VERTICAL_PADDING
 import com.chtibizoux.adeapp.ui.timetable.ZoomableComponent
 
 @Composable
@@ -46,7 +45,7 @@ fun SimpleResource(
         val hourWidth = getHourWidth(width)
         val hourHeight = getHourHeight(height)
 
-        Background(startHour, endHour, hourHeight * (endHour - startHour) + VERTICAL_PADDING * 2, hourWidth, week.size)
+        Background(startHour, endHour, hourHeight, hourWidth, week.size)
         Row {
             week.forEach { day ->
                 Box(Modifier.width(hourWidth.dp)) {
