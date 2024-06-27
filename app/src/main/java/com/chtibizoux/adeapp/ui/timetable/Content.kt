@@ -10,8 +10,10 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -46,7 +48,9 @@ fun WaitForCalendar(
 ) {
     if (calendar == null) {
         Column(
-            modifier = Modifier.background(MaterialTheme.colorScheme.background).fillMaxSize(),
+            modifier = Modifier
+                .background(MaterialTheme.colorScheme.background)
+                .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterVertically)
         ) {
@@ -57,7 +61,9 @@ fun WaitForCalendar(
         }
     } else if (calendar.days.isEmpty()) {
         Box(
-            modifier = Modifier.background(MaterialTheme.colorScheme.background).fillMaxSize(),
+            modifier = Modifier
+                .background(MaterialTheme.colorScheme.background)
+                .fillMaxSize(),
             contentAlignment = Alignment.Center,
         ) {
             Text(stringResource(R.string.no_calendar), color = Color.White)
@@ -87,15 +93,21 @@ fun TimetableContent(
     date: Date,
     refreshCalendar: suspend () -> Unit
 ) {
-    val isWeekView = remember { mutableStateOf(false) }
-    if (isWeekView.value) {
+    var isWeekView by remember { mutableStateOf(false) }
+    var initialDate by remember { mutableStateOf(date) }
+
+    if (isWeekView) {
         val weeks = Weeks(calendar.days)
         TimetableScaffold(
-            isWeekView,
-            date,
+            true,
+            initialDate,
             weeks.size,
             { weeks.getPage(it) },
             { weeks[it].first().getDate() },
+            {
+                initialDate = weeks[it].first().getDate()
+                isWeekView = false
+            },
             navController,
             previousButton,
             refreshCalendar
@@ -110,11 +122,15 @@ fun TimetableContent(
         }
     } else {
         TimetableScaffold(
-            isWeekView,
-            date,
+            false,
+            initialDate,
             calendar.days.size,
             { calendar.getPage(it) },
             { calendar.days[it].getDate() },
+            {
+                initialDate = calendar.days[it].getDate()
+                isWeekView = true
+            },
             navController,
             previousButton,
             refreshCalendar
@@ -132,15 +148,19 @@ fun TimetableContent(
 //    val weeks = Weeks(calendar.days)
 //    TimetableScaffold(
 //        isWeekView,
-//        date,
-//        if (isWeekView.value) weeks.size else calendar.days.size,
-//        { if (isWeekView.value) weeks.getPage(it) else calendar.getPage(it) },
-//        { (if (isWeekView.value) weeks[it].first() else calendar.days[it]).getDate() },
+//        initialDate,
+//        if (isWeekView) weeks.size else calendar.days.size,
+//        { if (isWeekView) weeks.getPage(it) else calendar.getPage(it) },
+//        { (if (isWeekView) weeks[it].first() else calendar.days[it]).getDate() },
+//        {
+//            initialDate = (if (isWeekView) weeks[it].first() else calendar.days[it]).getDate()
+//            isWeekView = true
+//        },
 //        navController,
 //        previousButton,
 //        refreshCalendar
 //    ) { page, xScrollEnabled, yScrollEnabled ->
-//        if (isWeekView.value) {
+//        if (isWeekView) {
 //            WeekComponent(
 //                navController,
 //                weeks[page],

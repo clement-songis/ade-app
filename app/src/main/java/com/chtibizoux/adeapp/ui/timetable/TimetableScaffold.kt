@@ -18,11 +18,9 @@ import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -37,17 +35,17 @@ import java.util.Date
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun TimetableScaffold(
-    isWeekViewState: MutableState<Boolean>,
+    isWeekView: Boolean,
     initialDate: Date,
     pageCount: Int,
     getPage: (date: Date) -> Int,
     getCurrentDate: (currentPage: Int) -> Date,
+    toggleView: (currentPage: Int) -> Unit,
     navController: NavController,
     previousButton: Boolean,
     refreshCalendar: suspend () -> Unit,
     content: @Composable (page: Int, xScrollEnabled: MutableState<Boolean>, yScrollEnabled: MutableState<Boolean>) -> Unit,
 ) {
-    var isWeekView by isWeekViewState
     val pagerState = rememberPagerState(initialPage = getPage(initialDate), pageCount = { pageCount })
 
     val coroutineScope = rememberCoroutineScope()
@@ -78,7 +76,7 @@ fun TimetableScaffold(
                 }
             },
             actions = {
-                IconButton(onClick = { isWeekView = !isWeekView }) {
+                IconButton(onClick = { toggleView(pagerState.currentPage) }) {
                     Icon(
                         if (isWeekView) Icons.Filled.CalendarViewDay else Icons.Filled.CalendarViewWeek,
                         stringResource(R.string.change_timetable_view)
