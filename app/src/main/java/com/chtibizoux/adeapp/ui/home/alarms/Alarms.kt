@@ -69,34 +69,16 @@ fun Alarms(navController: NavController, viewModel: SettingsViewModel) {
                     }
                 }
             }
-            // TODO
-//            val intent = LocalContext.current.findActivity()?.intent
-//            if (intent?.action == NEW_ALARM_ACTION) {
-//                val extra = intent.getStringExtra(TIME_EXTRA)
-//                if (extra != null) {
-//                    Time.fromString(extra)
-//                } else {
-//                    false
-//                }
-//            } else {
-//                false
-//            }
             AddAlarmButton(
-                false,
                 if (alarms.isEmpty()) {
                     Time(Calendar.getInstance().get(Calendar.HOUR_OF_DAY), 0)
                 } else {
                     alarms.last().forHour + 60
-                }, alarmSettings
+                },
+                alarmSettings
             ) {
                 viewModel.addAlarm(it)
             }
         }
     }
-}
-
-fun Context.findActivity(): Activity? = when (this) {
-    is Activity -> this
-    is ContextWrapper -> baseContext.findActivity()
-    else -> null
 }
