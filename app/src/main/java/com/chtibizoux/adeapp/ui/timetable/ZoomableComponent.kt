@@ -1,7 +1,7 @@
 package com.chtibizoux.adeapp.ui.timetable
 
 import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.calculateCentroid
 import androidx.compose.foundation.gestures.calculateZoom
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
@@ -22,19 +22,27 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.pointer.PointerEvent
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastForEach
+import androidx.compose.ui.util.fastSumBy
+import kotlin.math.PI
+import kotlin.math.atan2
 
 @Composable
 fun ZoomableComponent(
     sideWidth: Dp = 0.dp,
     header: @Composable (offset: IntOffset, width: Float) -> Unit = { _, _ -> },
     leftSide: @Composable (offset: IntOffset, height: Float) -> Unit = { _, _ -> },
-    content: @Composable (width: Float, height: Float) -> Unit,
+    enableVerticalZoom: Boolean = true,
+    enableHorizontalZoom: Boolean = true,
+    content: @Composable (width: Float, height: Float) -> Unit
 ) {
     val localDensity = LocalDensity.current
 
@@ -78,8 +86,17 @@ fun ZoomableComponent(
                                 val event = awaitPointerEvent()
                                 val zoomChange = event.calculateZoom()
 
-                                scaleX = (scaleX * zoomChange).coerceAtLeast(1f)
-                                // TODO: separate zoom
+                                val angle = event.calculateAngle()
+
+                                if ((-45f..45f).contains(angle)) {
+                                    if (enableHorizontalZoom) {
+                                        scaleX = (scaleX * zoomChange).coerceAtLeast(1f)
+                                    }
+                                } else {
+                                    if (enableVerticalZoom) {
+                                        scaleY = (scaleY * zoomChange).coerceAtLeast(1f)
+                                    }
+                                }
                             } while (event.changes.any { it.pressed })
                         }
                     }
@@ -88,10 +105,10 @@ fun ZoomableComponent(
                         height = coordinates.size.height
                     }
             ) {
+                val horizontalModifier = if (enableHorizontalZoom) Modifier.horizontalScroll(horizontalScrollState) else Modifier
+                val verticalModifier = if (enableVerticalZoom) horizontalModifier.verticalScroll(verticalScrollState) else horizontalModifier
                 Box(
-                    Modifier
-                        .horizontalScroll(horizontalScrollState)
-                        .verticalScroll(verticalScrollState)
+                    verticalModifier
                         .onGloballyPositioned { coordinates ->
                             contentWidth = coordinates.size.width
                             contentHeight = coordinates.size.height
@@ -103,6 +120,38 @@ fun ZoomableComponent(
         }
     }
 }
+
+fun PointerEvent.calculateAngle(): Float {
+    val pointerCount = changes.fastSumBy { if (it.previousPressed && it.pressed) 1 else 0 }
+    if (pointerCount < 2) {
+        return 0f
+    }
+    val currentCentroid = calculateCentroid()
+    var rotation = 0f
+    var rotationWeight = 0f
+
+    changes.fastForEach { change ->
+        if (change.pressed && change.previousPressed) {
+            val currentPosition = change.position
+            val currentOffset = currentPosition - currentCentroid
+
+            val currentAngle = currentOffset.angle()
+            val weight = currentOffset.getDistance()
+
+            rotation += when {
+                currentAngle > 180f -> currentAngle - 360f
+                currentAngle < -180f -> currentAngle + 360f
+                else -> currentAngle
+            } * weight
+
+            rotationWeight += weight
+        }
+    }
+    return if (rotationWeight == 0f) 0f else rotation / rotationWeight
+}
+
+fun Offset.angle(): Float =
+    if (x == 0f && y == 0f) 0f else -atan2(x, y) * 180f / PI.toFloat()
 
 fun Modifier.overflowable() =
     this
