@@ -1,8 +1,8 @@
 package com.chtibizoux.adeapp.data.ics
 
+import com.chtibizoux.adeapp.data.xml.calendarDateFormat
 import java.text.SimpleDateFormat
 import java.util.Date
-import java.util.GregorianCalendar
 import java.util.Locale
 
 class Parser {
@@ -54,11 +54,9 @@ class Parser {
                                 throw CalendarError("No event to close")
                             }
                             val event = eventBuilder.build()
-                            val index = days.indexOfFirst {
-                                isSameDay(it.date, event.dtStart)
-                            }
+                            val date = calendarDateFormat.format(Date(event.dtStart))
+                            val index = days.indexOfFirst { it.date == date }
                             if (index == -1) {
-                                val date = toMyDate(event.dtStart)
                                 val day = Day(date, listOf(event))
                                 days.add(day)
                             } else {
@@ -119,27 +117,7 @@ class Parser {
 
     private val dateTimeFormat = SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'", Locale.getDefault())
 
-    private val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
-
     private fun toTimestamp(date: String): Long? {
         return dateTimeFormat.parse(date)?.time
-    }
-
-    private fun toDate(day: MyDate): Date {
-        return GregorianCalendar(day.year, day.month, day.day).time
-    }
-
-    private fun toMyDate(timestamp: Long): MyDate {
-        val calendar = java.util.Calendar.getInstance()
-        calendar.time = Date(timestamp)
-        return MyDate(
-            calendar[java.util.Calendar.DAY_OF_MONTH],
-            calendar[java.util.Calendar.MONTH],
-            calendar[java.util.Calendar.YEAR]
-        )
-    }
-
-    private fun isSameDay(day: MyDate, date: Long): Boolean {
-        return dateFormat.format(toDate(day)) == dateFormat.format(Date(date))
     }
 }

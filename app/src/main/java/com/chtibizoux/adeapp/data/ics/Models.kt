@@ -6,12 +6,8 @@ import kotlinx.serialization.Serializable
 data class MyCalendar(val days: List<Day>)
 
 @Serializable
-data class MyDate(val day: Int, val month: Int, val year: Int)
-
-@Serializable
 data class Day(
-//    val date: String,
-    val date: MyDate,
+    val date: String,
     val events: List<Event>,
 )
 
