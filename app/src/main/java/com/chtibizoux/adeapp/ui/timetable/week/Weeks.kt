@@ -2,7 +2,6 @@ package com.chtibizoux.adeapp.ui.timetable.week
 
 import com.chtibizoux.adeapp.data.xml.Day
 import com.chtibizoux.adeapp.data.xml.Event
-import com.chtibizoux.adeapp.data.xml.calendarDateFormat
 import java.util.Calendar
 import java.util.Date
 

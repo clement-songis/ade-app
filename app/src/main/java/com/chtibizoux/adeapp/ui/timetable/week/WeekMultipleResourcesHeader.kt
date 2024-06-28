@@ -19,7 +19,6 @@ import com.chtibizoux.adeapp.data.xml.Event
 import com.chtibizoux.adeapp.data.xml.Resource
 import com.chtibizoux.adeapp.ui.timetable.MAIN_DIVIDER_HEIGHT
 import com.chtibizoux.adeapp.ui.timetable.MultipleResourcesHeader
-import com.chtibizoux.adeapp.ui.timetable.SECONDARY_DIVIDER_HEIGHT
 
 @Composable
 fun WeekMultipleResourcesHeader(

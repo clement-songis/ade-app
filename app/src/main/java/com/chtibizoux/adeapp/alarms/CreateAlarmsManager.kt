@@ -74,9 +74,18 @@ class CreateAlarmsManager(private val context: Context) {
         notify: Boolean = true
     ) {
         try {
-            val tomorrow = Calendar.getInstance()
-            tomorrow.add(Calendar.DATE, 1)
-            val result = repository.getStartingTime(user, tomorrow.time)
+            val alarmDay = Calendar.getInstance().apply {
+                val minutesNumber = get(Calendar.HOUR_OF_DAY) * 60 + get(Calendar.MINUTE)
+                if (alarms.all { alarm -> alarm.hours.all { it.getMinutesNumber() <= minutesNumber } }) {
+                    add(Calendar.DATE, 1)
+                }
+
+                // Reset seconds and milliseconds for alarms
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+            }
+
+            val result = repository.getStartingTime(user, alarmDay.time)
             if (result is Result.Success) {
                 val alarm = if (usePreviousAlarm) {
                     alarms.sortedBy { it.forHour.getMinutesNumber() }.reversed()
@@ -86,7 +95,7 @@ class CreateAlarmsManager(private val context: Context) {
                 }
                 if (alarm != null) {
                     for (time in alarm.hours) {
-                        createAlarm(time)
+                        createAlarm(alarmDay, time)
                     }
                     if (notify) {
                         notificationManager.showCreateAlarmSuccess(alarm.hours.size, alarm.forHour)
@@ -116,17 +125,14 @@ class CreateAlarmsManager(private val context: Context) {
         }
     }
 
-    private fun createAlarm(time: Time) {
-        val pendingIntent = AlarmsManager.getAlarmIntent(time.getMinutesNumber(), context)
-        val calendar: Calendar = Calendar.getInstance().apply {
-//            Add a day if UPDATE_HOUR is before midnight
-            add(Calendar.DATE, 1)
+    private fun createAlarm(tomorrow: Calendar, time: Time) {
+        val calendar: Calendar = tomorrow.clone() as Calendar
+        calendar.apply {
             set(Calendar.HOUR_OF_DAY, time.hour)
             set(Calendar.MINUTE, time.minute)
-
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
         }
+
+        val pendingIntent = AlarmsManager.getAlarmIntent(time.getMinutesNumber(), context)
 
         val alarmClockInfo = AlarmManager.AlarmClockInfo(calendar.timeInMillis, pendingIntent)
         alarmManager.setAlarmClock(alarmClockInfo, pendingIntent)

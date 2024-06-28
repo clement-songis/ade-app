@@ -52,7 +52,7 @@ fun MultipleResource(
                 Box(Modifier.width((hourWidth * leaves.size).dp)) {
                     day.events.forEach { event ->
                         val resource =
-                            allChildren.find { resource -> event.resources.find { resource.name == it.name && resource.id == it.id } != null }
+                            allChildren.find { resource -> event.resources.any { resource.name == it.name && resource.id == it.id } }
 
                         if (resource != null) {
                             val (index, length) = if (resource.children.isNotEmpty()) {

@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.widget.Toast
+import com.chtibizoux.adeapp.BuildConfig
 import com.chtibizoux.adeapp.MyNotificationManager
 import com.chtibizoux.adeapp.R
 import com.chtibizoux.adeapp.data.Time
@@ -62,8 +63,9 @@ class AlarmsManager(private val service: Service) {
 
         service.stopForeground(STOP_FOREGROUND_REMOVE)
 
-        val finishAlarmActivityIntent = Intent(AlarmActivity.FINISH_ALARM_ACTIVITY_ACTION)
-        service.sendBroadcast(finishAlarmActivityIntent)
+        val intent =
+            Intent(AlarmActivity.FINISH_ALARM_ACTIVITY_ACTION).setPackage(BuildConfig.APPLICATION_ID)
+        service.sendBroadcast(intent)
 
         wakelockManager.release()
     }
@@ -84,7 +86,8 @@ class AlarmsManager(private val service: Service) {
             add(Calendar.MINUTE, 10)
         }
 
-        val numberOfMinutes = calendar.get(Calendar.MINUTE) + 60 * calendar.get(Calendar.HOUR_OF_DAY)
+        val numberOfMinutes =
+            calendar.get(Calendar.MINUTE) + 60 * calendar.get(Calendar.HOUR_OF_DAY)
 
         notificationManager.showSnooze(Time(numberOfMinutes))
 

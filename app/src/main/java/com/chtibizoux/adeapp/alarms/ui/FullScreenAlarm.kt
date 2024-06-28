@@ -18,6 +18,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.chtibizoux.adeapp.BuildConfig
 import com.chtibizoux.adeapp.R
 import com.chtibizoux.adeapp.alarms.AlarmService
 
@@ -38,7 +39,8 @@ fun FullScreenAlarm() {
 
             Button(
                 onClick = {
-                    context.sendBroadcast(Intent(AlarmService.SNOOZE_ALARM_ACTION))
+                    val intent = Intent(AlarmService.SNOOZE_ALARM_ACTION).setPackage(BuildConfig.APPLICATION_ID)
+                    context.sendBroadcast(intent)
                 },
                 shape = RoundedCornerShape(20.dp),
             ) {
@@ -51,10 +53,13 @@ fun FullScreenAlarm() {
 
             Button(
                 onClick = {
-                    context.sendBroadcast(Intent(AlarmService.STOP_ALARM_ACTION))
+                    val intent = Intent(AlarmService.STOP_ALARM_ACTION).setPackage(BuildConfig.APPLICATION_ID)
+                    context.sendBroadcast(intent)
                 },
                 shape = RoundedCornerShape(24.dp),
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 30.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 30.dp)
             ) {
                 Text(
                     stringResource(R.string.cancel),

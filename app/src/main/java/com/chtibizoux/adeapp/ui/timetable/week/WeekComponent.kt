@@ -1,7 +1,6 @@
 package com.chtibizoux.adeapp.ui.timetable.week
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.navigation.NavController
 import com.chtibizoux.adeapp.data.xml.Day
 import com.chtibizoux.adeapp.data.xml.Event
