@@ -11,12 +11,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.sp
 import com.chtibizoux.adeapp.R
 import java.text.DateFormat
-import java.time.DayOfWeek
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
-import java.time.format.TextStyle
-import java.time.temporal.TemporalAdjusters
+import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
@@ -47,42 +43,48 @@ private fun getDayTitle(date: Date) =
 
 @Composable
 private fun getWeekTitle(date: Date): String {
-    val localDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
-    val firstDayOfWeek = localDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
-    val lastDayOfWeek = firstDayOfWeek.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY))
+    val firstDayOfWeek = Calendar.getInstance().apply {
+        time = date
+        set(Calendar.DAY_OF_WEEK, firstDayOfWeek)
+    }
+
+    val lastDayOfWeek = (firstDayOfWeek.clone() as Calendar).apply {
+        add(Calendar.DAY_OF_WEEK, 6)
+    }
 
     return when {
-        firstDayOfWeek.year != lastDayOfWeek.year -> {
-            val formatter = DateTimeFormatter.ofPattern(
-                stringResource(R.string.date_month_pattern),
-                Locale.getDefault()
-            )
+        firstDayOfWeek.get(Calendar.YEAR) != lastDayOfWeek.get(Calendar.YEAR) -> {
+            val dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM)
 
-            val formatFirstDay = firstDayOfWeek.format(formatter)
-            val formatLastDay = lastDayOfWeek.format(formatter)
+            val formatFirstDay = dateFormat.format(firstDayOfWeek.time)
+            val formatLastDay = dateFormat.format(lastDayOfWeek.time)
             stringResource(R.string.big_interval, formatFirstDay, formatLastDay)
         }
 
-        firstDayOfWeek.month != lastDayOfWeek.month -> {
-            val formatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
-                .withLocale(Locale.getDefault())
+        firstDayOfWeek.get(Calendar.MONTH) != lastDayOfWeek.get(Calendar.MONTH) -> {
+            val monthAndYearFormat = SimpleDateFormat(stringResource(R.string.date_month_pattern), Locale.getDefault())
 
-            val formatFirstDay = firstDayOfWeek.format(formatter)
-            val formatLastDay = lastDayOfWeek.format(formatter)
+            val formatFirstDay = monthAndYearFormat.format(firstDayOfWeek.time)
+            val formatLastDay = monthAndYearFormat.format(lastDayOfWeek.time)
             stringResource(
                 R.string.medium_interval,
                 formatFirstDay,
                 formatLastDay,
-                firstDayOfWeek.year
+                firstDayOfWeek.get(Calendar.YEAR)
             )
         }
 
-        else -> stringResource(
-            R.string.short_interval,
-            firstDayOfWeek.dayOfMonth,
-            lastDayOfWeek.dayOfMonth,
-            firstDayOfWeek.month.getDisplayName(TextStyle.FULL, Locale.getDefault()),
-            firstDayOfWeek.year
-        )
+        else -> {
+            val monthFormat = SimpleDateFormat("MMMM", Locale.getDefault())
+
+            val month = monthFormat.format(firstDayOfWeek.time)
+            stringResource(
+                R.string.short_interval,
+                firstDayOfWeek.get(Calendar.DAY_OF_MONTH),
+                lastDayOfWeek.get(Calendar.DAY_OF_MONTH),
+                month,
+                firstDayOfWeek.get(Calendar.YEAR)
+            )
+        }
     }
 }
