@@ -26,9 +26,9 @@ jobs:
           ./gradlew build --no-daemon
           ./gradlew assembleRelease --no-daemon \
             -Pandroid.injected.signing.store.file="$GITHUB_WORKSPACE/signing-key.jks" \
-            -Pandroid.injected.signing.store.password="${{ secrets.KEYSTORE_PASSWORD }}" \
-            -Pandroid.injected.signing.key.alias="${{ secrets.KEY_ALIAS }}" \
-            -Pandroid.injected.signing.key.password="${{ secrets.KEY_PASSWORD }}"
+            -Pandroid.injected.signing.store.password='${{ secrets.KEYSTORE_PASSWORD }}' \
+            -Pandroid.injected.signing.key.alias='${{ secrets.KEY_ALIAS }}' \
+            -Pandroid.injected.signing.key.password='${{ secrets.KEY_PASSWORD }}'
 
       - shell: bash
         run: rm "$GITHUB_WORKSPACE/signing-key.jks"
