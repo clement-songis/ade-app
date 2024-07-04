@@ -73,17 +73,6 @@ class CreateAlarmsManager(private val context: Context) {
         usePreviousAlarm: Boolean,
         notify: Boolean = true
     ) {
-//        createAlarm(Calendar.getInstance().apply {
-//            if (get(Calendar.HOUR_OF_DAY) >= 12) {
-//                add(Calendar.DATE, 1)
-//            }
-//        }, Time(12, 0))
-
-//        val calendar = Calendar.getInstance().apply {
-//            add(Calendar.MINUTE, 1)
-//        }
-//        createAlarm(calendar, Time(calendar.get(Calendar.HOUR), calendar.get(Calendar.MINUTE)))
-
         try {
             val alarmDay = Calendar.getInstance().apply {
                 val minutesNumber = get(Calendar.HOUR_OF_DAY) * 60 + get(Calendar.MINUTE)
