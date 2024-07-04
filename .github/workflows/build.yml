@@ -7,6 +7,8 @@ jobs:
   build:
     name: Build job
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Clone repo
         uses: actions/checkout@v4
@@ -30,13 +32,17 @@ jobs:
             -Pandroid.injected.signing.key.alias='${{ secrets.KEY_ALIAS }}' \
             -Pandroid.injected.signing.key.password='${{ secrets.KEY_PASSWORD }}'
 
-      - shell: bash
+      - name: Clean keystore
+        shell: bash
         run: rm "$GITHUB_WORKSPACE/signing-key.jks"
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload apk
+        uses: actions/upload-artifact@v4
         with:
+          name: app-release.apk
           path: app/build/outputs/apk/release/app-release.apk
 
-      - uses: ncipollo/release-action@v1
+      - name: Create a release
+        uses: ncipollo/release-action@v1
         with:
           artifacts: "app/build/outputs/apk/release/app-release.apk"
