@@ -1,3 +1,6 @@
+import java.io.ByteArrayOutputStream
+import kotlin.math.pow
+
 plugins {
     id("com.android.application")
     kotlin("android")
@@ -13,8 +16,11 @@ android {
         applicationId = "com.chtibizoux.adeapp"
         minSdk = 24
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+
+        versionName = getLatestGitTag()
+        versionCode = getVersionCode(versionName!!)
+
+        println("Version:\nname: $versionName\ncode: $versionCode")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -59,9 +65,29 @@ android {
     }
 }
 
+fun getLatestGitTag(): String {
+    try {
+        val stdout = ByteArrayOutputStream()
+        exec {
+            commandLine = listOf("git", "describe", "--tags", "--abbrev=0")
+            standardOutput = stdout
+        }
+        return stdout.toString().trim().replace("v", "")
+    } catch (e: Exception) {
+        throw Error("Enable to get the latest git tag")
+    }
+}
+
+fun getVersionCode(tag: String): Int {
+    val versionParts = tag.split(".").map { it.toInt() }
+    return versionParts.reversed().reduceIndexed { index, code, part ->
+        code + part * 100.0.pow(index).toInt()
+    }
+}
+
 dependencies {
     implementation("androidx.core:core-ktx:1.13.1")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.2")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.3")
     implementation("androidx.activity:activity-compose:1.9.0")
     implementation(platform("androidx.compose:compose-bom:2024.06.00"))
     implementation("androidx.compose.ui:ui")

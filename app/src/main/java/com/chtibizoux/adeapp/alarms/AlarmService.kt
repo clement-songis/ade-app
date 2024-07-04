@@ -41,7 +41,7 @@ class AlarmService : Service() {
                 }
 
                 else -> {
-                    throw Error("Bad action ${intent.action}")
+                    System.err.println("Bad action ${intent.action}")
                 }
             }
         }
@@ -75,7 +75,7 @@ class AlarmService : Service() {
         if (intent?.action == START_ALARM_ACTION) {
             alarmsManager.startAlarm()
         } else {
-            throw Error("Bad action ${intent?.action}")
+            System.err.println("Bad action ${intent?.action}")
         }
 
         return state

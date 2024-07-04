@@ -88,7 +88,7 @@ class AlarmsReceiver : BroadcastReceiver() {
             }
 
             else -> {
-                throw Error("Bad action ${intent.action}")
+                System.err.println("Bad action ${intent.action}")
             }
         }
 

@@ -1,0 +1,42 @@
+name: Create a release on push
+on:
+  push:
+    tags:
+      - '*'
+jobs:
+  build:
+    name: Build job
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone repo
+        uses: actions/checkout@v4
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v2
+
+      - name: Write keystore file from content
+        shell: bash
+        run: echo "${{ secrets.KEYSTORE }}" | base64 -d > "$GITHUB_WORKSPACE/signing-key.jks"
+
+      - name: Build APK
+        shell: bash
+        run: |
+          export JAVA_HOME="/usr/lib/jvm/temurin-11-jdk-amd64"
+          chmod +x ./gradlew
+          ./gradlew build --no-daemon
+          ./gradlew assembleRelease --no-daemon \
+            -Pandroid.injected.signing.store.file="$GITHUB_WORKSPACE/signing-key.jks" \
+            -Pandroid.injected.signing.store.password="${{ secrets.KEYSTORE_PASSWORD }}" \
+            -Pandroid.injected.signing.key.alias="${{ secrets.KEY_ALIAS }}" \
+            -Pandroid.injected.signing.key.password="${{ secrets.KEY_PASSWORD }}"
+
+      - shell: bash
+        run: rm "$GITHUB_WORKSPACE/signing-key.jks"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          path: app/build/outputs/apk/release/app-release.apk
+
+      - uses: ncipollo/release-action@v1
+        with:
+          artifacts: "app/build/outputs/apk/release/app-release.apk"

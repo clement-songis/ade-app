@@ -62,7 +62,8 @@ private fun getWeekTitle(date: Date): String {
         }
 
         firstDayOfWeek.get(Calendar.MONTH) != lastDayOfWeek.get(Calendar.MONTH) -> {
-            val monthAndYearFormat = SimpleDateFormat(stringResource(R.string.date_month_pattern), Locale.getDefault())
+            val monthAndYearFormat =
+                SimpleDateFormat(stringResource(R.string.date_month_pattern), Locale.getDefault())
 
             val formatFirstDay = monthAndYearFormat.format(firstDayOfWeek.time)
             val formatLastDay = monthAndYearFormat.format(lastDayOfWeek.time)
@@ -75,14 +76,15 @@ private fun getWeekTitle(date: Date): String {
         }
 
         else -> {
-            val monthFormat = SimpleDateFormat("MMMM", Locale.getDefault())
-
-            val month = monthFormat.format(firstDayOfWeek.time)
+            // SimpleDateFormat("MMMM", Locale.getDefault()).format(firstDayOfWeek.time)
+            val monthName =
+                firstDayOfWeek.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault())
+                    ?: "why ?"
             stringResource(
                 R.string.short_interval,
                 firstDayOfWeek.get(Calendar.DAY_OF_MONTH),
                 lastDayOfWeek.get(Calendar.DAY_OF_MONTH),
-                month,
+                monthName,
                 firstDayOfWeek.get(Calendar.YEAR)
             )
         }
