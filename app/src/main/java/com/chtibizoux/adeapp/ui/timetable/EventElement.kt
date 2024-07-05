@@ -1,6 +1,7 @@
 package com.chtibizoux.adeapp.ui.timetable
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,6 +26,8 @@ import androidx.navigation.NavController
 import com.chtibizoux.adeapp.data.xml.Event
 import kotlin.random.Random
 
+private const val TEXT_HEIGHT = 25
+
 @Composable
 fun EventElement(
     navController: NavController,
@@ -41,6 +44,8 @@ fun EventElement(
     // val endHour = event.endHour.getHourNumber()
     // val height = endHour - startHour
     val height = event.duration / 2f
+
+    val textHeight = (height * hourHeight) / ((height * hourHeight).toInt() / TEXT_HEIGHT)
 
     val yOffset = (VERTICAL_PADDING + (startHour - firstHour) * hourHeight).dp
     val mod = Modifier.height((height * hourHeight).dp)
@@ -60,28 +65,36 @@ fun EventElement(
         onClick = { showDialog = true }
     ) {
         Column(
-            modifier = Modifier.padding(vertical = 3.dp, horizontal = 10.dp),
+            modifier = Modifier.padding(horizontal = 10.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                event.name,
-                modifier = Modifier.height((hourHeight / 2f).dp),
-                textAlign = TextAlign.Center,
-                // overflow = TextOverflow.Ellipsis, Don't use it because of wierd text position glitches
-                maxLines = 1
-            )
+            Box(
+                modifier = Modifier.height(textHeight.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    event.name,
+                    textAlign = TextAlign.Center,
+                    // overflow = TextOverflow.Ellipsis, // Don't use it because of wierd text position glitches
+                    maxLines = 1
+                )
+            }
             listOf("classroom", "trainee", "instructor").forEach { category ->
                 val resources = event.resources.filter { it.category == category }
                 if (resources.isNotEmpty()) {
-                    Text(
-                        resources.joinToString { it.name },
-                        modifier = Modifier.height((hourHeight / 2f).dp),
-                        fontSize = 13.sp,
-                        textAlign = TextAlign.Center,
-                        // overflow = TextOverflow.Ellipsis,
-                        maxLines = 1
-                    )
+                    Box(
+                        modifier = Modifier.height(textHeight.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            resources.joinToString { it.name },
+                            fontSize = 13.sp,
+                            textAlign = TextAlign.Center,
+                            // overflow = TextOverflow.Ellipsis,
+                            maxLines = 1
+                        )
+                    }
                 }
             }
         }
