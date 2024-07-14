@@ -41,9 +41,8 @@ fun EventElement(
     var showDialog by remember { mutableStateOf(false) }
 
     val startHour = event.startHour.getHourNumber()
-    // val endHour = event.endHour.getHourNumber()
-    // val height = endHour - startHour
-    val height = event.duration / 2f
+    val endHour = event.endHour.getHourNumber()
+    val height = endHour - startHour
 
     val textHeight = (height * hourHeight) / ((height * hourHeight).toInt() / TEXT_HEIGHT)
 
