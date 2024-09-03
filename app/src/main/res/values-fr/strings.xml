@@ -34,7 +34,7 @@
     <string name="settings">Paramètres</string>
     <string name="ok">OK</string>
     <string name="back">retour</string>
-    <string name="use_previous_alarm">Utiliser l\'alarme précédente lorsqu\'il n\'y en a pas à configurer :</string>
+    <string name="use_previous_alarm">Utiliser l\'alarme précédente lorsqu\'il n\'y en a pas de configurer :</string>
     <string name="calendar_updated">Emploi du temps mis à jour</string>
     <string name="confirm_alarm_delete">Es tu sûre de vouloir supprimer cette alarme ?\nCette action est ireversible !</string>
     <string name="no_calendar_error">Il n\'y a pas de cours demain</string>
