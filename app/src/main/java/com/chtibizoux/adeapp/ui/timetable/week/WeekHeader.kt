@@ -1,5 +1,6 @@
 package com.chtibizoux.adeapp.ui.timetable.week
 
+import android.icu.text.SimpleDateFormat
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
@@ -15,9 +16,11 @@ import androidx.compose.ui.unit.dp
 import com.chtibizoux.adeapp.data.xml.Day
 import com.chtibizoux.adeapp.data.xml.Event
 import com.chtibizoux.adeapp.ui.timetable.SECONDARY_DIVIDER_HEIGHT
+import java.util.Locale
 
 @Composable
 fun WeekHeader(week: List<Day<Event>>, hourWidth: Float, offset: IntOffset = IntOffset.Zero) {
+    val dayFormat = SimpleDateFormat("EEEE", Locale.getDefault())
     Row(
         Modifier
             .offset { offset }
@@ -25,8 +28,9 @@ fun WeekHeader(week: List<Day<Event>>, hourWidth: Float, offset: IntOffset = Int
             .height(IntrinsicSize.Min)
     ) {
         week.forEach {
+            val day = dayFormat.format(it.getDate())
             Text(
-                it.date,
+                day.substring(0, 1).uppercase() + day.substring(1),
                 modifier = Modifier.weight(1f),
                 textAlign = TextAlign.Center,
                 maxLines = 1

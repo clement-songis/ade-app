@@ -38,8 +38,10 @@ fun TimetableTitle(date: Date, isWeekView: Boolean, goTo: (Date) -> Unit) {
     }
 }
 
-private fun getDayTitle(date: Date) =
-    DateFormat.getDateInstance(DateFormat.FULL, Locale.getDefault()).format(date)
+private fun getDayTitle(date: Date): String {
+    val title = DateFormat.getDateInstance(DateFormat.FULL, Locale.getDefault()).format(date)
+    return title.substring(0, 1).uppercase(Locale.getDefault()) + title.substring(1)
+}
 
 @Composable
 private fun getWeekTitle(date: Date): String {
