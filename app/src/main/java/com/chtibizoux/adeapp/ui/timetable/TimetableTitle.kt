@@ -16,7 +16,6 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
-
 @Composable
 fun TimetableTitle(date: Date, isWeekView: Boolean, goTo: (Date) -> Unit) {
     var showDatePicker by remember { mutableStateOf(false) }

@@ -27,20 +27,15 @@ class CreateAlarmsManager(private val context: Context) {
     private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
     private val createAlarmPendingIntent = PendingIntent.getBroadcast(
-        context,
-        ALARM_CREATOR_REQUEST_CODE,
-        Intent(context, AlarmsReceiver::class.java).apply {
+        context, ALARM_CREATOR_REQUEST_CODE, Intent(context, AlarmsReceiver::class.java).apply {
             action = AlarmsReceiver.CREATE_ALARM_ACTION
-        },
-        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        }, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
     )
 
     fun scheduleNextAlarmCreation() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !alarmManager.canScheduleExactAlarms()) {
             Toast.makeText(
-                context,
-                context.getString(R.string.unable_to_set_exact_alarm),
-                Toast.LENGTH_LONG
+                context, context.getString(R.string.unable_to_set_exact_alarm), Toast.LENGTH_LONG
             ).show()
             return
         }
@@ -56,9 +51,7 @@ class CreateAlarmsManager(private val context: Context) {
             }
         }
         alarmManager.setExactAndAllowWhileIdle(
-            AlarmManager.RTC_WAKEUP,
-            calendar.timeInMillis,
-            createAlarmPendingIntent
+            AlarmManager.RTC_WAKEUP, calendar.timeInMillis, createAlarmPendingIntent
         )
     }
 
@@ -95,7 +88,12 @@ class CreateAlarmsManager(private val context: Context) {
                 }
                 if (alarm != null) {
                     for (time in alarm.hours) {
-                        createAlarm(alarmDay, time)
+                        val calendar = Calendar.getInstance()
+                        val minutesNumber =
+                            calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE)
+                        if (time.getMinutesNumber() > minutesNumber) {
+                            createAlarm(alarmDay, time)
+                        }
                     }
                     if (notify) {
                         notificationManager.showCreateAlarmSuccess(alarm.hours.size, alarm.forHour)
@@ -114,9 +112,7 @@ class CreateAlarmsManager(private val context: Context) {
                     notificationManager.showGetStartTimeError()
                     // Retry
                     alarmManager.setExactAndAllowWhileIdle(
-                        AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                        30000,
-                        createAlarmPendingIntent
+                        AlarmManager.ELAPSED_REALTIME_WAKEUP, 30000, createAlarmPendingIntent
                     )
                 }
             }
