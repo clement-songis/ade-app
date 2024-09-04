@@ -8,7 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.style.TextAlign
 import com.chtibizoux.adeapp.R
 import java.text.DateFormat
 import java.text.SimpleDateFormat
@@ -23,7 +23,7 @@ fun TimetableTitle(date: Date, isWeekView: Boolean, goTo: (Date) -> Unit) {
     Button(onClick = { showDatePicker = true }) {
         Text(
             if (isWeekView) getWeekTitle(date) else getDayTitle(date),
-            fontSize = 18.sp
+            textAlign = TextAlign.Center
         )
     }
 
