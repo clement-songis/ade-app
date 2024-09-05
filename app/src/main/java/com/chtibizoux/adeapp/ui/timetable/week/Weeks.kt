@@ -11,10 +11,13 @@ class Weeks(days: List<Day<Event>>) : List<List<Day<Event>>> by days.groupBy({
     calendar.get(Calendar.WEEK_OF_YEAR) + calendar.weekYear * calendar.weeksInWeekYear
 }).values.toList() {
     fun getPage(date: Date = Date()): Int {
-        val index = this.indexOfFirst {
-            val lastHour = it.last().events.last().endHour
+        val index = this.indexOfFirst { days ->
+            val lastHour = days.last().events.sortedWith(
+                compareBy({ it.startHour.getMinutesNumber() },
+                    { it.endHour.getMinutesNumber() })
+            ).last().endHour
             val calendar = Calendar.getInstance().apply {
-                time = it.last().getDate()
+                time = days.last().getDate()
                 set(Calendar.HOUR_OF_DAY, lastHour.hour)
                 set(Calendar.MINUTE, lastHour.minute)
             }

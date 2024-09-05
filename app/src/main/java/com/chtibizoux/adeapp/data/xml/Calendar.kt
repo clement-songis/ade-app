@@ -13,10 +13,13 @@ val calendarDateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.FRANCE)
 @Serializable
 data class Calendar(val days: List<Day<Event>>) {
     fun getPage(date: Date = Date()): Int {
-        val index = this.days.indexOfFirst {
-            val lastHour = it.events.last().endHour
+        val index = this.days.indexOfFirst { day ->
+            val lastHour = day.events.sortedWith(
+                compareBy({ it.startHour.getMinutesNumber() },
+                    { it.endHour.getMinutesNumber() })
+            ).last().endHour
             val calendar = Calendar.getInstance().apply {
-                time = it.getDate()
+                time = day.getDate()
                 set(Calendar.HOUR_OF_DAY, lastHour.hour)
                 set(Calendar.MINUTE, lastHour.minute)
             }
