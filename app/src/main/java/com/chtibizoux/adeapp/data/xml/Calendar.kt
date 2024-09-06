@@ -14,10 +14,10 @@ val calendarDateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.FRANCE)
 data class Calendar(val days: List<Day<Event>>) {
     fun getPage(date: Date = Date()): Int {
         val index = this.days.indexOfFirst { day ->
-            val lastHour = day.events.sortedWith(
+            val lastHour = day.events.maxWithOrNull(
                 compareBy({ it.startHour.getMinutesNumber() },
                     { it.endHour.getMinutesNumber() })
-            ).last().endHour
+            )!!.endHour
             val calendar = Calendar.getInstance().apply {
                 time = day.getDate()
                 set(Calendar.HOUR_OF_DAY, lastHour.hour)

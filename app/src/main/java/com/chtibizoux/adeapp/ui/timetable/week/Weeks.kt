@@ -12,10 +12,10 @@ class Weeks(days: List<Day<Event>>) : List<List<Day<Event>>> by days.groupBy({
 }).values.toList() {
     fun getPage(date: Date = Date()): Int {
         val index = this.indexOfFirst { days ->
-            val lastHour = days.last().events.sortedWith(
+            val lastHour = days.last().events.maxWithOrNull(
                 compareBy({ it.startHour.getMinutesNumber() },
                     { it.endHour.getMinutesNumber() })
-            ).last().endHour
+            )!!.endHour
             val calendar = Calendar.getInstance().apply {
                 time = days.last().getDate()
                 set(Calendar.HOUR_OF_DAY, lastHour.hour)
