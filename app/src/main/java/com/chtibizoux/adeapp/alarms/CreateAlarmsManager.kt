@@ -88,12 +88,7 @@ class CreateAlarmsManager(private val context: Context) {
                 }
                 if (alarm != null) {
                     for (time in alarm.hours) {
-                        val calendar = Calendar.getInstance()
-                        val minutesNumber =
-                            calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE)
-                        if (time.getMinutesNumber() > minutesNumber) {
-                            createAlarm(alarmDay, time)
-                        }
+                        createAlarm(alarmDay, time)
                     }
                     if (notify) {
                         notificationManager.showCreateAlarmSuccess(alarm.hours.size, alarm.forHour)
@@ -128,10 +123,12 @@ class CreateAlarmsManager(private val context: Context) {
             set(Calendar.MINUTE, time.minute)
         }
 
-        val pendingIntent = AlarmsManager.getAlarmIntent(time.getMinutesNumber(), context)
+        if (calendar.timeInMillis > System.currentTimeMillis()) {
+            val pendingIntent = AlarmsManager.getAlarmIntent(time.getMinutesNumber(), context)
 
-        val alarmClockInfo = AlarmManager.AlarmClockInfo(calendar.timeInMillis, pendingIntent)
-        alarmManager.setAlarmClock(alarmClockInfo, pendingIntent)
+            val alarmClockInfo = AlarmManager.AlarmClockInfo(calendar.timeInMillis, pendingIntent)
+            alarmManager.setAlarmClock(alarmClockInfo, pendingIntent)
+        }
     }
 
     fun deleteAlarms(alarm: Alarm) {
