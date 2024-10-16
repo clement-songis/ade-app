@@ -1,7 +1,6 @@
 package com.chtibizoux.adeapp.ui.timetable
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -13,14 +12,15 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import com.chtibizoux.adeapp.R
@@ -46,13 +46,17 @@ fun TimetableScaffold(
     val pagerState =
         rememberPagerState(initialPage = getPage(initialDate), pageCount = { pageCount })
 
+    var isRefreshing by remember { mutableStateOf(true) }
+
     val coroutineScope = rememberCoroutineScope()
 
     val state = rememberPullToRefreshState()
-    if (state.isRefreshing) {
-        LaunchedEffect(true) {
+
+    val onRefresh: () -> Unit = {
+        isRefreshing = true
+        coroutineScope.launch {
             refreshCalendar()
-            state.endRefresh()
+            isRefreshing = false
         }
     }
 
@@ -81,14 +85,15 @@ fun TimetableScaffold(
             }
         )
     }) { padding ->
-        Box(Modifier.padding(padding).nestedScroll(state.nestedScrollConnection)) {
+        PullToRefreshBox(
+            modifier = Modifier.padding(padding),
+            state = state,
+            isRefreshing = isRefreshing,
+            onRefresh = onRefresh,
+        ) {
             HorizontalPager(pagerState) { page ->
                 content(page)
             }
-            PullToRefreshContainer(
-                modifier = Modifier.align(Alignment.TopCenter),
-                state = state,
-            )
         }
     }
 }
