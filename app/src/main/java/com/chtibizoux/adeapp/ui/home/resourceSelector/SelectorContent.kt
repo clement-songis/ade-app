@@ -6,8 +6,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.SearchBar
+import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -32,17 +36,22 @@ fun SelectorContent(
 
     Column(modifier = Modifier.fillMaxSize()) {
         SearchBar(
-            query = searchText,
-            onQueryChange = selectorViewModel::onSearchTextChange,
-            placeholder = {
-                Text(stringResource(R.string.search_resource))
+            inputField = {
+                SearchBarDefaults.InputField(
+                    query = searchText,
+                    onQueryChange = selectorViewModel::onSearchTextChange,
+                    onSearch = selectorViewModel::onSearchTextChange,
+                    expanded = isSearching,
+                    onExpandedChange = selectorViewModel::onActiveChange,
+                    placeholder = { Text(stringResource(R.string.search_resource)) },
+                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                )
             },
-            onSearch = selectorViewModel::onSearchTextChange,
-            active = isSearching,
-            onActiveChange = selectorViewModel::onActiveChange,
+            expanded = isSearching,
+            onExpandedChange = selectorViewModel::onActiveChange,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = if (isSearching) 0.dp else 16.dp)
+                .padding(horizontal = if (isSearching) 0.dp else 16.dp),
         ) {
             LazyColumn {
                 items(resourceList) { resource ->

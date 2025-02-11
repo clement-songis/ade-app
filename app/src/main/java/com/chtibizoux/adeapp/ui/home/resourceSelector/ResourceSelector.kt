@@ -21,6 +21,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.platform.LocalContext
@@ -87,6 +88,7 @@ fun ResourceSelector(
                 onRefresh = onRefresh,
                 modifier = Modifier
                     .fillMaxSize(),
+                contentAlignment = Alignment.Center,
                 state = state,
             ) {
                 if (resources == null) {
