@@ -53,7 +53,7 @@ fun SelectorContent(
                 .fillMaxWidth()
                 .padding(horizontal = if (isSearching) 0.dp else 16.dp),
         ) {
-            LazyColumn {
+            LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(resourceList) { resource ->
                     SimpleResourceComponent(navController, resource)
                 }

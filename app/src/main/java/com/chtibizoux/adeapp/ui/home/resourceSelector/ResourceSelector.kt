@@ -12,7 +12,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -43,8 +42,7 @@ fun ResourceSelector(
 ) {
     val resources by selectorViewModel.resourceTree.collectAsState()
     val context = LocalContext.current
-    val state = rememberPullToRefreshState()
-    var isRefreshing by remember { mutableStateOf(true) }
+    var isRefreshing by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
 
     val loadResources: suspend () -> Unit = {
@@ -56,13 +54,13 @@ fun ResourceSelector(
                 context, R.string.unable_to_get_resources, Toast.LENGTH_LONG
             ).show()
         }
-        isRefreshing = false
     }
 
     val onRefresh: () -> Unit = {
         isRefreshing = true
         coroutineScope.launch {
             loadResources()
+            isRefreshing = false
         }
     }
 
@@ -89,7 +87,6 @@ fun ResourceSelector(
                 modifier = Modifier
                     .fillMaxSize(),
                 contentAlignment = Alignment.Center,
-                state = state,
             ) {
                 if (resources == null) {
                     CircularProgressIndicator(
