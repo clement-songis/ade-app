@@ -3,7 +3,6 @@ package com.chtibizoux.adeapp.ui.timetable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -34,9 +33,9 @@ fun EventElement(
     event: Event,
     firstHour: Int,
     hourHeight: Float,
-    hourWidth: Float? = null,
-    size: Int = 1,
-    index: Int = 0
+    hourWidth: Float,
+    size: Float,
+    index: Float
 ) {
     var showDialog by remember { mutableStateOf(false) }
 
@@ -49,15 +48,9 @@ fun EventElement(
     val yOffset = (VERTICAL_PADDING + (startHour - firstHour) * hourHeight).dp
     val mod = Modifier.height((height * hourHeight).dp)
     Surface(
-        modifier = if (hourWidth == null) {
-            mod
-                .fillMaxWidth()
-                .offset(y = yOffset)
-        } else {
-            mod
-                .width((hourWidth * size).dp)
-                .offset(x = (index * hourWidth).dp, y = yOffset)
-        },
+        modifier = mod
+            .width((hourWidth * size).dp)
+            .offset(x = (index * hourWidth).dp, y = yOffset),
         color = event.getColor() ?: Color(Random.nextInt(0xffffff)),
         contentColor = Color.Black,
         shape = RoundedCornerShape(10.dp),

@@ -12,6 +12,7 @@ import com.chtibizoux.adeapp.data.xml.Event
 import com.chtibizoux.adeapp.ui.timetable.Background
 import com.chtibizoux.adeapp.ui.timetable.EventElement
 import com.chtibizoux.adeapp.ui.timetable.Hours
+import com.chtibizoux.adeapp.ui.timetable.NonOverlappingEvents
 import com.chtibizoux.adeapp.ui.timetable.TIME_WIDTH
 import com.chtibizoux.adeapp.ui.timetable.VERTICAL_PADDING
 import com.chtibizoux.adeapp.ui.timetable.ZoomableComponent
@@ -43,12 +44,15 @@ fun SimpleResource(
         Row {
             week.forEach { day ->
                 Box(Modifier.width(hourWidth.dp)) {
-                    day.events.forEach { event ->
+                    NonOverlappingEvents(day.events) { event, width, left ->
                         EventElement(
                             navController,
                             event,
                             startHour,
-                            hourHeight
+                            hourHeight,
+                            hourWidth,
+                            width,
+                            left
                         )
                     }
                 }

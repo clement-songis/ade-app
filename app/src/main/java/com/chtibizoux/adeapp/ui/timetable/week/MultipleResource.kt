@@ -10,11 +10,10 @@ import androidx.navigation.NavController
 import com.chtibizoux.adeapp.data.xml.Day
 import com.chtibizoux.adeapp.data.xml.Event
 import com.chtibizoux.adeapp.data.xml.Resource
-import com.chtibizoux.adeapp.data.xml.getAllChildren
 import com.chtibizoux.adeapp.data.xml.getLeaves
 import com.chtibizoux.adeapp.ui.timetable.Background
-import com.chtibizoux.adeapp.ui.timetable.EventElement
 import com.chtibizoux.adeapp.ui.timetable.Hours
+import com.chtibizoux.adeapp.ui.timetable.MultipleResourceEvents
 import com.chtibizoux.adeapp.ui.timetable.TIME_WIDTH
 import com.chtibizoux.adeapp.ui.timetable.VERTICAL_PADDING
 import com.chtibizoux.adeapp.ui.timetable.ZoomableComponent
@@ -28,7 +27,6 @@ fun MultipleResource(
     endHour: Int
 ) {
     val leaves = getLeaves(children)
-    val allChildren = getAllChildren(children)
 
     fun getHourWidth(width: Float) = (width / (leaves.size * week.size)).coerceAtLeast(1f)
 
@@ -50,41 +48,15 @@ fun MultipleResource(
         Row {
             week.forEach { day ->
                 Box(Modifier.width((hourWidth * leaves.size).dp)) {
-                    day.events.forEach { event ->
-                        val resource =
-                            allChildren.find { resource -> event.resources.any { resource.name == it.name && resource.id == it.id } }
-
-                        if (resource != null) {
-                            val (index, length) = if (resource.children.isNotEmpty()) {
-                                val eventResourceLeaves = getLeaves(resource.children)
-                                Pair(
-                                    leaves.indexOf(eventResourceLeaves.first()),
-                                    eventResourceLeaves.size
-                                )
-                            } else {
-                                Pair(leaves.indexOf(resource), 1)
-                            }
-
-                            EventElement(
-                                navController,
-                                event,
-                                startHour,
-                                hourHeight,
-                                hourWidth,
-                                length,
-                                index
-                            )
-                        } else {
-                            EventElement(
-                                navController,
-                                event,
-                                startHour,
-                                hourHeight,
-                                hourWidth,
-                                leaves.size
-                            )
-                        }
-                    }
+                    MultipleResourceEvents(
+                        day.events,
+                        children,
+                        leaves,
+                        navController,
+                        startHour,
+                        hourHeight,
+                        hourWidth
+                    )
                 }
             }
         }

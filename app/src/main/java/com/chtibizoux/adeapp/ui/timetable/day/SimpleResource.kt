@@ -8,12 +8,18 @@ import com.chtibizoux.adeapp.data.xml.Event
 import com.chtibizoux.adeapp.ui.timetable.Background
 import com.chtibizoux.adeapp.ui.timetable.EventElement
 import com.chtibizoux.adeapp.ui.timetable.Hours
+import com.chtibizoux.adeapp.ui.timetable.NonOverlappingEvents
 import com.chtibizoux.adeapp.ui.timetable.TIME_WIDTH
 import com.chtibizoux.adeapp.ui.timetable.VERTICAL_PADDING
 import com.chtibizoux.adeapp.ui.timetable.ZoomableComponent
 
 @Composable
-fun SimpleResource(events: List<Event>, navController: NavController, startHour: Int, endHour: Int) {
+fun SimpleResource(
+    events: List<Event>,
+    navController: NavController,
+    startHour: Int,
+    endHour: Int
+) {
     fun getHourWidth(width: Float) = width.coerceAtLeast(1f)
 
     fun getHourHeight(height: Float) = (height - VERTICAL_PADDING * 2) / (endHour - startHour)
@@ -30,8 +36,16 @@ fun SimpleResource(events: List<Event>, navController: NavController, startHour:
 
         Background(startHour, endHour, hourHeight, hourWidth)
         Box {
-            events.forEach { event ->
-                EventElement(navController, event, startHour, hourHeight, hourWidth)
+            NonOverlappingEvents(events) { event, width, left ->
+                EventElement(
+                    navController,
+                    event,
+                    startHour,
+                    hourHeight,
+                    hourWidth,
+                    width,
+                    left
+                )
             }
         }
     }
