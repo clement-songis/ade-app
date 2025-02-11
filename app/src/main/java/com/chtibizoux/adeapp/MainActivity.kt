@@ -3,7 +3,6 @@ package com.chtibizoux.adeapp
 import android.app.AlarmManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
@@ -24,7 +23,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val channelName = getString(R.string.title_alarms)
         val notificationManager =
-            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            getSystemService(NOTIFICATION_SERVICE) as NotificationManager
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
@@ -48,7 +47,7 @@ class MainActivity : ComponentActivity() {
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val alarmManager = getSystemService(Context.ALARM_SERVICE) as? AlarmManager
+            val alarmManager = getSystemService(ALARM_SERVICE) as? AlarmManager
             if (alarmManager?.canScheduleExactAlarms() == false) {
                 Intent().also { intent ->
                     intent.action = Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM

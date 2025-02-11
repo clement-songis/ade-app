@@ -98,12 +98,12 @@ fun TimetableContent(
     if (isWeekView) {
         val weeks = Weeks(calendar.days)
         TimetableScaffold(
-            true,
+            isWeekView = true,
             initialDate,
             weeks.size,
-            { weeks.getPage(it) },
-            { weeks[it].first().getDate() },
-            {
+            getPage = { weeks.getPage(it) },
+            getCurrentDate = { weeks[it].first().getDate() },
+            toggleView = {
                 initialDate = weeks[it].first().getDate()
                 isWeekView = false
             },
@@ -119,12 +119,12 @@ fun TimetableContent(
         }
     } else {
         TimetableScaffold(
-            false,
+            isWeekView = false,
             initialDate,
             calendar.days.size,
-            { calendar.getPage(it) },
-            { calendar.days[it].getDate() },
-            {
+            getPage = { calendar.getPage(it) },
+            getCurrentDate = { calendar.days[it].getDate() },
+            toggleView = {
                 initialDate = calendar.days[it].getDate()
                 isWeekView = true
             },
