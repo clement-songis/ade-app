@@ -1,9 +1,7 @@
 package com.chtibizoux.adeapp.ui.timetable
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
@@ -46,14 +44,12 @@ fun WaitForCalendar(
     refreshCalendar: suspend () -> Unit
 ) {
     if (calendar == null) {
-        Column(
+        Box(
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.background)
                 .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterVertically)
+            contentAlignment = Alignment.Center,
         ) {
-            Text(stringResource(R.string.no_calendar), color = Color.White)
             CircularProgressIndicator(
                 modifier = Modifier.size(80.dp), strokeCap = StrokeCap.Round, strokeWidth = 8.dp
             )
