@@ -23,7 +23,7 @@ import java.util.Locale
 class DataSource {
     private fun fetchEvents(user: User): Calendar {
         val url =
-            URL("${user.baseURL}/jsp/webapi?function=getEvents&detail=8&resources=${user.resourceId}&projectId=${user.projectId}&data=${user.data}")
+            URL("${user.baseURL}/jsp/webapi?function=getEvents&detail=8&resources=${user.resourceId}&projectId=${user.projectId}&data=${user.data}&days=0")
         val connection = url.openConnection() as HttpURLConnection
         connection.run {
             readTimeout = 10000
@@ -40,7 +40,7 @@ class DataSource {
     ): SimpleCalendar {
         val dateQuery = if (date == null) "" else "&date=${dateFormat.format(date)}"
         val url =
-            URL("${user.baseURL}/jsp/webapi?function=getEvents&detail=3$dateQuery&resources=${user.resourceId}&projectId=${user.projectId}&data=${user.data}")
+            URL("${user.baseURL}/jsp/webapi?function=getEvents&detail=3$dateQuery&resources=${user.resourceId}&projectId=${user.projectId}&data=${user.data}&days=0")
         val connection = url.openConnection() as HttpURLConnection
         connection.run {
             readTimeout = 10000
@@ -53,7 +53,7 @@ class DataSource {
 
     private fun fetchResources(user: User): ResourceTree {
         val url =
-            URL("${user.baseURL}/jsp/webapi?function=getResources&detail=2&tree=true&projectId=${user.projectId}&data=${user.data}")
+            URL("${user.baseURL}/jsp/webapi?function=getResources&detail=2&tree=true&projectId=${user.projectId}&data=${user.data}&days=0")
         val connection = url.openConnection() as HttpURLConnection
         connection.run {
             readTimeout = 10000
